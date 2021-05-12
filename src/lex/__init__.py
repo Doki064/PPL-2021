@@ -4,7 +4,13 @@ from src.lex import token_names
 
 class Token(object):
     """ A simple Token structure.
-        Contains the token type, value and position.
+
+        Contains the token position, name and value.
+
+        Attributes:
+            position: the start position of the token.
+            token_name: the name of the token.
+            value: the value of the token.
     """
 
     def __init__(self, position, token_name, value):
@@ -18,8 +24,10 @@ class Token(object):
 
 class LexerError(Exception):
     """ Lexer error exception.
-        pos:
-            Position in the input line where the error occurred.
+
+        Attributes:
+            position: the start position of the error.
+            message: the error message. Default is None.
     """
 
     def __init__(self, position, message=None):
@@ -29,7 +37,24 @@ class LexerError(Exception):
 
 
 class Lexer:
+    """The lexer.
+
+        Scans the file as stream and tokenize it.
+
+        Attributes:
+            stream: the data to work on.
+            EOF: the flag to indicate end of file.
+            symbol_table: stores the identifiers and their types.
+            current_position: the position in the stream currently.
+            current_char: the current character.
+    """
+
     def __init__(self, file=None):
+        """
+        Args:
+            file: the input file.
+        """
+
         with open(file, 'r') as f:
             self.stream = f.read()
         self.EOF = False
@@ -38,7 +63,7 @@ class Lexer:
         self.current_char = ""
         self._next_char()
 
-    # Process the next character.
+    # Moves to the next character.
     def _next_char(self):
         self.current_position += 1
         if self.current_position >= len(self.stream):
@@ -47,13 +72,13 @@ class Lexer:
         else:
             self.current_char = self.stream[self.current_position]
 
-    # Return the lookahead character.
+    # Returns the lookahead character.
     def _peek(self):
         if self.current_position + 1 >= len(self.stream):
             return ""
         return self.stream[self.current_position + 1]
 
-    # Skip whitespaces, newlines and comments.
+    # Skips whitespaces, newlines and comments.
     def _skip(self):
         if self.current_char == "/":
             last_position = self.current_position
@@ -72,8 +97,7 @@ class Lexer:
             self._next_char()
 
     # Returns the next token.
-    def get_token(self):
-        """Generates and returns the next token."""
+    def _get_token(self):
         self._skip()
 
         token = None
@@ -85,7 +109,7 @@ class Lexer:
                 if self.EOF:
                     raise LexerError(start_position, f"EOL while scanning string literal at position {start_position}")
             self._next_char()
-            token = Token(start_position, "LITERAL_STRING", self.stream[start_position:self.current_position + 1])
+            token = Token(start_position, token_names.STRING, self.stream[start_position:self.current_position + 1])
 
         elif self.current_char == '"':
             start_position = self.current_position
@@ -94,7 +118,7 @@ class Lexer:
                 if self.EOF:
                     raise LexerError(start_position, f"EOL while scanning string literal at position {start_position}")
             self._next_char()
-            token = Token(start_position, "LITERAL_STRING", self.stream[start_position:self.current_position + 1])
+            token = Token(start_position, token_names.STRING, self.stream[start_position:self.current_position + 1])
 
         elif self.current_char.isdigit():
             start_position = self.current_position
@@ -106,7 +130,7 @@ class Lexer:
                     self._next_char()
             if self._peek() in ["d", "D", "f", "F"]:
                 self._next_char()
-            token = Token(start_position, "LITERAL_NUMBER", self.stream[start_position:self.current_position + 1])
+            token = Token(start_position, token_names.NUMBER, self.stream[start_position:self.current_position + 1])
 
         elif self.current_char == ".":
             if self._peek().isdigit():
@@ -115,7 +139,7 @@ class Lexer:
                     self._next_char()
                 if self._peek() in ["d", "D", "f", "F"]:
                     self._next_char()
-                token = Token(start_position, "LITERAL_NUMBER", self.stream[start_position:self.current_position + 1])
+                token = Token(start_position, token_names.NUMBER, self.stream[start_position:self.current_position + 1])
             else:
                 token = Token(self.current_position, token_names.separators.get(self.current_char), self.current_char)
 
@@ -129,7 +153,7 @@ class Lexer:
             if word in token_names.keywords:
                 token = Token(start_position, token_names.keywords.get(word), word)
             else:
-                token = Token(start_position, "IDENTIFIER", word)
+                token = Token(start_position, token_names.IDENTIFIER, word)
 
         elif self.current_char in token_names.separators:
             token = Token(self.current_position, token_names.separators.get(self.current_char), self.current_char)
@@ -160,7 +184,7 @@ class Lexer:
                 token = Token(self.current_position, token_names.operators.get(self.current_char), self.current_char)
 
         elif self.current_char == "":
-            token = Token(self.current_position, "EOF", self.current_char)
+            token = Token(self.current_position, token_names.EOF, self.current_char)
 
         else:
             raise LexerError(self.current_position)
@@ -170,7 +194,7 @@ class Lexer:
 
     # Iterator function.
     def tokens(self):
-        """ Returns an iterator to the tokens found in the file."""
+        """Returns an iterator to the tokens found in the file."""
         while not self.EOF:
-            token = self.get_token()
+            token = self._get_token()
             yield token
