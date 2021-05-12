@@ -19,7 +19,7 @@ class Token(object):
         self.value = value
 
     def __str__(self):
-        return f"{self.position}\t\t {self.token_name}\t\t {self.value}"
+        return f"{self.position}\t {self.token_name}\t {self.value}"
 
 
 class LexerError(Exception):
@@ -58,7 +58,6 @@ class Lexer:
         with open(file, 'r') as f:
             self.stream = f.read()
         self.EOF = False
-        self.symbol_table = []
         self.current_position = -1
         self.current_char = ""
         self._next_char()
@@ -102,6 +101,7 @@ class Lexer:
 
         token = None
 
+        # Checks single-quoted string.
         if self.current_char == "'":
             start_position = self.current_position
             while not (self.current_char != "\\" and self._peek() == "'"):
@@ -111,6 +111,7 @@ class Lexer:
             self._next_char()
             token = Token(start_position, token_names.STRING, self.stream[start_position:self.current_position + 1])
 
+        # Checks double-quoted string.
         elif self.current_char == '"':
             start_position = self.current_position
             while not (self.current_char != "\\" and self._peek() == '"'):
@@ -120,6 +121,7 @@ class Lexer:
             self._next_char()
             token = Token(start_position, token_names.STRING, self.stream[start_position:self.current_position + 1])
 
+        # Checks number begins with a digit.
         elif self.current_char.isdigit():
             start_position = self.current_position
             while self._peek().isdigit():
@@ -132,6 +134,7 @@ class Lexer:
                 self._next_char()
             token = Token(start_position, token_names.NUMBER, self.stream[start_position:self.current_position + 1])
 
+        # Checks number begins with a dot.
         elif self.current_char == ".":
             if self._peek().isdigit():
                 start_position = self.current_position
@@ -143,6 +146,7 @@ class Lexer:
             else:
                 token = Token(self.current_position, token_names.separators.get(self.current_char), self.current_char)
 
+        # Checks word begins with an alphabetic letter.
         elif self.current_char.isalpha():
             start_position = self.current_position
             while self._peek() not in ["", " ", "\t", "\r", "\n"] \
@@ -150,14 +154,16 @@ class Lexer:
                     and self._peek() not in token_names.operators:
                 self._next_char()
             word = self.stream[start_position:self.current_position + 1]
-            if word in token_names.keywords:
+            if word in token_names.keywords:    # Checks if word is a keyword.
                 token = Token(start_position, token_names.keywords.get(word), word)
-            else:
+            else:                               # Otherwise put it as identifier.
                 token = Token(start_position, token_names.IDENTIFIER, word)
 
+        # Checks if is a separator.
         elif self.current_char in token_names.separators:
             token = Token(self.current_position, token_names.separators.get(self.current_char), self.current_char)
 
+        # Checks if is an operator.
         elif self.current_char in token_names.operators:
             last_position = self.current_position
             if self.current_char not in ["&", "|"] and self._peek() == "=":
@@ -183,9 +189,11 @@ class Lexer:
             else:
                 token = Token(self.current_position, token_names.operators.get(self.current_char), self.current_char)
 
+        # Checks if is EOF
         elif self.current_char == "":
             token = Token(self.current_position, token_names.EOF, self.current_char)
 
+        # Raise error if is an unknown token.
         else:
             raise LexerError(self.current_position)
 
