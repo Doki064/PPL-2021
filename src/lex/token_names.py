@@ -1,5 +1,9 @@
-"""TokenType stores the enumeration for all the types of tokens."""
+"""Stores the names of all the token types."""
 
+EOF = "EOF"
+IDENTIFIER = "IDENTIFIER"
+NUMBER = "LITERAL_NUMBER"
+STRING = "LITERAL_STRING"
 
 keywords = {
     "package": "KEYWORD_PACKAGE",
