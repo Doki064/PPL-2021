@@ -66,7 +66,7 @@ class Lexer:
     def _next_char(self):
         self.current_position += 1
         if self.current_position >= len(self.stream):
-            self.current_char = ""
+            self.current_char = "\0"
             self.EOF = True
         else:
             self.current_char = self.stream[self.current_position]
@@ -74,7 +74,7 @@ class Lexer:
     # Returns the lookahead character.
     def _peek(self):
         if self.current_position + 1 >= len(self.stream):
-            return ""
+            return "\0"
         return self.stream[self.current_position + 1]
 
     # Skips whitespaces, newlines and comments.
@@ -149,7 +149,7 @@ class Lexer:
         # Checks word begins with an alphabetic letter.
         elif self.current_char.isalpha():
             start_position = self.current_position
-            while self._peek() not in ["", " ", "\t", "\r", "\n"] \
+            while self._peek() not in [" ", "\t", "\r", "\n", "\0"] \
                     and self._peek() not in token_names.separators \
                     and self._peek() not in token_names.operators:
                 self._next_char()
@@ -190,7 +190,7 @@ class Lexer:
                 token = Token(self.current_position, token_names.operators.get(self.current_char), self.current_char)
 
         # Checks if is EOF
-        elif self.current_char == "":
+        elif self.current_char == "\0":
             token = Token(self.current_position, token_names.EOF, self.current_char)
 
         # Raise error if is an unknown token.
