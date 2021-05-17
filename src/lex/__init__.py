@@ -1,5 +1,15 @@
-""""""
-from lex import token_names
+"""This is the module containing all codes needed for the lexer.
+
+    This module would take the file and generate the tokens used by the parser.
+
+    Example:
+        >>> from src.lex import *
+        >>> lexer = Lexer("./test/example.java") # Lexer takes the path to file
+        >>> for token in lexer.tokens():
+        >>>     print(token)
+"""
+
+from src.lex import token_names
 
 
 class Token(object):
@@ -8,9 +18,9 @@ class Token(object):
         Contains the token position, name and value.
 
         Attributes:
-            position: the start position of the token.
-            token_name: the name of the token.
-            value: the value of the token.
+            position (int): The start position of the token.
+            token_name (str): The name of the token.
+            value (str): The value of the token.
     """
 
     def __init__(self, position, token_name, value):
@@ -26,8 +36,8 @@ class LexerError(Exception):
     """ Lexer error exception.
 
         Attributes:
-            position: the start position of the error.
-            message: the error message. Default is None.
+            position (int): The start position of the error.
+            message (str): The error message. Optional.
     """
 
     def __init__(self, position, message=None):
@@ -42,17 +52,16 @@ class Lexer:
         Scans the file as stream and tokenize it.
 
         Attributes:
-            stream: the data to work on.
-            EOF: the flag to indicate end of file.
-            symbol_table: stores the identifiers and their types.
-            current_position: the position in the stream currently.
-            current_char: the current character.
+            stream (str): The data to work on.
+            EOF (boolean): The flag to indicate end of file.
+            current_position (int): The position in the stream currently.
+            current_char (str): The current character.
     """
 
-    def __init__(self, file=None):
+    def __init__(self, file):
         """
         Args:
-            file: the input file.
+            file: The path to the input file.
         """
 
         with open(file, 'r') as f:
@@ -62,8 +71,8 @@ class Lexer:
         self.current_char = ""
         self._next_char()
 
-    # Moves to the next character.
     def _next_char(self):
+        """Moves to the next character. Set `EOF` to True when end of file."""
         self.current_position += 1
         if self.current_position >= len(self.stream):
             self.current_char = "\0"
@@ -71,14 +80,22 @@ class Lexer:
         else:
             self.current_char = self.stream[self.current_position]
 
-    # Returns the lookahead character.
     def _peek(self):
+        """Returns the lookahead character.
+
+            Returns:
+                str: The next character in the stream, null character "\0" if end of file.
+        """
         if self.current_position + 1 >= len(self.stream):
             return "\0"
         return self.stream[self.current_position + 1]
 
-    # Skips whitespaces, newlines and comments.
     def _skip(self):
+        """Skips whitespaces, newlines and comments.
+
+            Raises:
+                LexerError: An error occurred while getting tokens in the character stream.
+        """
         if self.current_char == "/":
             last_position = self.current_position
             if self._peek() == "/":  # Single-line comment
@@ -95,11 +112,16 @@ class Lexer:
         while self.current_char in [" ", "\t", "\r", "\n"]:
             self._next_char()
 
-    # Returns the next token.
     def _get_token(self):
-        self._skip()
+        """Returns the next token.
 
-        token = None
+            Returns:
+                Token: An token found in the stream.
+
+            Raises:
+                LexerError: An error occurred while getting tokens in the character stream.
+        """
+        self._skip()
 
         # Checks single-quoted string.
         if self.current_char == "'":
@@ -200,9 +222,16 @@ class Lexer:
         self._next_char()
         return token
 
-    # Iterator function.
+    # Generator function.
     def tokens(self):
-        """Returns an iterator to the tokens found in the file."""
+        """ An generator to iterate over all of the tokens found in the character stream.
+
+            Yields:
+                Token: A token object.
+            Raises:
+                LexerError: An error occurred while getting tokens in the character stream.
+        """
+
         while not self.EOF:
             token = self._get_token()
             yield token
