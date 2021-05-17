@@ -3,17 +3,14 @@ import sys
 
 
 def main():
-    print("Mini Java Compiler")
+    print("Mini Java Compiler - Lexer Test")
 
     if len(sys.argv) != 2:
         sys.exit("Error: Compiler needs source file as argument.")
-    with open(sys.argv[1], 'r') as inputFile:
-        input = inputFile.read()
 
-        lexer = Lexer(input)
-        while lexer.peek() != '\0':
-            print(lexer.curChar)
-            lexer.nextChar()
-
+    inputFile = sys.argv[1]    
+    lexer = Lexer(inputFile)
+    for token in lexer.tokens():
+        print(token)
 
 main()

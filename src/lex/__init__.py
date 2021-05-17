@@ -74,7 +74,7 @@ class Lexer:
     # Returns the lookahead character.
     def _peek(self):
         if self.current_position + 1 >= len(self.stream):
-            return ""
+            return '\0'
         return self.stream[self.current_position + 1]
 
     # Skips whitespaces, newlines and comments.
