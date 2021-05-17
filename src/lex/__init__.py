@@ -1,5 +1,5 @@
 """"""
-from src.lex import token_names
+from lex import token_names
 
 
 class Token(object):
