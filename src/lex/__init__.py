@@ -171,9 +171,9 @@ class Lexer:
         # Checks word begins with an alphabetic letter.
         elif self.current_char.isalpha():
             start_position = self.current_position
-            while self._peek() not in [" ", "\t", "\r", "\n", "\0"] \
-                    and self._peek() not in token_names.separators \
-                    and self._peek() not in token_names.operators:
+            while (self._peek() not in [" ", "\t", "\r", "\n", "\0"]
+                    and self._peek() not in token_names.separators
+                    and self._peek() not in token_names.operators):
                 self._next_char()
             word = self.stream[start_position:self.current_position + 1]
             if word in token_names.keywords:    # Checks if word is a keyword.
