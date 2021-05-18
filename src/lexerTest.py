@@ -10,7 +10,16 @@ def main():
 
     inputFile = sys.argv[1]    
     lexer = Lexer(inputFile)
+
+    filler = ""
+
+    # Token stream test
+    print(f"{filler:-<50}\nToken Stream Test")
     for token in lexer.tokens():
         print(token)
 
+    # Symbol table test
+    print(f"{filler:-<50}\nSymbol Table Test")
+    for _, v in Symbol.getSymbolsTable().items():
+        print(f"{v}")
 main()
