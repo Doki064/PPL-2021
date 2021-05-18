@@ -43,6 +43,7 @@ class Symbol:
     def __str__(self):
         return f"{self.kind:20}\t {self.name}"
 
+
 class Token(object):
     """ A simple Token structure.
 
@@ -187,7 +188,8 @@ class Lexer:
                     self._next_char()
             if self._peek() in ["d", "D", "f", "F"]:
                 self._next_char()
-            token = Token(start_position, self.current_position, Symbol.symbol(self.stream[start_position:self.current_position + 1], token_names.NUMBER))
+            token = Token(start_position, self.current_position, Symbol.symbol(
+                self.stream[start_position:self.current_position + 1], token_names.NUMBER))
 
         # Checks number begins with a dot.
         elif self.current_char == ".":
@@ -204,7 +206,7 @@ class Lexer:
                     self.current_char, token_names.separators.get(self.current_char)))
 
         # Checks word begins with an alphabetic letter.
-        elif self.current_char.isalpha():
+        elif self.current_char.isalpha() or self.current_char == "_":
             start_position = self.current_position
             while (self._peek() not in [" ", "\t", "\r", "\n", "\0"]
                     and self._peek() not in token_names.separators
