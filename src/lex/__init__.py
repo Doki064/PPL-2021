@@ -2,6 +2,34 @@
 from lex import token_names
 
 
+class Symbol:
+    def __init__(self, name, kind):
+        super().__init__()
+        self.name = name
+        self.kind = kind
+
+    __symbols = {}
+
+    def toString(self):
+        return self.name
+
+    def getKind(self):
+        return self.kind
+
+    @staticmethod
+    def symbol(newTokenStr, kind):
+        s = Symbol.__symbols.get(newTokenStr)
+        if s is None:
+            if kind is None:
+                return None
+            s = Symbol(newTokenStr, kind)
+            Symbol.__symbols[newTokenStr] = s
+        return s
+
+    @staticmethod
+    def getSymbolsTable():
+        return Symbol.__symbols
+
 class Token(object):
     """ A simple Token structure.
 
