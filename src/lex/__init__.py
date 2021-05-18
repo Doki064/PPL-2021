@@ -3,13 +3,13 @@
     This module would take the file and generate the tokens used by the parser.
 
     Example:
-        >>> from src.lex import *
+        >>> from lex import *
         >>> lexer = Lexer("./test/example.java") # Lexer takes the path to file
         >>> for token in lexer.tokens():
         >>>     print(token)
 """
 
-from src.lex import token_names
+from lex import token_names
 
 
 class Symbol:
@@ -40,6 +40,9 @@ class Symbol:
     def getSymbolsTable():
         return Symbol.__symbols
 
+    def __str__(self):
+        return f"{self.kind:20}\t {self.name}"
+
 class Token(object):
     """ A simple Token structure.
 
@@ -51,13 +54,13 @@ class Token(object):
             value (str): The value of the token.
     """
 
-    def __init__(self, position, token_name, value):
-        self.position = position
-        self.token_name = token_name
-        self.value = value
+    def __init__(self, leftPosition, rightPosition, symbol):
+        self.leftPosition = leftPosition
+        self.rightPosition = rightPosition
+        self.symbol = symbol
 
     def __str__(self):
-        return f"{self.position}\t {self.token_name}\t {self.value}"
+        return f"{self.leftPosition}\t {self.rightPosition}\t {self.symbol}"
 
 
 class LexerError(Exception):
@@ -159,7 +162,8 @@ class Lexer:
                 if self.EOF:
                     raise LexerError(start_position, f"EOL while scanning string literal at position {start_position}")
             self._next_char()
-            token = Token(start_position, token_names.STRING, self.stream[start_position:self.current_position + 1])
+            token = Token(start_position, self.current_position, Symbol.symbol(
+                self.stream[start_position:self.current_position + 1], token_names.STRING))
 
         # Checks double-quoted string.
         elif self.current_char == '"':
@@ -169,7 +173,8 @@ class Lexer:
                 if self.EOF:
                     raise LexerError(start_position, f"EOL while scanning string literal at position {start_position}")
             self._next_char()
-            token = Token(start_position, token_names.STRING, self.stream[start_position:self.current_position + 1])
+            token = Token(start_position, self.current_position, Symbol.symbol(
+                self.stream[start_position:self.current_position + 1], token_names.STRING))
 
         # Checks number begins with a digit.
         elif self.current_char.isdigit():
@@ -182,7 +187,7 @@ class Lexer:
                     self._next_char()
             if self._peek() in ["d", "D", "f", "F"]:
                 self._next_char()
-            token = Token(start_position, token_names.NUMBER, self.stream[start_position:self.current_position + 1])
+            token = Token(start_position, self.current_position, Symbol.symbol(self.stream[start_position:self.current_position + 1], token_names.NUMBER))
 
         # Checks number begins with a dot.
         elif self.current_char == ".":
@@ -192,9 +197,11 @@ class Lexer:
                     self._next_char()
                 if self._peek() in ["d", "D", "f", "F"]:
                     self._next_char()
-                token = Token(start_position, token_names.NUMBER, self.stream[start_position:self.current_position + 1])
+                token = Token(start_position, self.current_position, Symbol.symbol(
+                    self.stream[start_position:self.current_position + 1], token_names.NUMBER))
             else:
-                token = Token(self.current_position, token_names.separators.get(self.current_char), self.current_char)
+                token = Token(self.current_position, self.current_position, Symbol.symbol(
+                    self.current_char, token_names.separators.get(self.current_char)))
 
         # Checks word begins with an alphabetic letter.
         elif self.current_char.isalpha():
@@ -205,13 +212,16 @@ class Lexer:
                 self._next_char()
             word = self.stream[start_position:self.current_position + 1]
             if word in token_names.keywords:    # Checks if word is a keyword.
-                token = Token(start_position, token_names.keywords.get(word), word)
+                token = Token(start_position, self.current_position, Symbol.symbol(
+                    word, token_names.keywords.get(word)))
             else:                               # Otherwise put it as identifier.
-                token = Token(start_position, token_names.IDENTIFIER, word)
+                token = Token(start_position, self.current_position,
+                              Symbol.symbol(word, token_names.IDENTIFIER))
 
         # Checks if is a separator.
         elif self.current_char in token_names.separators:
-            token = Token(self.current_position, token_names.separators.get(self.current_char), self.current_char)
+            token = Token(self.current_position, self.current_position, Symbol.symbol(
+                self.current_char, token_names.separators.get(self.current_char)))
 
         # Checks if is an operator.
         elif self.current_char in token_names.operators:
@@ -219,29 +229,35 @@ class Lexer:
             if self.current_char not in ["&", "|"] and self._peek() == "=":
                 val = self.current_char + self._peek()
                 self._next_char()
-                token = Token(last_position, token_names.operators.get(val), val)
+                token = Token(last_position, self.current_position, Symbol.symbol(
+                    val, token_names.operators.get(val), ))
             elif self.current_char == "+" and self._peek() == "+":
                 val = self.current_char + self._peek()
                 self._next_char()
-                token = Token(last_position, token_names.operators.get(val), val)
+                token = Token(last_position, self.current_position,
+                              Symbol.symbol(val, token_names.operators.get(val)))
             elif self.current_char == "-" and self._peek() == "-":
                 val = self.current_char + self._peek()
                 self._next_char()
-                token = Token(last_position, token_names.operators.get(val), val)
+                token = Token(last_position, self.current_position, Symbol.symbol(val, token_names.operators.get(val)))
             elif self.current_char == "&" and self._peek() == "&":
                 val = self.current_char + self._peek()
                 self._next_char()
-                token = Token(last_position, token_names.operators.get(val), val)
+                token = Token(last_position, self.current_position, Symbol.symbol(
+                    val, token_names.operators.get(val)))
             elif self.current_char == "|" and self._peek() == "|":
                 val = self.current_char + self._peek()
                 self._next_char()
-                token = Token(last_position, token_names.operators.get(val), val)
+                token = Token(last_position, self.current_position, Symbol.symbol(
+                    val, token_names.operators.get(val)))
             else:
-                token = Token(self.current_position, token_names.operators.get(self.current_char), self.current_char)
+                token = Token(self.current_position, self.current_position, Symbol.symbol(
+                    self.current_char, token_names.operators.get(self.current_char)))
 
         # Checks if is EOF
         elif self.current_char == "\0":
-            token = Token(self.current_position, token_names.EOF, self.current_char)
+            token = Token(self.current_position, self.current_position,
+                          Symbol.symbol(self.current_char, token_names.EOF))
 
         # Raise error if is an unknown token.
         else:
