@@ -90,14 +90,14 @@ class Lexer:
             current_char (str): The current character.
     """
 
-    def __init__(self, file):
-        """
+    def __init__(self, character_stream):
+        """Lexer constructor.
+
         Args:
-            file: The path to the input file.
+            character_stream (str): The character stream of the input file.
         """
 
-        with open(file, 'r') as f:
-            self.stream = f.read()
+        self.stream = character_stream
         self.EOF = False
         self.current_position = -1
         self.current_char = ""
