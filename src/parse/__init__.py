@@ -17,37 +17,73 @@ class Parser:
 
     # Return true if the current token matches.
     def checkToken(self, kind):
-        return kind == self.curToken.getKind()
+        return kind == self.curToken.token_name
 
     # Return true if the next token matches.
     def checkPeek(self, kind):
-        return kind == self.peekToken.getKind()
+        return kind == self.peekToken.token_name
 
     # Try to match current token. If not, error. Advances the current token.
     def match(self, kind):
         if not self.checkToken(kind):
-            self.abort("Expected " + kind.name +
-                       ", got " + self.curToken.kind.name)
+            self.abort("Expected " + kind +
+                       ", got " + self.curToken.value)
         self.nextToken()
 
     # Advances the current token.
     def nextToken(self):
         self.curToken = self.peekToken
-        self.peekToken = next(self.tokens)
+        self.peekToken = next(self.tokens, token_names.EOF)
         # No need to worry about passing the EOF, lexer handles that.
 
     def abort(self, message):
         sys.exit("Error. " + message)
 
     def program(self):
-        t = AST()
-        match(token_names.keywords['public'])
-        match(token_names.keywords['class'])
+        t = programTree('Program/Class')
+        # match(token_names.KEYWORDS_ATTRIBUTE['public'])
+        match(token_names.KEYWORDS_TYPE['class'])
         match(token_names.IDENTIFIER)
         t.addKid(self.block())
         return t
 
     def block(self):
-        match(token_names.separators['{'])
-        t = AST()
+        match(token_names.SEPARATORS['{'])
+        t = blockTree('Code block')
+        while True:
+            try:
+                t.addKid(self.decl())
+            except SyntaxError:
+                break
+        while True:
+            try:
+                t.addKid(self.statement())
+            except SyntaxError:
+                break
+        match(token_names.SEPARATORS['}'])
+        return t
+
+    def decl(self):
+        typ, name = self.typ(), self.name()
         
+    def typ(self):
+        t = typeTree('')
+        for key, types in token_names.KEYWORDS_TYPE:
+            if self.checkToken(types):
+                t.setLabel(key)
+                self.nextToken()
+                break
+        if t.getLabel() == '':
+            raise SyntaxError(f'Unrecognized type: {self.curToken.token_name}')
+        return t
+
+    def name(self):
+        if self.checkToken(token_names.IDENTIFIER):
+            t = idTree('id', self.curToken.value)
+            self.nextToken()
+            return t
+        raise SyntaxError()
+
+    def statement(self):
+        pass
+

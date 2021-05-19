@@ -1,12 +1,15 @@
-class AST(object):
+from abc import ABC
+
+
+class AST(ABC):
     nodeCount = 0
 
-    def __init__(self):
+    def __init__(self, label):
         super().__init__()
         self._kids = []
         AST.nodeCount += 1
         self._nodeNum = AST.nodeCount
-        self._label = ""
+        self._label = label
 
     def getKid(self, idx):
         if idx <= 0 or idx > kidCount():
@@ -27,3 +30,32 @@ class AST(object):
 
     def getLabel(self):
         return self._label
+
+
+class programTree(AST):
+    def __init__(self, label):
+        super().__init__(label)
+
+
+class blockTree(AST):
+    def __init__(self, label):
+        super().__init__(label)
+
+
+class declTree(AST):
+    def __init__(self, label):
+        super().__init__(label)
+
+
+class typeTree(AST):
+    def __init__(self, label):
+        super().__init__(label)
+
+
+class idTree(AST):
+    def __init__(self, label, name):
+        super().__init__(label)
+        self.name = name
+
+    def getName(self):
+        return self.name
