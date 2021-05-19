@@ -2,6 +2,7 @@
 
 from enum import Enum
 
+# Must keep!
 EOF = "EOF"
 IDENTIFIER = "IDENTIFIER"
 NUMBER = "NUMBER"
@@ -10,6 +11,11 @@ STRING = "STRING"
 IGNORED = {
     "package": "KEYWORD_PACKAGE",
     "import": "KEYWORD_IMPORT",
+    "public": "KEYWORD_PUBLIC",
+    "private": "KEYWORD_PRIVATE",
+    "protected": "KEYWORD_PROTECTED",
+    "abstract": "KEYWORD_ABSTRACT",
+    "static": "KEYWORD_STATIC",
 }
 
 KEYWORDS = {
@@ -46,11 +52,6 @@ KEYWORDS_TYPE = {
 }
 
 KEYWORDS_ATTRIBUTE = {
-    "public": "KEYWORD_PUBLIC",
-    "private": "KEYWORD_PRIVATE",
-    "protected": "KEYWORD_PROTECTED",
-    "abstract": "KEYWORD_ABSTRACT",
-    "static": "KEYWORD_STATIC",
     "final": "KEYWORD_FINAL",
 }
 
