@@ -1,16 +1,20 @@
 """This is the module containing all codes needed for the lexer.
 
-    This module would take the file and generate the tokens used by the parser.
+    This module would take the character stream and generate a collection of tokens.
 
     Example:
-        >>> from lex import *
-        >>> lexer = Lexer("./test/example.java") # Lexer takes the path to file
+        >>> from lex import Lexer
+        >>> lexer = Lexer(character_stream)
         >>> for token in lexer.tokens():
         >>>     print(token)
 """
 
 from typing import Iterator
-from lex import token_names
+
+try:
+    from lex import token_names
+except Exception:
+    from src.lex import token_names
 
 
 class Token:
