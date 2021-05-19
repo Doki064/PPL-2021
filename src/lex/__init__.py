@@ -190,7 +190,7 @@ class Lexer:
                               token_names.NUMBER, self.stream[start_position:self.current_position + 1])
             else:
                 token = Token(self.current_position, self.current_position,
-                              token_names.SEPARATORS.get(self.current_char), self.current_char)
+                              token_names.Separators(self.current_char).name, self.current_char)
 
         # Checks word begins with an alphabetic letter or an underscore.
         elif self.current_char.isalpha() or self.current_char == "_":
@@ -201,60 +201,62 @@ class Lexer:
                 self._next_char()
             word = self.stream[start_position:self.current_position + 1]
             # Checks if word is ignored.
-            if word in token_names.IGNORED:
+            if word in token_names.Ignored.Keywords.values():
                 while self.current_char != ";":
                     self._next_char()
+            elif word in token_names.Ignored.KeywordsAttribute.values():
+                self._next_char()
             # Checks if word is a keyword.
-            elif word in token_names.KEYWORDS:
+            elif word in token_names.Keywords.values():
                 token = Token(start_position, self.current_position,
-                              token_names.KEYWORDS.get(word), word)
-            elif word in token_names.KEYWORDS_TYPE:
+                              token_names.Keywords(word).name, word)
+            elif word in token_names.KeywordsType.values():
                 token = Token(start_position, self.current_position,
-                              token_names.KEYWORDS_TYPE.get(word), word)
-            elif word in token_names.KEYWORDS_ATTRIBUTE:
+                              token_names.KeywordsType(word).name, word)
+            elif word in token_names.KeywordsAttribute.values():
                 token = Token(start_position, self.current_position,
-                              token_names.KEYWORDS_ATTRIBUTE.get(word), word)
+                              token_names.KeywordsAttribute(word).name, word)
             # Otherwise put it as identifier.
             else:
                 token = Token(start_position, self.current_position,
                               token_names.IDENTIFIER, word)
 
         # Checks if is a separator.
-        elif self.current_char in token_names.SEPARATORS:
+        elif self.current_char in token_names.Separators.values():
             token = Token(self.current_position, self.current_position,
-                          token_names.SEPARATORS.get(self.current_char), self.current_char)
+                          token_names.Separators(self.current_char).name, self.current_char)
 
         # Checks if is an operator.
-        elif self.current_char in token_names.OPERATORS:
+        elif self.current_char in token_names.Operators.values():
             last_position = self.current_position
             if self.current_char not in ["&", "|"] and self._peek() == "=":
                 val = self.current_char + self._peek()
                 self._next_char()
                 token = Token(last_position, self.current_position,
-                              token_names.OPERATORS.get(val), val)
+                              token_names.Operators(val).name, val)
             elif self.current_char == "+" and self._peek() == "+":
                 val = self.current_char + self._peek()
                 self._next_char()
                 token = Token(last_position, self.current_position,
-                              token_names.OPERATORS.get(val), val)
+                              token_names.Operators(val).name, val)
             elif self.current_char == "-" and self._peek() == "-":
                 val = self.current_char + self._peek()
                 self._next_char()
                 token = Token(last_position, self.current_position,
-                              token_names.OPERATORS.get(val), val)
+                              token_names.Operators(val).name, val)
             elif self.current_char == "&" and self._peek() == "&":
                 val = self.current_char + self._peek()
                 self._next_char()
                 token = Token(last_position, self.current_position,
-                              token_names.OPERATORS.get(val), val)
+                              token_names.Operators(val).name, val)
             elif self.current_char == "|" and self._peek() == "|":
                 val = self.current_char + self._peek()
                 self._next_char()
                 token = Token(last_position, self.current_position,
-                              token_names.OPERATORS.get(val), val)
+                              token_names.Operators(val).name, val)
             else:
                 token = Token(self.current_position, self.current_position,
-                              token_names.OPERATORS.get(self.current_char), self.current_char)
+                              token_names.Operators(self.current_char).name, self.current_char)
 
         # Checks if is EOF
         elif self.current_char == "\0":
