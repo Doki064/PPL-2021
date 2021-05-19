@@ -1,6 +1,7 @@
 import sys
 
 from lex import *
+from ast import *
 
 # Parser object keeps track of current token and checks if the code matches the grammar.
 class Parser:
@@ -35,3 +36,6 @@ class Parser:
 
     def abort(self, message):
         sys.exit("Error. " + message)
+
+    def program(self):
+        t = AST()

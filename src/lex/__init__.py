@@ -12,7 +12,7 @@
 from lex import token_names
 
 
-class Symbol:
+class Symbol(object):
     def __init__(self, name, kind):
         super().__init__()
         self.name = name
