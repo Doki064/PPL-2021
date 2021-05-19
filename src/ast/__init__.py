@@ -1,6 +1,4 @@
-from abc import ABC
-
-class AST(ABC):
+class AST(object):
     nodeCount = 0
 
     def __init__(self):
