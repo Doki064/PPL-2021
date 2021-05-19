@@ -15,8 +15,14 @@ def main():
 
     # Token stream test
     print(f"{filler:-<50}\nToken Stream Test")
-    for token in lexer.tokens():
-        print(token)
+    # for token in lexer.tokens():
+    #     print(token)
+    tokens = lexer.tokens()
+    while True:
+        try:
+            print(next(tokens))
+        except StopIteration:
+            break
 
     # Symbol table test
     print(f"{filler:-<50}\nSymbol Table Test")

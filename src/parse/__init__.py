@@ -8,6 +8,8 @@ class Parser:
     def __init__(self, lexer):
         self.lexer = lexer
 
+        self.tokens = lexer.tokens()
+
         self.curToken = None
         self.peekToken = None
         self.nextToken()
@@ -15,11 +17,11 @@ class Parser:
 
     # Return true if the current token matches.
     def checkToken(self, kind):
-        return kind == self.curToken.kind
+        return kind == self.curToken.getKind()
 
     # Return true if the next token matches.
     def checkPeek(self, kind):
-        return kind == self.peekToken.kind
+        return kind == self.peekToken.getKind()
 
     # Try to match current token. If not, error. Advances the current token.
     def match(self, kind):
@@ -31,7 +33,7 @@ class Parser:
     # Advances the current token.
     def nextToken(self):
         self.curToken = self.peekToken
-        self.peekToken = self.lexer.getToken()
+        self.peekToken = next(self.tokens)
         # No need to worry about passing the EOF, lexer handles that.
 
     def abort(self, message):
@@ -39,3 +41,13 @@ class Parser:
 
     def program(self):
         t = AST()
+        match(token_names.keywords['public'])
+        match(token_names.keywords['class'])
+        match(token_names.IDENTIFIER)
+        t.addKid(self.block())
+        return t
+
+    def block(self):
+        match(token_names.separators['{'])
+        t = AST()
+        
