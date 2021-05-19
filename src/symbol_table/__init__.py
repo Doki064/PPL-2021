@@ -40,7 +40,7 @@ class SymbolTable(OrderedDict):
 
         while self.current_token is not None:
             if self.current_token.token_name == token_names.IDENTIFIER:
-                identifier_position = self.current_token.left_position
+                identifier_key = identifier_position = self.current_token.left_position
                 identifier_name = self.current_token.value
                 if self.next_token.token_name == token_names.SEPARATORS.get("["):
                     while True:
@@ -58,17 +58,20 @@ class SymbolTable(OrderedDict):
                 else:
                     raise LexerError(self.current_token.position, "Out of scope!")
 
-                for value in self.values():
-                    if value["identifier_name"] == identifier_name:
-                        if identifier_type is None:
-                            break
+                for key, value in reversed(self.items()):
+                    # all_keys = [key for key, value in self.items() if value["identifier_type"] is not None]
+                    if identifier_type is None:
+                        if (value["identifier_name"] == identifier_name
+                                and value["identifier_type"] is not None
+                                and value["scope"][1] <= scope_level):
+                            identifier_position = key
                 else:
-                    self[identifier_position] = {
+                    self[identifier_key] = {
                         "identifier_position": identifier_position,
                         "identifier_name": identifier_name,
                         "identifier_type": identifier_type,
                         "attributes": tuple(attributes),
-                        "scope": scope,
+                        "scope": (scope, scope_level),
                     }
 
                 identifier_type = None
