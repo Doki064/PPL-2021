@@ -1,6 +1,21 @@
+"""This is the module to generate the symbol table.
+
+    This module would generate a symbol table from a collection of tokens.
+
+    Example:
+        >>> from lex import Lexer
+        >>> from symbol_table import SymbolTable
+        >>> lexer = Lexer(character_stream)
+        >>> st = SymbolTable(lexer=lexer)
+        >>> print(st) # Recommend to use pprint: pprint.pprint(st)
+"""
+
 from collections import OrderedDict
 
-from src.lex import *
+try:
+    from lex import *
+except Exception:
+    from src.lex import *
 
 
 class SymbolTable(OrderedDict):
@@ -12,15 +27,24 @@ class SymbolTable(OrderedDict):
             next_token (Token): The next token in the iteration.
     """
 
-    def __init__(self, lexer):
+    def __init__(self, lexer=None, tokens=None):
         """SymbolTable constructor.
 
+            Takes lexer or tokens argument to get the collection of tokens. Prioritizes lexer if both are provided.
+
             Args:
-                lexer (Lexer): The lexer for generating collections of token.
+                lexer (Lexer): The lexer for generating collections of token. Defaults to None.
+                tokens (Iterator[Token]): The iterator over the collection tokens. Defaults to None.
+
         """
 
         super().__init__()
-        self.tokens = lexer.tokens()
+        if lexer is not None:
+            self.tokens = lexer.tokens()
+        elif tokens is not None:
+            self.tokens = tokens
+        else:
+            raise TypeError("__init__() needs at least 1 argument: 'lexer' or 'tokens'.")
         self.current_token = None
         self.next_token = None
         self._advance()
@@ -58,21 +82,30 @@ class SymbolTable(OrderedDict):
                 else:
                     raise LexerError(self.current_token.left_position, "Out of scope!")
 
-                for key, value in reversed(self.items()):
-                    # all_keys = [key for key, value in self.items() if value["identifier_type"] is not None]
-                    if identifier_type is None:
-                        if (value["identifier_name"] == identifier_name
-                                and value["identifier_type"] is not None
-                                and value["scope"][1] <= scope_level):
-                            identifier_position = key
-                else:
-                    self[identifier_key] = {
-                        "identifier_position": identifier_position,
-                        "identifier_name": identifier_name,
-                        "identifier_type": identifier_type,
-                        "attributes": tuple(attributes),
-                        "scope": (scope, scope_level),
-                    }
+                if identifier_type is None:
+                    try:
+                        # A valid key must fulfill all the criteria below:
+                        #   has the same identifier name,
+                        #   its identifier type cannot be NoneType,
+                        #   has the same or larger scope as the current identifier,
+                        #   is the most recent key.
+                        # If there is a valid key, pass it as the identifier_position for the current identifier.
+                        latest_valid_key = next(key for key, value in reversed(self.items())
+                                                if (value["identifier_name"] == identifier_name
+                                                    and value["identifier_type"] is not None
+                                                    and value["scope"][1] <= scope_level))
+                    except StopIteration:
+                        pass
+                    else:
+                        identifier_position = latest_valid_key
+
+                self[identifier_key] = {
+                    "identifier_position": identifier_position,
+                    "identifier_name": identifier_name,
+                    "identifier_type": identifier_type,
+                    "attributes": tuple(attributes),
+                    "scope": (scope, scope_level),
+                }
                 identifier_type = None
                 attributes.clear()
 
