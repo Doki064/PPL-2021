@@ -13,5 +13,6 @@ def run():
 
 
 if __name__ == '__main__':
-    sys.argv = ["symtableTest.py", "../test/case1/Main.java"]
+    if len(sys.argv) < 2:
+        sys.argv = ["symtableTest.py", "../test/case1/Main.java"]
     run()
