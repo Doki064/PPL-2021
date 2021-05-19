@@ -40,14 +40,14 @@ class SymbolTable(OrderedDict):
 
         while self.current_token is not None:
             if self.current_token.token_name == token_names.IDENTIFIER:
-                identifier_position = self.current_token.left_position
+                identifier_key = identifier_position = self.current_token.left_position
                 identifier_name = self.current_token.value
-                if self.next_token.token_name == token_names.SEPARATORS.get("["):
+                if self.next_token.token_name == token_names.Separators("[").name:
                     while True:
                         self._advance()
                         identifier_name += self.current_token.value
-                        if (self.current_token.token_name == token_names.SEPARATORS.get("]")
-                                and self.next_token.token_name != token_names.SEPARATORS.get("[")):
+                        if (self.current_token.token_name == token_names.Separators("]").name
+                                and self.next_token.token_name != token_names.Separators("[").name):
                             break
                 if scope_level == -1:
                     scope = "outer_scope"
@@ -56,47 +56,49 @@ class SymbolTable(OrderedDict):
                 elif scope_level >= 1:
                     scope = f"inner_scope_{scope_level}"
                 else:
-                    raise LexerError(self.current_token.position, "Out of scope!")
+                    raise LexerError(self.current_token.left_position, "Out of scope!")
 
-                for value in self.values():
-                    if value["identifier_name"] == identifier_name:
-                        if identifier_type is None:
-                            break
+                for key, value in reversed(self.items()):
+                    # all_keys = [key for key, value in self.items() if value["identifier_type"] is not None]
+                    if identifier_type is None:
+                        if (value["identifier_name"] == identifier_name
+                                and value["identifier_type"] is not None
+                                and value["scope"][1] <= scope_level):
+                            identifier_position = key
                 else:
-                    self[identifier_position] = {
+                    self[identifier_key] = {
                         "identifier_position": identifier_position,
                         "identifier_name": identifier_name,
                         "identifier_type": identifier_type,
                         "attributes": tuple(attributes),
-                        "scope": scope,
+                        "scope": (scope, scope_level),
                     }
-
                 identifier_type = None
                 attributes.clear()
 
-            elif self.current_token.token_name in token_names.KEYWORDS_TYPE.values():
-                if self.next_token.token_name == token_names.SEPARATORS.get("["):
+            elif self.current_token.token_name in token_names.KeywordsType.names():
+                if self.next_token.token_name == token_names.Separators("[").name:
                     identifier_type = self.current_token.value
                     while True:
                         self._advance()
                         identifier_type += self.current_token.value
-                        if (self.current_token.token_name == token_names.SEPARATORS.get("]")
-                                and self.next_token.token_name != token_names.SEPARATORS.get("[")):
+                        if (self.current_token.token_name == token_names.Separators("]").name
+                                and self.next_token.token_name != token_names.Separators("[").name):
                             break
                 elif self.next_token.token_name == token_names.IDENTIFIER:
                     identifier_type = self.current_token.value
 
-            elif self.current_token.token_name in token_names.KEYWORDS_ATTRIBUTE.values():
-                if (self.next_token.token_name in token_names.KEYWORDS_ATTRIBUTE.values()
-                        or self.next_token.token_name in token_names.KEYWORDS_TYPE.values()):
+            elif self.current_token.token_name in token_names.KeywordsAttribute.names():
+                if (self.next_token.token_name in token_names.KeywordsAttribute.names()
+                        or self.next_token.token_name in token_names.KeywordsType.names()):
                     attributes.append(self.current_token.value)
 
-            elif (self.current_token.token_name == token_names.SEPARATORS.get("{")
-                  or self.current_token.token_name == token_names.SEPARATORS.get("(")):
+            elif (self.current_token.token_name == token_names.Separators("{").name
+                  or self.current_token.token_name == token_names.Separators("(").name):
                 scope_level += 1
 
-            elif (self.current_token.token_name == token_names.SEPARATORS.get("}")
-                  or self.current_token.token_name == token_names.SEPARATORS.get(")")):
+            elif (self.current_token.token_name == token_names.Separators("}").name
+                  or self.current_token.token_name == token_names.Separators(")").name):
                 scope_level -= 1
 
             self._advance()
