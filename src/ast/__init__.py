@@ -24,6 +24,7 @@ class AST(ABC):
 
     def addKid(self, kidAST):
         self._kids.add(kidAST)
+        return self
 
     def setLabel(self, label):
         self.label = label
@@ -42,10 +43,24 @@ class blockTree(AST):
         super().__init__(label)
 
 
-class declTree(AST):
+class declrTree(AST):
     def __init__(self, label):
         super().__init__(label)
 
+
+class declTreeWithAssign(AST):
+    def __init__(self, label):
+        super().__init__(label)
+
+
+class funcDeclTree(AST):
+    def __init__(self, label):
+        super().__init__(label)
+
+
+class funcHeadTree(AST):
+    def __init__(self, label):
+        super().__init__(label)
 
 class typeTree(AST):
     def __init__(self, label):
@@ -59,3 +74,21 @@ class idTree(AST):
 
     def getName(self):
         return self.name
+class assignTree(AST):
+    def __init__(self, label):
+        super().__init__(label)
+
+
+class ifTree(AST):
+    def __init__(self, label):
+        super().__init__(label)
+        
+
+class whileTree(AST):
+    def __init__(self, label):
+        super().__init__(label)
+
+
+class returnTree(AST):
+    def __init__(self, label):
+        super().__init__(label)

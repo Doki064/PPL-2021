@@ -65,6 +65,18 @@ class Parser:
 
     def decl(self):
         typ, name = self.typ(), self.name()
+        if self.checkToken(token_names.SEPARATORS['(']):
+            t = funcDeclTree('Function').addKid(typ).addKid(name)
+            t.addKid(self.funcHead())
+            t.addKid(self.block())
+            return t
+        if self.checkToken(token_names.OPERATORS['=']):
+            t = declTreeWithAssign('Declaration with assignment').addKid(typ).addKid(name)
+            t.addKid(self.expr())
+            return t
+        self.match(token_names.SEPARATORS[';'])
+        t = declrTree('Declaration').addKid(typ).addKid(name)
+        return t
         
     def typ(self):
         t = typeTree('')
@@ -84,6 +96,22 @@ class Parser:
             return t
         raise SyntaxError()
 
-    def statement(self):
-        pass
+    def funcHead(self):
+        self.match(token_names.SEPARATORS['('])
+        t = funcHeadTree('Function Header')
+        if not self.checkToken(token_names.SEPARATORS[')']):
+            while True:
+                t.addKid(self.decl())
+                if self.checkToken(token_names.SEPARATORS[',']):
+                    self.nextToken()
+                else:
+                    break
+        match(token_names.SEPARATORS[')'])
+        return t
 
+    def statement(self):
+        if self.checkToken(token_names.KEYWORDS['if']):
+            t = ifTree()
+
+    def expr(self):
+        pass
