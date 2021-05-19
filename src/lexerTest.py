@@ -25,8 +25,6 @@ def main():
         except StopIteration:
             break
 
-    # Symbol table test
-    print(f"{filler:-<50}\nSymbol Table Test")
 
 if __name__ == '__main__':
     sys.argv = ["./lexerTest.py", "../test/case1/Main.java"]
