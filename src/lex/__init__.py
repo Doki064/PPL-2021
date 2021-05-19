@@ -15,16 +15,16 @@ from lex import token_names
 class Symbol(object):
     def __init__(self, name, kind):
         super().__init__()
-        self.name = name
-        self.kind = kind
+        self.__name = name
+        self.__kind = kind
 
     __symbols = {}
 
     def toString(self):
-        return self.name
+        return self.__name
 
     def getKind(self):
-        return self.kind
+        return self.__kind
 
     @staticmethod
     def symbol(newTokenStr, kind):
@@ -41,7 +41,7 @@ class Symbol(object):
         return Symbol.__symbols
 
     def __str__(self):
-        return f"{self.kind:20}\t {self.name}"
+        return f"{self.__kind:20}\t {self.__name}"
 
 
 class Token(object):
@@ -63,6 +63,11 @@ class Token(object):
     def __str__(self):
         return f"{self.leftPosition}\t {self.rightPosition}\t {self.symbol}"
 
+    def getKind(self):
+        return self.symbol.getKind()
+
+    def getName(self):
+        return self.symbol.getName()
 
 class LexerError(Exception):
     """ Lexer error exception.
