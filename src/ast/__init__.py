@@ -5,27 +5,27 @@ class AST(ABC):
 
     def __init__(self):
         super().__init__()
-        self.kids = []
+        self._kids = []
         AST.nodeCount += 1
-        self.nodeNum = AST.nodeCount
-        self.label = ""
+        self._nodeNum = AST.nodeCount
+        self._label = ""
 
     def getKid(self, idx):
         if idx <= 0 or idx > kidCount():
             return None
-        return kids[idx - 1]
+        return _kids[idx - 1]
 
     def getKids(self):
-        return self.kids
+        return self._kids
 
     def kidCount(self):
-        return len(self.kids)
+        return len(self._kids)
 
     def addKid(self, kidAST):
-        self.kids.add(kidAST)
+        self._kids.add(kidAST)
 
     def setLabel(self, label):
         self.label = label
 
     def getLabel(self):
-        return self.label
+        return self._label
