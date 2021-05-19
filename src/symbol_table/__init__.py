@@ -1,6 +1,6 @@
 from collections import OrderedDict
 
-from src.lex import *
+from lex import *
 
 
 class SymbolTable(OrderedDict):

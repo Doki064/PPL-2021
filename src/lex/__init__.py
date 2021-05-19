@@ -45,13 +45,6 @@ class Token:
             return self.left_position == other.left_position and self.value == other.value
         return NotImplemented
 
-    def getKind(self):
-        return self.symbol.getKind()
-
-    def getName(self):
-        return self.symbol.getName()
-
-
 class LexerError(Exception):
     """ Lexer exception."""
 
