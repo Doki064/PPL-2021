@@ -5,28 +5,14 @@ IDENTIFIER = "IDENTIFIER"
 NUMBER = "LITERAL_NUMBER"
 STRING = "LITERAL_STRING"
 
-keywords = {
+IGNORED = {
     "package": "KEYWORD_PACKAGE",
     "import": "KEYWORD_IMPORT",
-    "class": "KEYWORD_CLASS",
-    "public": "KEYWORD_PUBLIC",
-    "private": "KEYWORD_PRIVATE",
-    "protected": "KEYWORD_PROTECTED",
-    "static": "KEYWORD_STATIC",
-    "final": "KEYWORD_FINAL",
+}
+
+KEYWORDS = {
     "this": "KEYWORD_THIS",
     "new": "KEYWORD_NEW",
-    "var": "KEYWORD_VAR",
-    "byte": "KEYWORD_BYTE",
-    "short": "KEYWORD_SHORT",
-    "int": "KEYWORD_INT",
-    "long": "KEYWORD_LONG",
-    "float": "KEYWORD_FLOAT",
-    "double": "KEYWORD_DOUBLE",
-    "char": "KEYWORD_CHAR",
-    "String": "KEYWORD_STRING",
-    "boolean": "KEYWORD_BOOLEAN",
-    "void": "KEYWORD_VOID",
     "return": "KEYWORD_RETURN",
     "if": "KEYWORD_IF",
     "else": "KEYWORD_ELSE",
@@ -38,7 +24,30 @@ keywords = {
     "continue": "KEYWORD_CONTINUE",
 }
 
-operators = {
+KEYWORDS_TYPE = {
+    "class": "KEYWORD_CLASS",
+    "var": "KEYWORD_VAR",
+    "byte": "KEYWORD_BYTE",
+    "short": "KEYWORD_SHORT",
+    "int": "KEYWORD_INT",
+    "long": "KEYWORD_LONG",
+    "float": "KEYWORD_FLOAT",
+    "double": "KEYWORD_DOUBLE",
+    "char": "KEYWORD_CHAR",
+    "String": "KEYWORD_STRING",
+    "boolean": "KEYWORD_BOOLEAN",
+    "void": "KEYWORD_VOID",
+}
+
+KEYWORDS_ATTRIBUTE = {
+    "public": "KEYWORD_PUBLIC",
+    "private": "KEYWORD_PRIVATE",
+    "protected": "KEYWORD_PROTECTED",
+    "static": "KEYWORD_STATIC",
+    "final": "KEYWORD_FINAL",
+}
+
+OPERATORS = {
     "+": "OP_ADD",
     "-": "OP_SUB",
     "*": "OP_MUL",
@@ -66,7 +75,7 @@ operators = {
     "||": "OP_LOGIC_OR",
 }
 
-separators = {
+SEPARATORS = {
     "(": "SEP_PAREN_LEFT",
     ")": "SEP_PAREN_RIGHT",
     "[": "SEP_BRACKET_LEFT",
