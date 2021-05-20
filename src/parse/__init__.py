@@ -58,7 +58,7 @@ class Parser:
                 matchType = kind
                 break
         if not doesMatch:
-            self.abort(f'Expected {kind}, got {self.curToken.value}, at {self.curToken.position}')
+            self.abort(f'Expected {token_names.getValueByName(kind)}, got {self.curToken.value}, at line {self.curToken.position}')
         self.nextToken()
         return matchType
 
@@ -88,11 +88,6 @@ class Parser:
         t = blockTree()
         while True:
             try:
-                t.addKid(self.decl())
-            except SyntaxError:
-                break
-        while True:
-            try:
                 t.addKid(self.statement())
             except SyntaxError:
                 break
@@ -106,7 +101,7 @@ class Parser:
             t.addKid(self.funcHead())
             t.addKid(self.block())
             return t
-        if self.checkToken(token_names.OPERATORS['=']):
+        if self.checkToken(token_names.OPERATORS['=']) and requireSemiColon:
             self.nextToken()
             t = declTreeWithAssign().addKid(typ).addKid(name)
             t.addKid(self.expr())
@@ -128,7 +123,7 @@ class Parser:
                 break
 
         if t.getLabel() == 'Type':
-            raise SyntaxError(f'Unrecognized type: {self.curToken.token_name}')
+            raise SyntaxError(f'Unrecognized type: {token_names.getValueByName(self.curToken.token_name)}')
 
         if self.checkToken(token_names.SEPARATORS['[']):
             self.nextToken()
@@ -142,7 +137,7 @@ class Parser:
             self.nextToken()
             return t
         raise SyntaxError(
-            f'Expected: {token_names.IDENTIFIER}, got {self.curToken.token_name}, at {self.curToken.position}')
+            f'Expected: {token_names.IDENTIFIER}, got {token_names.getValueByName(self.curToken.token_name)}, at line {self.curToken.position}')
 
     def funcHead(self):
         self.match(token_names.SEPARATORS['('])
@@ -158,6 +153,8 @@ class Parser:
         return t
 
     def statement(self):
+        if self.curToken.token_name in token_names.KEYWORDS_TYPE.values():
+            return self.decl()
         if self.checkToken(token_names.KEYWORDS['if']):
             t = ifTree()
             self.nextToken()
@@ -302,4 +299,3 @@ class Parser:
             return t
         else:
             return None
-

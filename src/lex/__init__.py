@@ -40,7 +40,7 @@ class Token:
         value (str): The value of the token.
     """
 
-    def __init__(self, start_position, end_position, token_name, value):
+    def __init__(self, line_number, line_start_position, start_position, end_position, token_name, value):
         """Token constructor.
 
         Args:
@@ -49,7 +49,8 @@ class Token:
             token_name (str): The name of the token.
             value (str): The value of the token.
         """
-        self.position = self._start_position = start_position
+        self.position = f"{line_number}:{start_position - line_start_position}"
+        self._start_position = start_position
         self._end_position = end_position
         self.token_name = token_name
         self.value = value
@@ -80,11 +81,11 @@ class Token:
         return f"{self._start_position}\t {self._end_position}\t {self.token_name}\t {self.value}"
 
     def __hash__(self):
-        return hash((self.position, self.token_name, self.value))
+        return hash((self._start_position, self.token_name, self.value))
 
     def __eq__(self, other):
         if isinstance(other, Token):
-            return self.position == other.position and self.token_name == other.token_name and self.value == other.value
+            return self._start_position == other._start_position and self.token_name == other.token_name and self.value == other.value
         return NotImplemented
 
 
@@ -128,6 +129,8 @@ class Lexer:
         """
         self.stream = character_stream
         self.EOF = False
+        self.line_number = 1
+        self.line_start_position = -1
         self.current_position = -1
         self.current_char = ""
         self._next_char()
@@ -164,6 +167,9 @@ class Lexer:
                     self._next_char()
             elif self._peek() == "*":  # Multiple-line comment
                 while self.current_char != "*" or self._peek() != "/":
+                    if self.current_char == "\n":
+                        self.line_number += 1
+                        self.line_start_position = self.current_position
                     self._next_char()
                     if self.EOF:  # Check unclosed comment
                         raise LexerError(
@@ -172,6 +178,9 @@ class Lexer:
                 self._next_char()
 
         while self.current_char in [" ", "\t", "\r", "\n"]:
+            if self.current_char == "\n":
+                self.line_number += 1
+                self.line_start_position = self.current_position
             self._next_char()
 
     def _get_token(self):
@@ -195,7 +204,7 @@ class Lexer:
                     raise LexerError(
                         start_position, f"EOL while scanning string literal at position {start_position}")
             self._next_char()
-            token = Token(start_position, self.current_position,
+            token = Token(self.line_number, self.line_start_position, start_position, self.current_position,
                           _token_names.STRING, self.stream[start_position:self.current_position + 1])
 
         # Checks double-quoted string.
@@ -207,7 +216,7 @@ class Lexer:
                     raise LexerError(
                         start_position, f"EOL while scanning string literal at position {start_position}")
             self._next_char()
-            token = Token(start_position, self.current_position,
+            token = Token(self.line_number, self.line_start_position, start_position, self.current_position,
                           _token_names.STRING, self.stream[start_position:self.current_position + 1])
 
         # Checks number begins with a digit.
@@ -221,7 +230,7 @@ class Lexer:
                     self._next_char()
             if self._peek() in ["d", "D", "f", "F"]:
                 self._next_char()
-            token = Token(start_position, self.current_position,
+            token = Token(self.line_number, self.line_start_position, start_position, self.current_position,
                           _token_names.NUMBER, self.stream[start_position:self.current_position + 1])
 
         # Checks number begins with a dot.
@@ -232,10 +241,10 @@ class Lexer:
                     self._next_char()
                 if self._peek() in ["d", "D", "f", "F"]:
                     self._next_char()
-                token = Token(start_position, self.current_position,
+                token = Token(self.line_number, self.line_start_position, start_position, self.current_position,
                               _token_names.NUMBER, self.stream[start_position:self.current_position + 1])
             else:
-                token = Token(self.current_position, self.current_position,
+                token = Token(self.line_number, self.line_start_position, self.current_position, self.current_position,
                               _token_names.Separators(self.current_char).name, self.current_char)
 
         # Checks word begins with an alphabetic letter or an underscore.
@@ -250,22 +259,22 @@ class Lexer:
             word = self.stream[start_position:self.current_position + 1]
             # Checks if word is a keyword.
             if word in _token_names.Keywords.values():
-                token = Token(start_position, self.current_position,
+                token = Token(self.line_number, self.line_start_position, start_position, self.current_position,
                               _token_names.Keywords(word).name, word)
             elif word in _token_names.KeywordsType.values():
-                token = Token(start_position, self.current_position,
+                token = Token(self.line_number, self.line_start_position, start_position, self.current_position,
                               _token_names.KeywordsType(word).name, word)
             elif word in _token_names.KeywordsAttribute.values():
-                token = Token(start_position, self.current_position,
+                token = Token(self.line_number, self.line_start_position, start_position, self.current_position,
                               _token_names.KeywordsAttribute(word).name, word)
             # Otherwise put it as identifier.
             else:
-                token = Token(start_position, self.current_position,
+                token = Token(self.line_number, self.line_start_position, start_position, self.current_position,
                               _token_names.IDENTIFIER, word)
 
         # Checks if is a separator.
         elif self.current_char in _token_names.Separators.values():
-            token = Token(self.current_position, self.current_position,
+            token = Token(self.line_number, self.line_start_position, self.current_position, self.current_position,
                           _token_names.Separators(self.current_char).name, self.current_char)
 
         # Checks if is an operator.
@@ -274,35 +283,35 @@ class Lexer:
             if self.current_char not in ["&", "|"] and self._peek() == "=":
                 val = self.current_char + self._peek()
                 self._next_char()
-                token = Token(last_position, self.current_position,
+                token = Token(self.line_number, self.line_start_position, last_position, self.current_position,
                               _token_names.Operators(val).name, val)
             elif self.current_char == "+" and self._peek() == "+":
                 val = self.current_char + self._peek()
                 self._next_char()
-                token = Token(last_position, self.current_position,
+                token = Token(self.line_number, self.line_start_position, last_position, self.current_position,
                               _token_names.Operators(val).name, val)
             elif self.current_char == "-" and self._peek() == "-":
                 val = self.current_char + self._peek()
                 self._next_char()
-                token = Token(last_position, self.current_position,
+                token = Token(self.line_number, self.line_start_position, last_position, self.current_position,
                               _token_names.Operators(val).name, val)
             elif self.current_char == "&" and self._peek() == "&":
                 val = self.current_char + self._peek()
                 self._next_char()
-                token = Token(last_position, self.current_position,
+                token = Token(self.line_number, self.line_start_position, last_position, self.current_position,
                               _token_names.Operators(val).name, val)
             elif self.current_char == "|" and self._peek() == "|":
                 val = self.current_char + self._peek()
                 self._next_char()
-                token = Token(last_position, self.current_position,
+                token = Token(self.line_number, self.line_start_position, last_position, self.current_position,
                               _token_names.Operators(val).name, val)
             else:
-                token = Token(self.current_position, self.current_position,
+                token = Token(self.line_number, self.line_start_position, self.current_position, self.current_position,
                               _token_names.Operators(self.current_char).name, self.current_char)
 
         # Checks if is EOF
         elif self.current_char == "\0":
-            token = Token(self.current_position, self.current_position,
+            token = Token(self.line_number, self.line_start_position, self.current_position, self.current_position,
                           _token_names.EOF, self.current_char)
 
         # Raise error if is an unknown token.
