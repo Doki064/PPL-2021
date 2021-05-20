@@ -24,11 +24,19 @@ class Parser:
         return kind == self.peekToken.token_name
 
     # Try to match current token. If not, error. Advances the current token.
-    def match(self, kind):
-        if not self.checkToken(kind):
+    def match(self, kinds):
+        if type(kinds) is not list: kinds = [kinds]
+        doesMatch = False
+        for kind in kinds:
+            if self.checkToken(kind):
+                doesMatch = True
+                matchType = kind
+                break
+        if not doesMatch:
             self.abort("Expected " + kind +
                        ", got " + self.curToken.value)
         self.nextToken()
+        return matchType
 
     # Advances the current token.
     def nextToken(self):
@@ -113,7 +121,7 @@ class Parser:
         if self.checkToken(token_names.KEYWORDS['if']):
             t = ifTree()
             self.nextToken()
-            t.addKid(self.expr())
+            t.addKid(self.expr(), True)
             t.addKid(self.block())
             if self.checkToken(token_names.KEYWORDS['else']):
                 self.nextToken()
@@ -123,7 +131,7 @@ class Parser:
         if self.checkToken(token_names.KEYWORDS['while']):
             t = whileTree()
             self.nextToken()
-            t.addKid(self.expr())
+            t.addKid(self.expr(), True)
             t.addKid(self.block())
             return t
 
@@ -136,10 +144,51 @@ class Parser:
         if self.checkToken(token_names.SEPARATORS['{']):
             return self.block()
 
-        t = assignTree().addKid(self.name())
-        self.match(token_names.OPERATORS['='])
+        assignOPs = [token_names.OPERATORS['='],
+                     token_names.OPERATORS['+='], 
+                     token_names.OPERATORS['-='], 
+                     token_names.OPERATORS['*='], 
+                     token_names.OPERATORS['/='], 
+                     token_names.OPERATORS['%=']]
+        kid = self.name()
+        t = assignTree(self.match(assignOPs)).addKid(kid)
         t.addKid(self.expr())
         return t
 
-    def expr(self):
+    def expr(self, requireBracket=False):
+        if requireBracket or self.checkToken(token_names.SEPARATORS['(']):
+            self.match(token_names.SEPARATORS['('])
+            requireBracket = True
+        
+        kid = self.simpleExpr()
+        t = self.formRelationTree()
+        if t is None:
+            return kid
+
+        t.addKid(kid)
+        t.addKid(self.simpleExpr())
+        return t
+
+    def simpleExpr(self):
+        addOPs = [token_names.OPERATORS['+'],
+                     token_names.OPERATORS['-'],
+                     token_names.OPERATORS['|']]
+
+        kid = self.term()
+        t = self.formAddOpTree()
+        while t is not None:
+            t.addKid(kid)
+            t.addKid(self.term())
+            kid = t
+            t = self.formAddOpTree()
+        return kid
+
+
+    def formRelationTree(self):
+        pass
+
+    def formAddOpTree(self):
+        pass
+
+    def term(self):
         pass
