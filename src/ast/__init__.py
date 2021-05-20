@@ -27,7 +27,7 @@ class AST(ABC):
         return self
 
     def setLabel(self, label):
-        self.label = label
+        self._label = label
 
     def getLabel(self):
         return self._label
@@ -86,6 +86,15 @@ class idTree(AST):
 class numberTree(AST):
     def __init__(self, value):
         super().__init__('literal number')
+        self.value = value
+
+    def getValue(self):
+        return self.value
+
+
+class stringTree(AST):
+    def __init__(self, value):
+        super().__init__('literal string')
         self.value = value
 
     def getValue(self):
