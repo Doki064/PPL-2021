@@ -4,12 +4,14 @@
 
     Example:
         >>> from lex import Lexer
+        >>> with open(path_to_file, "r") as f:
+        >>>     character_stream = f.read()
         >>> lexer = Lexer(character_stream)
         >>> for token in lexer.tokens():
         >>>     print(token)
 """
 
-from typing import Iterator
+from typing import Iterable
 
 try:
     from lex import token_names
@@ -23,31 +25,32 @@ class Token:
     #     Contains the token position, name and value.
     # """
 
-    def __init__(self, left_position, right_position, token_name, value):
+    def __init__(self, start_position, end_position, token_name, value):
         """Token constructor.
 
             Args:
-                left_position (int): The start position of the token.
-                right_position (int): The end position of the token.
+                start_position (int): The start position of the token.
+                end_position (int): The end position of the token.
                 token_name (str): The name of the token.
                 value (str): The value of the token.
         """
 
-        self.left_position = left_position
-        self.right_position = right_position
+        self.position = self.start_position = start_position
+        self.end_position = end_position
         self.token_name = token_name
         self.value = value
 
     def __str__(self):
-        return f"{self.left_position}\t {self.right_position}\t {self.token_name}\t {self.value}"
+        return f"{self.start_position}\t {self.end_position}\t {self.token_name}\t {self.value}"
 
     def __hash__(self):
-        return hash((self.left_position, self.right_position, self.token_name, self.value))
+        return hash((self.position, self.token_name, self.value))
 
     def __eq__(self, other):
         if isinstance(other, Token):
-            return self.left_position == other.left_position and self.value == other.value
+            return self.position == other.position and self.token_name == other.token_name and self.value == other.value
         return NotImplemented
+
 
 class LexerError(Exception):
     """ Lexer exception."""
@@ -276,7 +279,7 @@ class Lexer:
         return token
 
     # Generator function.
-    def tokens(self) -> Iterator[Token]:
+    def tokens(self) -> Iterable[Token]:
         """ An generator to iterate over all of the tokens found in the character stream.
 
             Yields:
