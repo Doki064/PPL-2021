@@ -140,7 +140,7 @@ def values():
 
 
 def items():
-    return (
+    return dict(
             Keywords.items() +
             KeywordsType.items() +
             KeywordsAttribute.items() +
@@ -150,10 +150,10 @@ def items():
 
 
 def get_value_by_name(name):
-    for k, v in items():
-        if k == name:
-            return v
-    return None
+    try:
+        return items()[name]
+    except KeyError:
+        return None
 
 
 class _BaseEnum(_Enum):
