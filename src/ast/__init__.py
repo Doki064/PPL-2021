@@ -34,61 +34,61 @@ class AST(ABC):
 
 
 class programTree(AST):
-    def __init__(self, label):
-        super().__init__(label)
+    def __init__(self):
+        super().__init__('Program/Class')
 
 
 class blockTree(AST):
-    def __init__(self, label):
-        super().__init__(label)
+    def __init__(self):
+        super().__init__('Code block')
 
 
 class declrTree(AST):
-    def __init__(self, label):
-        super().__init__(label)
+    def __init__(self):
+        super().__init__('Declaration')
 
 
 class declTreeWithAssign(AST):
-    def __init__(self, label):
-        super().__init__(label)
+    def __init__(self):
+        super().__init__('Declaration with Assignment')
 
 
 class funcDeclTree(AST):
-    def __init__(self, label):
-        super().__init__(label)
+    def __init__(self):
+        super().__init__('Function Declaration')
 
 
 class funcHeadTree(AST):
-    def __init__(self, label):
-        super().__init__(label)
+    def __init__(self):
+        super().__init__('Function header')
 
 class typeTree(AST):
-    def __init__(self, label):
-        super().__init__(label)
+    def __init__(self):
+        super().__init__('Type')
 
 
 class idTree(AST):
-    def __init__(self, label, name):
-        super().__init__(label)
+    def __init__(self, name):
+        super().__init__('id')
         self.name = name
 
     def getName(self):
         return self.name
 class assignTree(AST):
-    def __init__(self, label):
-        super().__init__(label)
+    def __init__(self):
+        super().__init__('Assignment')
 
 
 class ifTree(AST):
-    def __init__(self, label):
-        super().__init__(label)
+    def __init__(self):
+        super().__init__('if statement')
         
 
 class whileTree(AST):
-    def __init__(self, label):
-        super().__init__(label)
+    def __init__(self):
+        super().__init__('while statement')
 
 
 class returnTree(AST):
-    def __init__(self, label):
-        super().__init__(label)
+    def __init__(self):
+        super().__init__('return statement')
