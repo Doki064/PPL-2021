@@ -75,7 +75,7 @@ class Parser:
             t.addKid(self.expr())
             return t
         self.match(token_names.SEPARATORS[';'])
-        t = declrTree('Declaration').addKid(typ).addKid(name)
+        t = declrTree().addKid(typ).addKid(name)
         return t
         
     def typ(self):
@@ -113,9 +113,33 @@ class Parser:
         if self.checkToken(token_names.KEYWORDS['if']):
             t = ifTree()
             self.nextToken()
-            self.match(token_names.SEPARATORS['('])
             t.addKid(self.expr())
-            self.match
+            t.addKid(self.block())
+            if self.checkToken(token_names.KEYWORDS['else']):
+                self.nextToken()
+                t.addKid(self.block())
+            return t
+        
+        if self.checkToken(token_names.KEYWORDS['while']):
+            t = whileTree()
+            self.nextToken()
+            t.addKid(self.expr())
+            t.addKid(self.block())
+            return t
+
+        if self.checkToken(token_names.KEYWORDS['return']):
+            t = returnTree()
+            self.nextToken()
+            t.addKid(self.expr())
+            return t
+
+        if self.checkToken(token_names.SEPARATORS['{']):
+            return self.block()
+
+        t = assignTree().addKid(self.name())
+        self.match(token_names.OPERATORS['='])
+        t.addKid(self.expr())
+        return t
 
     def expr(self):
         pass
