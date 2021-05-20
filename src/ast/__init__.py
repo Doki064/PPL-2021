@@ -88,12 +88,15 @@ class AST(ABC):
         """
         return self._label
 
-
+#                      GRAMMAR NOTES                                  #
+# --------------------------------------------------------------------#
+#               Children trees are noted by '*'                       #
+#                   [] stands for a list of                           #
 class programTree(AST):
     """ An AST for the program structure.
 
         GRAMMAR:
-            program :- class id block
+            program    :-   class *id *block
     """
     def __init__(self):
         super().__init__('Program/Class')
@@ -103,7 +106,7 @@ class blockTree(AST):
     """ An AST for a codeblock structure.
 
         GRAMMAR:
-            block :- { [statements] }
+            block   :-  { [*statements] }
     """
     def __init__(self):
         super().__init__('Code block')
@@ -113,65 +116,133 @@ class declrTree(AST):
     """ An AST for a declaration statement structure.
 
         GRAMMAR:
-            dclrTree :- type id ( funcHead ) block
-                        type id = expr ;
-                        type id ;
-                        type id 
+            declr   :-  *type *id = *expr ; 
+                        *type *id ;
+                        *type *id 
     """
     def __init__(self):
         super().__init__('Declaration')
 
 
-class declTreeWithAssign(AST):
-    def __init__(self):
-        super().__init__('Declaration with Assignment')
-
-
 class funcDeclTree(AST):
+    """ An AST for a function declaration structure.
+
+        GRAMMAR:
+            funcDeclr   :-  *type *id *funcHead *block
+    """
     def __init__(self):
         super().__init__('Function Declaration')
 
 
 class funcHeadTree(AST):
+    """ An AST for a function header structure.
+
+        GRAMMAR:
+            funcHead   :-   ()               #   void
+                            ( [*declr] )     #   params / list of declr
+    """
     def __init__(self):
         super().__init__('Function header')
 
 class typeTree(AST):
+    """ An AST for a type structure.
+        ATOMIC/LEAF
+
+        GRAMMAR:
+            type   :-   type
+
+        Args:
+            isList (bool): whether the type is for a single or a list/array of variables.
+                            E.g: String vs String[]
+    """
     def __init__(self, isList=False):
         super().__init__('Type')
         self.isArray = isList
 
     def setArray(self):
+        """ Set the value of isList to True
+
+        Returns:
+            None
+        """
         self.isArray = True
 
     def isArray(self):
+        """ Return the value of isList.
+
+        Returns:
+            (bool) whether the type is an array or not.
+        """
         return self.isArray
 
 
 class idTree(AST):
+    """ An AST for a identifier or name.
+        ATOMIC/LEAF
+
+        GRAMMAR:
+            id   :-   id/name
+
+        Args:
+            name (str): name of the identifier.
+    """
     def __init__(self, name):
         super().__init__('id')
         self.name = name
 
     def getName(self):
+        """ Return the value of id's name.
+
+        Returns:
+            (str) name of the id.
+        """
         return self.name
 
 
 class numberTree(AST):
+    """ An AST for a literal number.
+        ATOMIC/LEAF
+
+        GRAMMAR:
+            num   :-    <int>
+                        <float>
+     
+        Args:
+            value (str): value of the literal number.
+    """
     def __init__(self, value):
         super().__init__('literal number')
         self.value = value
 
     def getValue(self):
+        """ Return the value of literal number.
+
+        Returns:
+            (str) value of the number.
+        """
         return self.value
 
 
 class stringTree(AST):
+    """ An AST for a literal string.
+        ATOMIC/LEAF
+
+        GRAMMAR:
+            string  :-  string
+     
+        Args:
+            value (str): value of the literal string.
+    """
     def __init__(self, value):
         super().__init__('literal string')
         self.value = value
 
     def getValue(self):
+        """ Return the value of literal string.
+
+        Returns:
+            (str) value of the string.
+        """
         return self.value
 
 
