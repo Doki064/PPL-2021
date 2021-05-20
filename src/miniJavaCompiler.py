@@ -2,6 +2,7 @@ import pathlib
 
 from lex import *
 from parse import *
+from codegen import *
 
 
 def main():
@@ -15,9 +16,13 @@ def main():
     # Initialize the lexer and parser.
     lexer = Lexer(buffer)
     parser = Parser(lexer)
-
-    parser.program()  # Start the parser.
+    emitter = Emitter("cast1Main")
+    # p = parser.program()  # Start the parser.
+    code_gen = CodeGen(parser, emitter)
+    code_gen.generate_code()
+    print(code_gen.emitter.code)
     print("Parsing completed.")
 
 
+sys.argv = ["", "../test/case1/Main.java"]
 main()
