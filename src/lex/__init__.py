@@ -331,3 +331,10 @@ class Lexer:
             token = self._get_token()
             if token is not None:
                 yield token
+
+    def reset(self):
+        """Resets the lexer to its initial state."""
+        self.EOF = False
+        self.current_position = -1
+        self.current_char = ""
+        self._next_char()
