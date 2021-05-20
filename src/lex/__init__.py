@@ -240,13 +240,8 @@ class Lexer:
 
         # Checks word begins with an alphabetic letter or an underscore.
         elif self.current_char.isalpha() or self.current_char == "_":
-            last_position = start_position = self.current_position
+            start_position = self.current_position
             while True:
-                if (self.stream[last_position:self.current_position + 1] in ["Math", "System", ".in", ".out"]
-                        and self._peek() == "."):
-                    self._next_char()
-                    last_position = self.current_position
-                    continue
                 if (self._peek() in [" ", "\t", "\r", "\n", "\0"]
                         or self._peek() in _token_names.SEPARATORS
                         or self._peek() in _token_names.OPERATORS):
