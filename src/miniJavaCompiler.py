@@ -24,5 +24,5 @@ def main():
     print("Parsing completed.")
 
 
-sys.argv = ["", "../test/case1/Main.java"]
+# sys.argv = ["", "../test/case1/Main.java"]
 main()
