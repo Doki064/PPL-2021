@@ -124,6 +124,10 @@ class _BaseEnum(_Enum):
     def values(cls):
         return [member.value for member in cls]
 
+    @classmethod
+    def items(cls):
+        return [(member.name, member.value) for member in cls]
+
 
 class Ignored(_BaseEnum):
     # Keywords

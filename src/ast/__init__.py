@@ -106,7 +106,7 @@ class assignTree(AST):
         super().__init__('Assignment')
         self.assignToken = assignToken
 
-    def getAssignToken(self):
+    def getToken(self):
         return self.assignToken
 
 
@@ -135,7 +135,7 @@ class relOPTree(AST):
         super().__init__('Relational Operation')
         self.relToken = relToken
 
-    def getRelToken(self):
+    def getToken(self):
         return self.relToken
 
 
@@ -144,7 +144,7 @@ class addOPTree(AST):
         super().__init__('Additional Operation')
         self.addToken = addToken
 
-    def getAddToken(self):
+    def getToken(self):
         return self.addToken
 
 
@@ -153,5 +153,5 @@ class multOPTree(AST):
         super().__init__('Multiplication Operation')
         self.multToken = multToken
 
-    def getMultToken(self):
+    def getToken(self):
         return self.multToken
