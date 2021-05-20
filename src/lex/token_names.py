@@ -1,6 +1,25 @@
 """Stores the names of all the token types."""
 
-from enum import Enum
+__all__ = [
+    "EOF",
+    "IDENTIFIER",
+    "NUMBER",
+    "STRING",
+    "IGNORED",
+    "KEYWORDS",
+    "KEYWORDS_TYPE",
+    "KEYWORDS_ATTRIBUTE",
+    "OPERATORS",
+    "SEPARATORS",
+    "Ignored",
+    "Keywords",
+    "KeywordsType",
+    "KeywordsAttribute",
+    "Operators",
+    "Separators",
+]
+
+from enum import Enum as _Enum
 
 # Must keep!
 EOF = "EOF"
@@ -97,7 +116,7 @@ SEPARATORS = {
 }
 
 
-class _BaseEnum(Enum):
+class _BaseEnum(_Enum):
     @classmethod
     def names(cls):
         return [member.name for member in cls]

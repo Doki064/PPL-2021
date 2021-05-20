@@ -10,25 +10,28 @@ Example:
     >>> st = SymbolTable(lexer=lexer)
 """
 
-from collections import OrderedDict
-from typing import Tuple
+__all__ = ["SymbolTable"]
 
-try:
-    from lex import *
-except Exception:
-    from src.lex import *
+from collections import OrderedDict as _OrderedDict
+from typing import Iterator as _Iterator
+from typing import Tuple as _Tuple
+
+from lex import Lexer as _Lexer
+from lex import LexerError as _LexerError
+from lex import Token as _Token
+from lex import token_names as _token_names
 
 
-class SymbolTable(OrderedDict):
+class SymbolTable(_OrderedDict):
     """The symbol table.
 
     Attributes:
-        tokens (Iterator[Token]): The iterator over the collection tokens.
-        current_token (Token): The current token in the iteration.
-        next_token (Token): The next token in the iteration.
+        tokens (_Iterator[_Token]): The iterator over the collection tokens.
+        current_token (_Token): The current token in the iteration.
+        next_token (_Token): The next token in the iteration.
     """
 
-    def __init__(self, lexer: Lexer = None, tokens: Iterator[Token] = None):
+    def __init__(self, lexer: _Lexer = None, tokens: _Iterator[_Token] = None):
         """SymbolTable constructor.
 
         Takes lexer or tokens argument to get the collection of tokens. Prioritizes lexer if both are provided.
@@ -56,23 +59,30 @@ class SymbolTable(OrderedDict):
         self.current_token = self.next_token
         self.next_token = next(self.tokens, None)
 
+    def last(self):
+        return next(reversed(self))
+
     def _generate(self):
         """Function for generating a symbol table."""
         scope_level = -1
-        identifier_type = None
-        attributes = []
+        identifier_type = []
+        identifier_attribute = []
 
         while self.current_token is not None:
-            if self.current_token.check_token(token_names.IDENTIFIER):
+            if self.current_token.check_token(_token_names.IDENTIFIER):
                 identifier_key = identifier_position = self.current_token.position
                 identifier_name = self.current_token.value
-                if self.next_token.check_token(token_names.Separators("[")):
+                if self.next_token.check_token(_token_names.Separators("[")):
                     while True:
                         self._advance()
                         identifier_name += self.current_token.value
-                        if (self.current_token.check_token(token_names.Separators("]"))
-                                and not self.next_token.check_token(token_names.Separators("["))):
+                        if (self.current_token.check_token(_token_names.Separators("]"))
+                                and not self.next_token.check_token(_token_names.Separators("["))):
                             break
+
+                if self.next_token.check_token(_token_names.Separators("(")):
+                    identifier_type.append("function")
+
                 if scope_level == -1:
                     scope = "outer_scope"
                 elif scope_level == 0:
@@ -80,7 +90,7 @@ class SymbolTable(OrderedDict):
                 elif scope_level >= 1:
                     scope = f"inner_scope_{scope_level}"
                 else:
-                    raise LexerError(self.current_token.position, "Out of scope!")
+                    raise _LexerError(self.current_token.position, "Out of scope!")
 
                 if identifier_type is None:
                     try:
@@ -102,41 +112,42 @@ class SymbolTable(OrderedDict):
                 self[identifier_key] = {
                     "identifier_position": identifier_position,
                     "identifier_name": identifier_name,
-                    "identifier_type": identifier_type,
-                    "attributes": tuple(attributes),
-                    "scope": (scope, scope_level),
+                    "identifier_type": tuple(identifier_type),
+                    "identifier_attribute": tuple(identifier_attribute),
+                    "identifier_scope": (scope, scope_level),
                 }
-                identifier_type = None
-                attributes.clear()
+                identifier_type.clear()
+                identifier_attribute.clear()
 
-            elif self.current_token.check_token(token_names.KeywordsType.names()):
-                if self.next_token.check_token(token_names.Separators("[")):
-                    identifier_type = self.current_token.value
+            elif self.current_token.check_token(_token_names.KeywordsType.names()):
+                if self.next_token.check_token(_token_names.Separators("[")):
+                    id_type = self.current_token.value
                     while True:
                         self._advance()
-                        identifier_type += self.current_token.value
-                        if (self.current_token.check_token(token_names.Separators("]"))
-                                and not self.next_token.check_token(token_names.Separators("["))):
+                        id_type += self.current_token.value
+                        if (self.current_token.check_token(_token_names.Separators("]"))
+                                and not self.next_token.check_token(_token_names.Separators("["))):
                             break
-                elif self.next_token.check_token(token_names.IDENTIFIER):
-                    identifier_type = self.current_token.value
+                    identifier_type.append(id_type)
+                elif self.next_token.check_token(_token_names.IDENTIFIER):
+                    identifier_type.append(self.current_token.value)
 
-            elif self.current_token.check_token(token_names.KeywordsAttribute.names()):
-                if (self.next_token.check_token(token_names.KeywordsAttribute.names())
-                        or self.next_token.check_token(token_names.KeywordsType.names())):
-                    attributes.append(self.current_token.value)
+            elif self.current_token.check_token(_token_names.KeywordsAttribute.names()):
+                if (self.next_token.check_token(_token_names.KeywordsAttribute.names())
+                        or self.next_token.check_token(_token_names.KeywordsType.names())):
+                    identifier_attribute.append(self.current_token.value)
 
-            elif (self.current_token.check_token(token_names.Separators("{"))
-                  or self.current_token.check_token(token_names.Separators("("))):
+            elif (self.current_token.check_token(_token_names.Separators("{"))
+                  or self.current_token.check_token(_token_names.Separators("("))):
                 scope_level += 1
 
-            elif (self.current_token.check_token(token_names.Separators("}"))
-                  or self.current_token.check_token(token_names.Separators(")"))):
+            elif (self.current_token.check_token(_token_names.Separators("}"))
+                  or self.current_token.check_token(_token_names.Separators(")"))):
                 scope_level -= 1
 
             self._advance()
 
-    def get_declared_position(self, identifier_key) -> int:
+    def get_identifier_position(self, identifier_key) -> int:
         """Gets the declared location of the given identifier key.
 
         Args:
@@ -147,7 +158,18 @@ class SymbolTable(OrderedDict):
         """
         return self.get(identifier_key)["identifier_position"]
 
-    def get_identifier_type(self, identifier_key) -> Tuple[str, ...]:
+    def get_identifier_name(self, identifier_key) -> str:
+        """Gets the name of the given identifier key.
+
+        Args:
+            identifier_key (int): The dictionary key of the identifier.
+
+        Returns:
+            The value of identifier_name attribute of the identifier.
+        """
+        return self.get(identifier_key)["identifier_name"]
+
+    def get_identifier_type(self, identifier_key) -> _Tuple[str, ...]:
         """Gets the type of the given identifier key.
 
         Args:
@@ -158,25 +180,26 @@ class SymbolTable(OrderedDict):
         """
         return self.get(identifier_key)["identifier_type"]
 
-    def get_identifier_attributes(self, identifier_key) -> str:
+    def get_identifier_attribute(self, identifier_key) -> _Tuple[str, ...]:
         """Gets the attributes of the given identifier key.
 
         Args:
             identifier_key (int): The dictionary key of the identifier.
 
         Returns:
-            The value of identifier_type attribute of the identifier.
+            The value of identifier_attribute attribute of the identifier.
         """
-        return self.get(identifier_key)["attributes"]
+        return self.get(identifier_key)["identifier_attribute"]
 
-    def get_identifier_scope(self, identifier_key) -> Tuple[str, int]:
+    def get_identifier_scope(self, identifier_key) -> _Tuple[str, int]:
         """Gets the scope of the given identifier key.
 
         Args:
             identifier_key (int): The dictionary key of the identifier.
 
         Returns:
-            A tuple of scope name and scope level.
+            The value of identifier_scope attribute of the identifier,
+                which is a tuple of scope name and scope level.
 
         Example:
             >>> st = SymbolTable(lexer=lexer)
@@ -184,4 +207,4 @@ class SymbolTable(OrderedDict):
             >>> scope
             ("class_scope", 0)
         """
-        return self.get(identifier_key)["scope"]
+        return self.get(identifier_key)["identifier_scope"]
