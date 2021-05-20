@@ -247,56 +247,130 @@ class stringTree(AST):
 
 
 class assignTree(AST):
+    """ An AST for a assignment structure.
+
+        GRAMMAR:
+            assignment  :-  *id assign_op *expr ;
+     
+        Args:
+            assignToken (str): the assignment operator token name.
+    """
     def __init__(self, assignToken):
         super().__init__('Assignment')
         self.assignToken = assignToken
 
-    def getAssignToken(self):
+    def getToken(self):
+        """ Return the assignment operator token name.
+
+        Returns:
+            (str) the assignment operator token name.
+        """
         return self.assignToken
 
 
 class ifTree(AST):
+    """ An AST for a ifStatement structure.
+
+        GRAMMAR:
+            ifStatement  :-  if ( *expr ) *block
+                             if ( *expr ) *block else *block
+    """
     def __init__(self):
         super().__init__('if statement')
         
 
 class whileTree(AST):
+    """ An AST for a whileStatement structure.
+
+        GRAMMAR:
+            whileStatement  :-  while ( *expr ) *block
+    """
     def __init__(self):
         super().__init__('while statement')
 
 
 class returnTree(AST):
+    """ An AST for a returnStatement structure.
+
+        GRAMMAR:
+            returnStatement  :-  return expr ;
+    """
     def __init__(self):
         super().__init__('return statement')
 
 
 class callTree(AST):
+    """ An AST for a function call structure.
+
+        GRAMMAR:
+            funcCall  :-  *id ()
+                          *id ( [*expr] )
+    """
     def __init__(self):
         super().__init__('function call')
 
 
 class relOPTree(AST):
+    """ An AST for a relation operation structure.
+
+        GRAMMAR:
+            relOp   :-  *expr rel_op *expr
+
+        Args:
+            relToken (str): the relational operator token name.
+    """
     def __init__(self, relToken):
         super().__init__('Relational Operation')
         self.relToken = relToken
 
-    def getRelToken(self):
+    def getToken(self):
+        """ Return the relation operator token name.
+
+        Returns:
+            (str) the relation operator token name.
+        """
         return self.relToken
 
 
 class addOPTree(AST):
+    """ An AST for a addition operation structure.
+
+        GRAMMAR:
+            addOp   :-  *expr rel_op *expr
+            
+        Args:
+            addToken (str): the addition operator token name.
+    """
     def __init__(self, addToken):
         super().__init__('Additional Operation')
         self.addToken = addToken
 
-    def getAddToken(self):
+    def getToken(self):
+        """ Return the addition operator token name.
+
+        Returns:
+            (str) the addition operator token name.
+        """
         return self.addToken
 
 
 class multOPTree(AST):
+    """ An AST for a multiplication operation structure.
+
+        GRAMMAR:
+            addOp   :-  *expr rel_op *expr
+                        
+        Args:
+            multToken (str): the multiplication operator token name.
+    """
     def __init__(self, multToken):
         super().__init__('Multiplication Operation')
         self.multToken = multToken
 
-    def getMultToken(self):
+    def getToken(self):
+        """ Return the multiplication operator token name.
+
+        Returns:
+            (str) the multiplication operator token name.
+        """
         return self.multToken
