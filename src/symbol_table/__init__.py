@@ -11,18 +11,19 @@
 """
 
 from collections import OrderedDict
+from collections.abc import Iterable
 
 try:
-    from lex import *
+    from lex import token_names, LexerError
 except Exception:
-    from src.lex import *
+    from src.lex import token_names, LexerError
 
 
 class SymbolTable(OrderedDict):
     """The symbol table.
 
         Attributes:
-            tokens (Iterable[Token]): The iterator over the collection tokens.
+            tokens (Iterator[Token]): The iterator over the collection tokens.
             current_token (Token): The current token in the iteration.
             next_token (Token): The next token in the iteration.
     """
@@ -34,7 +35,7 @@ class SymbolTable(OrderedDict):
 
             Args:
                 lexer (Lexer): The lexer for generating collections of token. Defaults to None.
-                tokens (Iterable[Token]): The iterator over the collection tokens. Defaults to None.
+                tokens (Iterator[Token]): The iterator over the collection tokens. Defaults to None.
 
         """
 
