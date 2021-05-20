@@ -130,6 +130,7 @@ class Ignored:
     class Keywords(_BaseEnum):
         KEYWORD_PACKAGE = "package"
         KEYWORD_IMPORT = "import"
+        KEYWORD_NEW = "new"
 
     # Attributes
     class KeywordsAttribute(_BaseEnum):
@@ -142,7 +143,6 @@ class Ignored:
 
 class Keywords(_BaseEnum):
     KEYWORD_THIS = "this"
-    KEYWORD_NEW = "new"
     KEYWORD_RETURN = "return"
     KEYWORD_TRY = "try"
     KEYWORD_CATCH = "catch"
