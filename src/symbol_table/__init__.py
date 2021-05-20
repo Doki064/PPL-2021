@@ -11,7 +11,6 @@
 """
 
 from collections import OrderedDict
-from collections.abc import Iterable
 
 try:
     from lex import token_names, LexerError
@@ -57,30 +56,22 @@ class SymbolTable(OrderedDict):
         self.current_token = self.next_token
         self.next_token = next(self.tokens, None)
 
-    def _check_token(self, token, *args):
-        if len(args) == 1:
-            if isinstance(args[0], str) or isinstance(args[0], token_names.Enum):
-                return token.token_name == args[0]
-            elif isinstance(args[0], Iterable):
-                return token.token_name in args[0]
-        raise TypeError("_check_token() taking 1 argument, type: str, Enum or Iterable object")
-
     def _generate(self):
         """Function for generating a symbol table."""
         scope_level = -1
-        identifier_type = []
+        identifier_type = None
         attributes = []
 
         while self.current_token is not None:
-            if self._check_token(self.current_token, token_names.IDENTIFIER):
+            if self.current_token.check_token(token_names.IDENTIFIER):
                 identifier_key = identifier_position = self.current_token.position
                 identifier_name = self.current_token.value
-                if self._check_token(self.next_token, token_names.Separators("[")):
+                if self.next_token.check_token(token_names.Separators("[")):
                     while True:
                         self._advance()
                         identifier_name += self.current_token.value
-                        if (self._check_token(self.current_token, token_names.Separators("]"))
-                                and not self._check_token(self.next_token, token_names.Separators("["))):
+                        if (self.current_token.check_token(token_names.Separators("]"))
+                                and not self.next_token.check_token(token_names.Separators("["))):
                             break
                 if scope_level == -1:
                     scope = "outer_scope"
@@ -89,7 +80,7 @@ class SymbolTable(OrderedDict):
                 elif scope_level >= 1:
                     scope = f"inner_scope_{scope_level}"
                 else:
-                    raise LexerError(self.current_token.left_position, "Out of scope!")
+                    raise LexerError(self.current_token.position, "Out of scope!")
 
                 if identifier_type is None:
                     try:
@@ -115,32 +106,32 @@ class SymbolTable(OrderedDict):
                     "attributes": tuple(attributes),
                     "scope": (scope, scope_level),
                 }
-                identifier_type.clear()
+                identifier_type = None
                 attributes.clear()
 
-            elif self._check_token(self.current_token, token_names.KeywordsType.names()):
-                if self._check_token(self.next_token, token_names.Separators("[")):
+            elif self.current_token.check_token(token_names.KeywordsType.names()):
+                if self.next_token.check_token(token_names.Separators("[")):
                     identifier_type = self.current_token.value
                     while True:
                         self._advance()
                         identifier_type += self.current_token.value
-                        if (self._check_token(self.current_token, token_names.Separators("]"))
-                                and not self._check_token(self.next_token, token_names.Separators("["))):
+                        if (self.current_token.check_token(token_names.Separators("]"))
+                                and not self.next_token.check_token(token_names.Separators("["))):
                             break
-                elif self._check_token(self.next_token, token_names.IDENTIFIER):
+                elif self.next_token.check_token(token_names.IDENTIFIER):
                     identifier_type = self.current_token.value
 
-            elif self._check_token(self.current_token, token_names.KeywordsAttribute.names()):
-                if (self._check_token(self.next_token, token_names.KeywordsAttribute.names())
-                        or self._check_token(self.next_token, token_names.KeywordsType.names())):
+            elif self.current_token.check_token(token_names.KeywordsAttribute.names()):
+                if (self.next_token.check_token(token_names.KeywordsAttribute.names())
+                        or self.next_token.check_token(token_names.KeywordsType.names())):
                     attributes.append(self.current_token.value)
 
-            elif (self._check_token(self.current_token, token_names.Separators("{"))
-                  or self._check_token(self.current_token, token_names.Separators("("))):
+            elif (self.current_token.check_token(token_names.Separators("{"))
+                  or self.current_token.check_token(token_names.Separators("("))):
                 scope_level += 1
 
-            elif (self._check_token(self.current_token, token_names.Separators("}"))
-                  or self._check_token(self.current_token, token_names.Separators(")"))):
+            elif (self.current_token.check_token(token_names.Separators("}"))
+                  or self.current_token.check_token(token_names.Separators(")"))):
                 scope_level -= 1
 
             self._advance()

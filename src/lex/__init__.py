@@ -11,7 +11,7 @@
         >>>     print(token)
 """
 
-from typing import Iterator
+from typing import Iterator, Iterable
 
 try:
     from lex import _token_names
@@ -22,10 +22,10 @@ token_names = _token_names
 
 
 class Token:
-    # """ A simple Token structure.
+    """ A simple Token structure.
 
-    #     Contains the token position, name and value.
-    # """
+        Contains the token position, name and value.
+    """
 
     def __init__(self, start_position, end_position, token_name, value):
         """Token constructor.
@@ -37,13 +37,21 @@ class Token:
                 value (str): The value of the token.
         """
 
-        self.position = self.start_position = start_position
-        self.end_position = end_position
+        self.position = self._start_position = start_position
+        self._end_position = end_position
         self.token_name = token_name
         self.value = value
 
+    def check_token(self, *args):
+        if len(args) == 1:
+            if isinstance(args[0], str) or isinstance(args[0], token_names.Enum):
+                return self.token_name == args[0]
+            elif isinstance(args[0], Iterable):
+                return self.token_name in args[0]
+        raise TypeError("_check_token() taking 1 argument, type: str, Enum or Iterable object")
+
     def __str__(self):
-        return f"{self.start_position}\t {self.end_position}\t {self.token_name}\t {self.value}"
+        return f"{self._start_position}\t {self._end_position}\t {self.token_name}\t {self.value}"
 
     def __hash__(self):
         return hash((self.position, self.token_name, self.value))
