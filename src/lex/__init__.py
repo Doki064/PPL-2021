@@ -318,6 +318,13 @@ class Lexer:
         self._next_char()
         return token
 
+    def reset(self):
+        """Resets the lexer to its initial state."""
+        self.EOF = False
+        self.current_position = -1
+        self.current_char = ""
+        self._next_char()
+
     def tokens(self) -> _Iterator[Token]:
         """ An generator to iterate over all of the tokens found in the character stream.
 
@@ -327,6 +334,7 @@ class Lexer:
         Raises:
             LexerError: An error occurred while getting tokens in the character stream.
         """
+        self.reset()
         while not self.EOF:
             token = self._get_token()
             if token is not None:
