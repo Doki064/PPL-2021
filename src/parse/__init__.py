@@ -58,8 +58,7 @@ class Parser:
                 matchType = kind
                 break
         if not doesMatch:
-            self.abort("Expected " + kind +
-                       ", got " + self.curToken.value)
+            self.abort(f'Expected {kind}, got {self.curToken.value}, at {self.curToken.position}')
         self.nextToken()
         return matchType
 
