@@ -23,7 +23,7 @@ class AST(ABC):
         return len(self._kids)
 
     def addKid(self, kidAST):
-        self._kids.add(kidAST)
+        self._kids.append(kidAST)
         return self
 
     def setLabel(self, label):
@@ -74,9 +74,24 @@ class idTree(AST):
 
     def getName(self):
         return self.name
+
+
+class numberTree(AST):
+    def __init__(self, value):
+        super().__init__('literal number')
+        self.value = value
+
+    def getValue(self):
+        return self.value
+
+
 class assignTree(AST):
-    def __init__(self):
+    def __init__(self, assignToken):
         super().__init__('Assignment')
+        self.assignToken = assignToken
+
+    def getAssignToken(self):
+        return self.assignToken
 
 
 class ifTree(AST):
@@ -92,3 +107,26 @@ class whileTree(AST):
 class returnTree(AST):
     def __init__(self):
         super().__init__('return statement')
+
+
+class callTree(AST):
+    def __init__(self):
+        super().__init__('function call')
+
+
+class relOPTree(AST):
+    def __init__(self, relToken):
+        super().__init__('Relational Operation')
+        self.relToken = relToken
+
+    def getRelToken(self):
+        return self.relToken
+
+
+class addOPTree(AST):
+    def __init__(self, addToken):
+        super().__init__('Additional Operation')
+        self.addToken = addToken
+
+    def getAddToken(self):
+        return self.addToken
