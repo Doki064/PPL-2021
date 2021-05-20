@@ -18,7 +18,7 @@ def main():
     print(f"{filler:-<50}\nToken Stream Test")
     # for token in lexer.tokens():
     #     print(token)
-    tokens = lexer.tokens()
+    tokens = lexer.tokens(ignore=True)
     while True:
         try:
             print(next(tokens))
