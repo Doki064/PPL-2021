@@ -5,8 +5,8 @@ from enum import Enum
 # Must keep!
 EOF = "EOF"
 IDENTIFIER = "IDENTIFIER"
-NUMBER = "NUMBER"
-STRING = "STRING"
+NUMBER = "LITERAL_NUMBER"
+STRING = "LITERAL_STRING"
 
 IGNORED = {
     "package": "KEYWORD_PACKAGE",

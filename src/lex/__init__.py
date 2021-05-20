@@ -4,50 +4,65 @@
 
     Example:
         >>> from lex import Lexer
+        >>> with open(path_to_file, "r") as f:
+        >>>     character_stream = f.read()
         >>> lexer = Lexer(character_stream)
         >>> for token in lexer.tokens():
         >>>     print(token)
 """
 
-from typing import Iterator
+from typing import Iterator, Iterable
 
 try:
-    from lex import token_names
+    from lex import _token_names
 except Exception:
-    from src.lex import token_names
+    from src.lex import _token_names
+
+token_names = _token_names
 
 
 class Token:
-    # """ A simple Token structure.
+    """ A simple Token structure.
 
-    #     Contains the token position, name and value.
-    # """
+        Contains the token position, name and value.
+    """
 
-    def __init__(self, left_position, right_position, token_name, value):
+    def __init__(self, start_position, end_position, token_name, value):
         """Token constructor.
 
             Args:
-                left_position (int): The start position of the token.
-                right_position (int): The end position of the token.
+                start_position (int): The start position of the token.
+                end_position (int): The end position of the token.
                 token_name (str): The name of the token.
                 value (str): The value of the token.
         """
 
-        self.left_position = left_position
-        self.right_position = right_position
+        self.position = self._start_position = start_position
+        self._end_position = end_position
         self.token_name = token_name
         self.value = value
 
+    def check_token(self, *args):
+        if len(args) == 1:
+            if isinstance(args[0], str):
+                return self.token_name == args[0]
+            elif isinstance(args[0], token_names.Enum):
+                return self.token_name == args[0].name
+            elif isinstance(args[0], Iterable):
+                return self.token_name in args[0]
+        raise TypeError("_check_token() taking 1 argument, type: str, Enum or Iterable object")
+
     def __str__(self):
-        return f"{self.left_position}\t {self.right_position}\t {self.token_name}\t {self.value}"
+        return f"{self._start_position}\t {self._end_position}\t {self.token_name}\t {self.value}"
 
     def __hash__(self):
-        return hash((self.left_position, self.right_position, self.token_name, self.value))
+        return hash((self.position, self.token_name, self.value))
 
     def __eq__(self, other):
         if isinstance(other, Token):
-            return self.left_position == other.left_position and self.value == other.value
+            return self.position == other.position and self.token_name == other.token_name and self.value == other.value
         return NotImplemented
+
 
 class LexerError(Exception):
     """ Lexer exception."""
@@ -155,7 +170,7 @@ class Lexer:
                         start_position, f"EOL while scanning string literal at position {start_position}")
             self._next_char()
             token = Token(start_position, self.current_position,
-                          token_names.STRING, self.stream[start_position:self.current_position + 1])
+                          _token_names.STRING, self.stream[start_position:self.current_position + 1])
 
         # Checks double-quoted string.
         elif self.current_char == '"':
@@ -167,7 +182,7 @@ class Lexer:
                         start_position, f"EOL while scanning string literal at position {start_position}")
             self._next_char()
             token = Token(start_position, self.current_position,
-                          token_names.STRING, self.stream[start_position:self.current_position + 1])
+                          _token_names.STRING, self.stream[start_position:self.current_position + 1])
 
         # Checks number begins with a digit.
         elif self.current_char.isdigit():
@@ -181,7 +196,7 @@ class Lexer:
             if self._peek() in ["d", "D", "f", "F"]:
                 self._next_char()
             token = Token(start_position, self.current_position,
-                          token_names.NUMBER, self.stream[start_position:self.current_position + 1])
+                          _token_names.NUMBER, self.stream[start_position:self.current_position + 1])
 
         # Checks number begins with a dot.
         elif self.current_char == ".":
@@ -192,81 +207,81 @@ class Lexer:
                 if self._peek() in ["d", "D", "f", "F"]:
                     self._next_char()
                 token = Token(start_position, self.current_position,
-                              token_names.NUMBER, self.stream[start_position:self.current_position + 1])
+                              _token_names.NUMBER, self.stream[start_position:self.current_position + 1])
             else:
                 token = Token(self.current_position, self.current_position,
-                              token_names.Separators(self.current_char).name, self.current_char)
+                              _token_names.Separators(self.current_char).name, self.current_char)
 
         # Checks word begins with an alphabetic letter or an underscore.
         elif self.current_char.isalpha() or self.current_char == "_":
             start_position = self.current_position
             while (self._peek() not in [" ", "\t", "\r", "\n", "\0"]
-                   and self._peek() not in token_names.SEPARATORS
-                   and self._peek() not in token_names.OPERATORS):
+                   and self._peek() not in _token_names.SEPARATORS
+                   and self._peek() not in _token_names.OPERATORS):
                 self._next_char()
             word = self.stream[start_position:self.current_position + 1]
             # Checks if word is ignored.
-            if word in token_names.Ignored.Keywords.values():
+            if word in _token_names.Ignored.Keywords.values():
                 while self.current_char != ";":
                     self._next_char()
-            elif word in token_names.Ignored.KeywordsAttribute.values():
+            elif word in _token_names.Ignored.KeywordsAttribute.values():
                 self._next_char()
             # Checks if word is a keyword.
-            elif word in token_names.Keywords.values():
+            elif word in _token_names.Keywords.values():
                 token = Token(start_position, self.current_position,
-                              token_names.Keywords(word).name, word)
-            elif word in token_names.KeywordsType.values():
+                              _token_names.Keywords(word).name, word)
+            elif word in _token_names.KeywordsType.values():
                 token = Token(start_position, self.current_position,
-                              token_names.KeywordsType(word).name, word)
-            elif word in token_names.KeywordsAttribute.values():
+                              _token_names.KeywordsType(word).name, word)
+            elif word in _token_names.KeywordsAttribute.values():
                 token = Token(start_position, self.current_position,
-                              token_names.KeywordsAttribute(word).name, word)
+                              _token_names.KeywordsAttribute(word).name, word)
             # Otherwise put it as identifier.
             else:
                 token = Token(start_position, self.current_position,
-                              token_names.IDENTIFIER, word)
+                              _token_names.IDENTIFIER, word)
 
         # Checks if is a separator.
-        elif self.current_char in token_names.Separators.values():
+        elif self.current_char in _token_names.Separators.values():
             token = Token(self.current_position, self.current_position,
-                          token_names.Separators(self.current_char).name, self.current_char)
+                          _token_names.Separators(self.current_char).name, self.current_char)
 
         # Checks if is an operator.
-        elif self.current_char in token_names.Operators.values():
+        elif self.current_char in _token_names.Operators.values():
             last_position = self.current_position
             if self.current_char not in ["&", "|"] and self._peek() == "=":
                 val = self.current_char + self._peek()
                 self._next_char()
                 token = Token(last_position, self.current_position,
-                              token_names.Operators(val).name, val)
+                              _token_names.Operators(val).name, val)
             elif self.current_char == "+" and self._peek() == "+":
                 val = self.current_char + self._peek()
                 self._next_char()
                 token = Token(last_position, self.current_position,
-                              token_names.Operators(val).name, val)
+                              _token_names.Operators(val).name, val)
             elif self.current_char == "-" and self._peek() == "-":
                 val = self.current_char + self._peek()
                 self._next_char()
                 token = Token(last_position, self.current_position,
-                              token_names.Operators(val).name, val)
+                              _token_names.Operators(val).name, val)
             elif self.current_char == "&" and self._peek() == "&":
                 val = self.current_char + self._peek()
                 self._next_char()
                 token = Token(last_position, self.current_position,
-                              token_names.Operators(val).name, val)
+                              _token_names.Operators(val).name, val)
             elif self.current_char == "|" and self._peek() == "|":
                 val = self.current_char + self._peek()
                 self._next_char()
                 token = Token(last_position, self.current_position,
-                              token_names.Operators(val).name, val)
+                              _token_names.Operators(val).name, val)
             else:
                 token = Token(self.current_position, self.current_position,
-                              token_names.Operators(self.current_char).name, self.current_char)
+                              _token_names.Operators(self.current_char).name, self.current_char)
 
         # Checks if is EOF
         elif self.current_char == "\0":
             token = Token(self.current_position, self.current_position,
-                          token_names.EOF, self.current_char)
+                          _token_names.EOF, self.current_char)
 
         # Raise error if is an unknown token.
         else:
