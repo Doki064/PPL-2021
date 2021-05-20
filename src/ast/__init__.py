@@ -63,8 +63,15 @@ class funcHeadTree(AST):
         super().__init__('Function header')
 
 class typeTree(AST):
-    def __init__(self):
+    def __init__(self, isList=False):
         super().__init__('Type')
+        self.isArray = isList
+
+    def setArray(self):
+        self.isArray = True
+
+    def isArray(self):
+        return self.isArray
 
 
 class idTree(AST):

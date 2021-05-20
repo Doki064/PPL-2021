@@ -124,8 +124,14 @@ class Parser:
                 t.setLabel(key)
                 self.nextToken()
                 break
+            
         if t.getLabel() == 'type':
             raise SyntaxError(f'Unrecognized type: {self.curToken.token_name}')
+
+        if self.checkToken(token_names.SEPARATORS['[']):
+            self.nextToken()
+            self.match(token_names.SEPARATORS[']'])
+            t.setArray()
         return t
 
     def name(self):
@@ -171,6 +177,7 @@ class Parser:
             t = returnTree()
             self.nextToken()
             t.addKid(self.expr())
+            self.match(token_names.SEPARATORS[';'])
             return t
 
         if self.checkToken(token_names.SEPARATORS['{']):
@@ -211,7 +218,7 @@ class Parser:
         t = self.formMultOpTree()
         while t is not None:
             t.addKid(kid)
-            t.addKid(self.factor)
+            t.addKid(self.factor())
             kid = t
             t = self.formMultOpTree()
         return kid
