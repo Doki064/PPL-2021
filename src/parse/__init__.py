@@ -107,8 +107,11 @@ class Parser:
             t.addKid(self.block())
             return t
         if self.checkToken(token_names.OPERATORS['=']):
+            self.nextToken()
             t = declTreeWithAssign().addKid(typ).addKid(name)
             t.addKid(self.expr())
+            if requireSemiColon:
+                self.match(token_names.SEPARATORS[';'])
             return t
         if requireSemiColon: 
             self.match(token_names.SEPARATORS[';'])
@@ -124,7 +127,7 @@ class Parser:
                 self.nextToken()
                 break
 
-        if t.getLabel() == 'type':
+        if t.getLabel() == 'Type':
             raise SyntaxError(f'Unrecognized type: {self.curToken.token_name}')
 
         if self.checkToken(token_names.SEPARATORS['[']):
@@ -158,7 +161,7 @@ class Parser:
         if self.checkToken(token_names.KEYWORDS['if']):
             t = ifTree()
             self.nextToken()
-            t.addKid(self.expr(), True)
+            t.addKid(self.expr(True))
             t.addKid(self.block())
             if self.checkToken(token_names.KEYWORDS['else']):
                 self.nextToken()
@@ -168,7 +171,7 @@ class Parser:
         if self.checkToken(token_names.KEYWORDS['while']):
             t = whileTree()
             self.nextToken()
-            t.addKid(self.expr(), True)
+            t.addKid(self.expr(True))
             t.addKid(self.block())
             return t
 
@@ -183,6 +186,21 @@ class Parser:
             return self.block()
 
         kid = self.name()
+
+        if self.checkToken(token_names.SEPARATORS['(']):
+            self.nextToken()
+            t = callTree().addKid(kid)
+            if not self.checkToken(token_names.SEPARATORS[')']):
+                while True:
+                    t.addKid(self.expr())
+                    if self.checkToken(token_names.SEPARATORS[',']):
+                        self.nextToken()
+                    else:
+                        break
+            self.match(token_names.SEPARATORS[')'])
+            self.match(token_names.SEPARATORS[';'])
+            return t
+
         t = assignTree(self.match(Parser.assignOPs)).addKid(kid)
         t.addKid(self.expr())
         self.match(token_names.SEPARATORS[';'])
@@ -196,10 +214,15 @@ class Parser:
         kid = self.simpleExpr()
         t = self.formRelationTree()
         if t is None:
+            if requireBracket:
+                self.match(token_names.SEPARATORS[')'])
             return kid
 
         t.addKid(kid)
         t.addKid(self.simpleExpr())
+
+        if requireBracket:
+            self.match(token_names.SEPARATORS[')'])
         return t
 
     def simpleExpr(self):
@@ -231,6 +254,11 @@ class Parser:
 
         if self.checkToken(token_names.NUMBER):
             t = numberTree(self.curToken.value)
+            self.nextToken()
+            return t
+
+        if self.checkToken(token_names.STRING):
+            t = stringTree(self.curToken.value)
             self.nextToken()
             return t
 
