@@ -17,7 +17,10 @@ __all__ = [
     "KeywordsAttribute",
     "Operators",
     "Separators",
-    "getValueByName"
+    "names",
+    "values",
+    "items",
+    "get_value_by_name",
 ]
 
 from enum import Enum as _Enum
@@ -116,32 +119,42 @@ SEPARATORS = {
 }
 
 
-def getValueByName(name):
-    try:
-        return Ignored[name].value
-    except KeyError:
-        pass
-    try:
-        return Keywords[name].value
-    except KeyError:
-        pass
-    try:
-        return KeywordsType[name].value
-    except KeyError:
-        pass
-    try:
-        return KeywordsAttribute[name].value
-    except KeyError:
-        pass
-    try:
-        return Operators[name].value
-    except KeyError:
-        pass
-    try:
-        return Separators[name].value
-    except KeyError:
-        pass
+def names():
+    return (
+            Keywords.names() +
+            KeywordsType.names() +
+            KeywordsAttribute.names() +
+            Operators.names() +
+            Separators.names()
+    )
+
+
+def values():
+    return (
+            Keywords.values() +
+            KeywordsType.values() +
+            KeywordsAttribute.values() +
+            Operators.values() +
+            Separators.values()
+    )
+
+
+def items():
+    return (
+            Keywords.items() +
+            KeywordsType.items() +
+            KeywordsAttribute.items() +
+            Operators.items() +
+            Separators.items()
+    )
+
+
+def get_value_by_name(name):
+    for k, v in items():
+        if k == name:
+            return v
     return None
+
 
 class _BaseEnum(_Enum):
     @classmethod

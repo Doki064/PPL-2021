@@ -58,7 +58,7 @@ class Parser:
                 matchType = kind
                 break
         if not doesMatch:
-            self.abort(f'Expected {token_names.getValueByName(kind)}, got {self.curToken.value}, at line {self.curToken.position}')
+            self.abort(f'Expected {token_names.get_value_by_name(kind)}, got {self.curToken.value}, at line {self.curToken.position}')
         self.nextToken()
         return matchType
 
@@ -121,7 +121,7 @@ class Parser:
                 break
 
         if t.getLabel() == 'Type':
-            raise SyntaxError(f'Unrecognized type: {token_names.getValueByName(self.curToken.token_name)}')
+            raise SyntaxError(f'Unrecognized type: {token_names.get_value_by_name(self.curToken.token_name)}')
 
         if self.checkToken(token_names.SEPARATORS['[']):
             self.nextToken()
@@ -135,7 +135,7 @@ class Parser:
             self.nextToken()
             return t
         raise SyntaxError(
-            f'Expected: {token_names.IDENTIFIER}, got {token_names.getValueByName(self.curToken.token_name)}, at line {self.curToken.position}')
+            f'Expected: {token_names.IDENTIFIER}, got {token_names.get_value_by_name(self.curToken.token_name)}, at line {self.curToken.position}')
 
     def funcHead(self):
         self.match(token_names.SEPARATORS['('])
