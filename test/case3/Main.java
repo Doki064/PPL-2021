@@ -14,5 +14,6 @@ public class Main {
         var by = scanner.nextDouble();
         var res = manhattanDistance(ax, ay, bx, by);
         System.out.printf("Manhattan Distance: %.2f", res);
+        var test = "dummy";
     }
 }

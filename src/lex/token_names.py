@@ -17,6 +17,7 @@ __all__ = [
     "KeywordsAttribute",
     "Operators",
     "Separators",
+    "getValueByName"
 ]
 
 from enum import Enum as _Enum
@@ -114,6 +115,33 @@ SEPARATORS = {
     ",": "SEP_COMMA",
 }
 
+
+def getValueByName(name):
+    try:
+        return Ignored[name].value
+    except KeyError:
+        pass
+    try:
+        return Keywords[name].value
+    except KeyError:
+        pass
+    try:
+        return KeywordsType[name].value
+    except KeyError:
+        pass
+    try:
+        return KeywordsAttribute[name].value
+    except KeyError:
+        pass
+    try:
+        return Operators[name].value
+    except KeyError:
+        pass
+    try:
+        return Separators[name].value
+    except KeyError:
+        pass
+    return None
 
 class _BaseEnum(_Enum):
     @classmethod
