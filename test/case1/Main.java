@@ -15,5 +15,6 @@ public class Main {
             var res = circleArea(r);
             System.out.printf("Circle area: %.2f", res);
         }
+        scanner.close();
     }
 }
