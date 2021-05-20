@@ -35,7 +35,7 @@ class Token:
     Contains the token position, name and value.
 
     Attributes:
-        position (int): The position of the token.
+        position (str): The position of the token, its format is ``{line_number}:{position from the start of the line}``
         token_name (str): The name of the token.
         value (str): The value of the token.
     """
@@ -44,6 +44,8 @@ class Token:
         """Token constructor.
 
         Args:
+            line_number (int): The current line number.
+            line_start_position (int): The start position of the current line.
             start_position (int): The start position of the token.
             end_position (int): The end position of the token.
             token_name (str): The name of the token.
@@ -78,14 +80,14 @@ class Token:
         raise TypeError("_check_token() taking 1 argument, type: str, Enum or Sequence")
 
     def __str__(self):
-        return f"{self._start_position}\t {self._end_position}\t {self.token_name}\t {self.value}"
+        return f"{self.position}\t {self._start_position}\t {self.token_name}\t {self.value}"
 
     def __hash__(self):
-        return hash((self._start_position, self.token_name, self.value))
+        return hash((self.position, self._end_position, self.token_name, self.value))
 
     def __eq__(self, other):
         if isinstance(other, Token):
-            return self._start_position == other._start_position and self.token_name == other.token_name and self.value == other.value
+            return self.position == other.position and self.token_name == other.token_name and self.value == other.value
         return NotImplemented
 
 
@@ -130,7 +132,7 @@ class Lexer:
         self.stream = character_stream
         self.EOF = False
         self.line_number = 1
-        self.line_start_position = -1
+        self.line_start_position = 0
         self.current_position = -1
         self.current_char = ""
         self._next_char()
@@ -143,6 +145,9 @@ class Lexer:
             self.EOF = True
         else:
             self.current_char = self.stream[self.current_position]
+            if self.current_char == "\n":
+                self.line_number += 1
+                self.line_start_position = self.current_position
 
     def _peek(self):
         """Returns the lookahead character.
@@ -167,9 +172,6 @@ class Lexer:
                     self._next_char()
             elif self._peek() == "*":  # Multiple-line comment
                 while self.current_char != "*" or self._peek() != "/":
-                    if self.current_char == "\n":
-                        self.line_number += 1
-                        self.line_start_position = self.current_position
                     self._next_char()
                     if self.EOF:  # Check unclosed comment
                         raise LexerError(
@@ -178,9 +180,6 @@ class Lexer:
                 self._next_char()
 
         while self.current_char in [" ", "\t", "\r", "\n"]:
-            if self.current_char == "\n":
-                self.line_number += 1
-                self.line_start_position = self.current_position
             self._next_char()
 
     def _get_token(self):
