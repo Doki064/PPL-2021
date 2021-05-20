@@ -107,8 +107,7 @@ class Parser:
             t.addKid(self.block())
             return t
         if self.checkToken(token_names.OPERATORS['=']):
-            t = declTreeWithAssign(
-                'Declaration with assignment').addKid(typ).addKid(name)
+            t = declTreeWithAssign().addKid(typ).addKid(name)
             t.addKid(self.expr())
             return t
         if requireSemiColon: 
@@ -124,7 +123,7 @@ class Parser:
                 t.setLabel(key)
                 self.nextToken()
                 break
-            
+
         if t.getLabel() == 'type':
             raise SyntaxError(f'Unrecognized type: {self.curToken.token_name}')
 
