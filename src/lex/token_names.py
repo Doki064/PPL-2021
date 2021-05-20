@@ -125,23 +125,24 @@ class _BaseEnum(_Enum):
         return [member.value for member in cls]
 
 
-class Ignored:
+class Ignored(_BaseEnum):
     # Keywords
-    class Keywords(_BaseEnum):
-        KEYWORD_PACKAGE = "package"
-        KEYWORD_IMPORT = "import"
-        KEYWORD_NEW = "new"
+    KEYWORD_PACKAGE = "package"
+    KEYWORD_IMPORT = "import"
+    KEYWORD_NEW = "new"
 
     # Attributes
-    class KeywordsAttribute(_BaseEnum):
-        KEYWORD_PUBLIC = "public"
-        KEYWORD_PRIVATE = "private"
-        KEYWORD_PROTECTED = "protected"
-        KEYWORD_ABSTRACT = "abstract"
-        KEYWORD_STATIC = "static"
+    KEYWORD_PUBLIC = "public"
+    KEYWORD_PRIVATE = "private"
+    KEYWORD_PROTECTED = "protected"
+    KEYWORD_ABSTRACT = "abstract"
+    KEYWORD_STATIC = "static"
 
 
 class Keywords(_BaseEnum):
+    KEYWORD_PACKAGE = "package"
+    KEYWORD_IMPORT = "import"
+    KEYWORD_NEW = "new"
     KEYWORD_THIS = "this"
     KEYWORD_RETURN = "return"
     KEYWORD_TRY = "try"
