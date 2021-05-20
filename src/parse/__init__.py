@@ -40,16 +40,16 @@ class Parser:
         sys.exit("Error. " + message)
 
     def program(self):
-        t = programTree('Program/Class')
+        t = programTree()
         # match(token_names.KEYWORDS_ATTRIBUTE['public'])
-        match(token_names.KEYWORDS_TYPE['class'])
-        match(token_names.IDENTIFIER)
+        self.match(token_names.KEYWORDS_TYPE['class'])
+        self.match(token_names.IDENTIFIER)
         t.addKid(self.block())
         return t
 
     def block(self):
-        match(token_names.SEPARATORS['{'])
-        t = blockTree('Code block')
+        self.match(token_names.SEPARATORS['{'])
+        t = blockTree()
         while True:
             try:
                 t.addKid(self.decl())
@@ -60,13 +60,13 @@ class Parser:
                 t.addKid(self.statement())
             except SyntaxError:
                 break
-        match(token_names.SEPARATORS['}'])
+        self.match(token_names.SEPARATORS['}'])
         return t
 
     def decl(self):
         typ, name = self.typ(), self.name()
         if self.checkToken(token_names.SEPARATORS['(']):
-            t = funcDeclTree('Function').addKid(typ).addKid(name)
+            t = funcDeclTree().addKid(typ).addKid(name)
             t.addKid(self.funcHead())
             t.addKid(self.block())
             return t
@@ -79,26 +79,26 @@ class Parser:
         return t
         
     def typ(self):
-        t = typeTree('')
+        t = typeTree()
         for key, types in token_names.KEYWORDS_TYPE:
             if self.checkToken(types):
                 t.setLabel(key)
                 self.nextToken()
                 break
-        if t.getLabel() == '':
+        if t.getLabel() == 'type':
             raise SyntaxError(f'Unrecognized type: {self.curToken.token_name}')
         return t
 
     def name(self):
         if self.checkToken(token_names.IDENTIFIER):
-            t = idTree('id', self.curToken.value)
+            t = idTree(self.curToken.value)
             self.nextToken()
             return t
         raise SyntaxError()
 
     def funcHead(self):
         self.match(token_names.SEPARATORS['('])
-        t = funcHeadTree('Function Header')
+        t = funcHeadTree()
         if not self.checkToken(token_names.SEPARATORS[')']):
             while True:
                 t.addKid(self.decl())
@@ -112,6 +112,10 @@ class Parser:
     def statement(self):
         if self.checkToken(token_names.KEYWORDS['if']):
             t = ifTree()
+            self.nextToken()
+            self.match(token_names.SEPARATORS['('])
+            t.addKid(self.expr())
+            self.match
 
     def expr(self):
         pass
