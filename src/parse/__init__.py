@@ -99,7 +99,7 @@ class Parser:
         self.match(token_names.SEPARATORS['}'])
         return t
 
-    def decl(self):
+    def decl(self, requireSemiColon=True):
         typ, name = self.typ(), self.name()
         if self.checkToken(token_names.SEPARATORS['(']):
             t = funcDeclTree().addKid(typ).addKid(name)
@@ -111,7 +111,8 @@ class Parser:
                 'Declaration with assignment').addKid(typ).addKid(name)
             t.addKid(self.expr())
             return t
-        self.match(token_names.SEPARATORS[';'])
+        if requireSemiColon: 
+            self.match(token_names.SEPARATORS[';'])
         t = declrTree().addKid(typ).addKid(name)
         return t
 
@@ -133,19 +134,19 @@ class Parser:
             self.nextToken()
             return t
         raise SyntaxError(
-            f'Expected: {token_names.IDENTIFIER}, got {self.curToken.token_name}, at {self.curToken.start_position}')
+            f'Expected: {token_names.IDENTIFIER}, got {self.curToken.token_name}, at {self.curToken.position}')
 
     def funcHead(self):
         self.match(token_names.SEPARATORS['('])
         t = funcHeadTree()
         if not self.checkToken(token_names.SEPARATORS[')']):
             while True:
-                t.addKid(self.decl())
+                t.addKid(self.decl(requireSemiColon=False))
                 if self.checkToken(token_names.SEPARATORS[',']):
                     self.nextToken()
                 else:
                     break
-        match(token_names.SEPARATORS[')'])
+        self.match(token_names.SEPARATORS[')'])
         return t
 
     def statement(self):
@@ -176,8 +177,9 @@ class Parser:
             return self.block()
 
         kid = self.name()
-        t = assignTree(self.match(assignOPs)).addKid(kid)
+        t = assignTree(self.match(Parser.assignOPs)).addKid(kid)
         t.addKid(self.expr())
+        self.match(token_names.SEPARATORS[';'])
         return t
 
     def expr(self, requireBracket=False):
@@ -243,7 +245,7 @@ class Parser:
         return t
 
     def formRelationTree(self):
-        if self.curToken.token_name in relOPs:
+        if self.curToken.token_name in Parser.relOPs:
             t = relOPTree(self.curToken.token_name)
             self.nextToken()
             return t
@@ -252,7 +254,7 @@ class Parser:
 
 
     def formAddOpTree(self):
-        if self.curToken.token_name in addOPs:
+        if self.curToken.token_name in Parser.addOPs:
             t = addOPTree(self.curToken.token_name)
             self.nextToken()
             return t
@@ -260,7 +262,7 @@ class Parser:
             return None
 
     def formMultOpTree(self):
-        if self.curToken.token_name in multOPs:
+        if self.curToken.token_name in Parser.multOPs:
             t = addOPTree(self.curToken.token_name)
             self.nextToken()
             return t
