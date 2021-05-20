@@ -103,10 +103,8 @@ class Parser:
             return t
         if self.checkToken(token_names.OPERATORS['=']) and requireSemiColon:
             self.nextToken()
-            t = declTreeWithAssign().addKid(typ).addKid(name)
-            t.addKid(self.expr())
-            if requireSemiColon:
-                self.match(token_names.SEPARATORS[';'])
+            t = declrTree().addKid(typ).addKid(name).addKid(self.expr())
+            self.match(token_names.SEPARATORS[';'])
             return t
         if requireSemiColon: 
             self.match(token_names.SEPARATORS[';'])
