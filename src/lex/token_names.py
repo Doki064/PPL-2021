@@ -112,7 +112,6 @@ SEPARATORS = {
     ":": "SEP_COLON",
     ";": "SEP_SEMICOLON",
     ",": "SEP_COMMA",
-    ".": "SEP_DOT",
 }
 
 
@@ -221,4 +220,3 @@ class Separators(_BaseEnum):
     SEP_COLON = ":"
     SEP_SEMICOLON = ";"
     SEP_COMMA = ","
-    SEP_DOT = "."
