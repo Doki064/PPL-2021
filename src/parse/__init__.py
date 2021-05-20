@@ -263,7 +263,7 @@ class Parser:
 
     def formMultOpTree(self):
         if self.curToken.token_name in Parser.multOPs:
-            t = addOPTree(self.curToken.token_name)
+            t = multOPTree(self.curToken.token_name)
             self.nextToken()
             return t
         else:

@@ -130,3 +130,12 @@ class addOPTree(AST):
 
     def getAddToken(self):
         return self.addToken
+
+
+class multOPTree(AST):
+    def __init__(self, multToken):
+        super().__init__('Multiplication Operation')
+        self.multToken = multToken
+
+    def getMultToken(self):
+        return self.multToken
