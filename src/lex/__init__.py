@@ -1,17 +1,21 @@
 """This is the module containing all codes needed for the lexer.
 
-    This module would take the character stream and generate a collection of tokens.
+This module would take the character stream and generate a collection of tokens.
 
-    Example:
-        >>> from lex import Lexer
-        >>> with open(path_to_file, "r") as f:
-        >>>     character_stream = f.read()
-        >>> lexer = Lexer(character_stream)
-        >>> for token in lexer.tokens():
-        >>>     print(token)
+Example:
+    >>> from lex import Lexer
+    >>>
+    >>> with open(path_to_file, "r") as f:
+    >>>     character_stream = f.read()
+    >>> lexer = Lexer(character_stream)
+
+    # Lexer has an Iterator to get tokens:
+
+    >>> for token in lexer.tokens():
+    >>>     print(token)
 """
 
-from typing import Iterator, Iterable
+from typing import Iterator, Sequence
 
 try:
     from lex import _token_names
@@ -19,38 +23,55 @@ except Exception:
     from src.lex import _token_names
 
 token_names = _token_names
+Enum = _token_names.Enum
 
 
 class Token:
     """ A simple Token structure.
 
-        Contains the token position, name and value.
+    Contains the token position, name and value.
+
+    Attributes:
+        position (int): The position of the token.
+        token_name (str): The name of the token.
+        value (str): The value of the token.
     """
 
     def __init__(self, start_position, end_position, token_name, value):
         """Token constructor.
 
-            Args:
-                start_position (int): The start position of the token.
-                end_position (int): The end position of the token.
-                token_name (str): The name of the token.
-                value (str): The value of the token.
+        Args:
+            start_position (int): The start position of the token.
+            end_position (int): The end position of the token.
+            token_name (str): The name of the token.
+            value (str): The value of the token.
         """
-
         self.position = self._start_position = start_position
         self._end_position = end_position
         self.token_name = token_name
         self.value = value
 
-    def check_token(self, *args):
+    def check_token(self, *args) -> bool:
+        """Check the token type whether it matches that of the passed argument.
+
+        Args:
+            *args: The function takes only one argument, which can be a string, an enum object, or a sequence object.
+
+        Returns:
+            True if matches, False otherwise.
+                If the argument is a sequence, True if it contains this token type, False otherwise.
+
+        Raises:
+            TypeError: An error occurred when the argument is missing, or of incorrect types.
+        """
         if len(args) == 1:
             if isinstance(args[0], str):
                 return self.token_name == args[0]
-            elif isinstance(args[0], token_names.Enum):
+            elif isinstance(args[0], Enum):
                 return self.token_name == args[0].name
-            elif isinstance(args[0], Iterable):
+            elif isinstance(args[0], Sequence):
                 return self.token_name in args[0]
-        raise TypeError("_check_token() taking 1 argument, type: str, Enum or Iterable object")
+        raise TypeError("_check_token() taking 1 argument, type: str, Enum or Sequence")
 
     def __str__(self):
         return f"{self._start_position}\t {self._end_position}\t {self.token_name}\t {self.value}"
@@ -65,16 +86,20 @@ class Token:
 
 
 class LexerError(Exception):
-    """ Lexer exception."""
+    """Lexer exception.
 
-    def __init__(self, position, message=None):
+    Attributes:
+        position (int): The position in the stream where the error occurred.
+        message (str): Human readable description of the error.
+    """
+
+    def __init__(self, position, message: str = None):
         """LexerError constructor.
 
-            Args:
-                position (int): The start position of the error.
-                message (str): The error message. Optional.
+        Args:
+            position (int): The start position of the error.
+            message: Human readable description of the error. Optional.
         """
-
         self.position = position
         self.message = f"Unknown token at position {self.position}" if message is None else message
         super().__init__(self.message)
@@ -83,13 +108,13 @@ class LexerError(Exception):
 class Lexer:
     """The lexer.
 
-        Scans the file as stream and tokenize it.
+    Scans the file as stream and tokenize it.
 
-        Attributes:
-            stream (str): The data to work on.
-            EOF (boolean): The flag to indicate end of file.
-            current_position (int): The position in the stream currently.
-            current_char (str): The current character.
+    Attributes:
+        stream (str): The data to work on.
+        EOF (boolean): The flag to indicate end of file.
+        current_position (int): The position in the stream currently.
+        current_char (str): The current character.
     """
 
     def __init__(self, character_stream):
@@ -98,7 +123,6 @@ class Lexer:
         Args:
             character_stream (str): The character stream of the input file.
         """
-
         self.stream = character_stream
         self.EOF = False
         self.current_position = -1
@@ -117,8 +141,8 @@ class Lexer:
     def _peek(self):
         """Returns the lookahead character.
 
-            Returns:
-                str: The next character in the stream, null character "\0" if end of file.
+        Returns:
+            str: The next character in the stream, null character "\0" if end of file.
         """
         if self.current_position + 1 >= len(self.stream):
             return "\0"
@@ -127,8 +151,8 @@ class Lexer:
     def _skip(self):
         """Skips whitespaces, newlines and comments.
 
-            Raises:
-                LexerError: An error occurred while getting tokens in the character stream.
+        Raises:
+            LexerError: An error occurred while getting tokens in the character stream.
         """
         if self.current_char == "/":
             last_position = self.current_position
@@ -150,13 +174,12 @@ class Lexer:
     def _get_token(self):
         """Returns the next token.
 
-            Returns:
-                Token: An token found in the stream.
+        Returns:
+            Token: An token found in the stream.
 
-            Raises:
-                LexerError: An error occurred while getting tokens in the character stream.
+        Raises:
+            LexerError: An error occurred while getting tokens in the character stream.
         """
-
         self._skip()
 
         token = None
@@ -290,16 +313,15 @@ class Lexer:
         self._next_char()
         return token
 
-    # Generator function.
     def tokens(self) -> Iterator[Token]:
         """ An generator to iterate over all of the tokens found in the character stream.
 
-            Yields:
-                Token: A token object.
-            Raises:
-                LexerError: An error occurred while getting tokens in the character stream.
-        """
+        Yields:
+            Token: A token object.
 
+        Raises:
+            LexerError: An error occurred while getting tokens in the character stream.
+        """
         while not self.EOF:
             token = self._get_token()
             if token is not None:

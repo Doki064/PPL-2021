@@ -1,43 +1,43 @@
 """This is the module to generate the symbol table.
 
-    This module would generate a symbol table from a collection of tokens.
+This module would generate a symbol table from a collection of tokens.
 
-    Example:
-        >>> from lex import Lexer
-        >>> from symbol_table import SymbolTable
-        >>> lexer = Lexer(character_stream)
-        >>> st = SymbolTable(lexer=lexer)
-        >>> print(st) # Recommend to use pprint: pprint.pprint(st)
+Example:
+    >>> from lex import Lexer
+    >>> from symbol_table import SymbolTable
+    >>>
+    >>> lexer = Lexer(character_stream)
+    >>> st = SymbolTable(lexer=lexer)
 """
 
 from collections import OrderedDict
+from typing import Tuple
 
 try:
-    from lex import token_names, LexerError
+    from lex import *
 except Exception:
-    from src.lex import token_names, LexerError
+    from src.lex import *
 
 
 class SymbolTable(OrderedDict):
     """The symbol table.
 
-        Attributes:
-            tokens (Iterator[Token]): The iterator over the collection tokens.
-            current_token (Token): The current token in the iteration.
-            next_token (Token): The next token in the iteration.
+    Attributes:
+        tokens (Iterator[Token]): The iterator over the collection tokens.
+        current_token (Token): The current token in the iteration.
+        next_token (Token): The next token in the iteration.
     """
 
-    def __init__(self, lexer=None, tokens=None):
+    def __init__(self, lexer: Lexer = None, tokens: Iterator[Token] = None):
         """SymbolTable constructor.
 
-            Takes lexer or tokens argument to get the collection of tokens. Prioritizes lexer if both are provided.
+        Takes lexer or tokens argument to get the collection of tokens. Prioritizes lexer if both are provided.
 
-            Args:
-                lexer (Lexer): The lexer for generating collections of token. Defaults to None.
-                tokens (Iterator[Token]): The iterator over the collection tokens. Defaults to None.
+        Args:
+            lexer: The lexer for generating collections of token. Defaults to None.
+            tokens: The iterator over the collection tokens. Defaults to None.
 
         """
-
         super().__init__()
         if lexer is not None:
             self.tokens = lexer.tokens()
@@ -135,3 +135,53 @@ class SymbolTable(OrderedDict):
                 scope_level -= 1
 
             self._advance()
+
+    def get_declared_position(self, identifier_key) -> int:
+        """Gets the declared location of the given identifier key.
+
+        Args:
+            identifier_key (int): The dictionary key of the identifier.
+
+        Returns:
+            The value of identifier_position attribute of the identifier.
+        """
+        return self.get(identifier_key)["identifier_position"]
+
+    def get_identifier_type(self, identifier_key) -> Tuple[str, ...]:
+        """Gets the type of the given identifier key.
+
+        Args:
+            identifier_key (int): The dictionary key of the identifier.
+
+        Returns:
+            The value of identifier_type attribute of the identifier.
+        """
+        return self.get(identifier_key)["identifier_type"]
+
+    def get_identifier_attributes(self, identifier_key) -> str:
+        """Gets the attributes of the given identifier key.
+
+        Args:
+            identifier_key (int): The dictionary key of the identifier.
+
+        Returns:
+            The value of identifier_type attribute of the identifier.
+        """
+        return self.get(identifier_key)["attributes"]
+
+    def get_identifier_scope(self, identifier_key) -> Tuple[str, int]:
+        """Gets the scope of the given identifier key.
+
+        Args:
+            identifier_key (int): The dictionary key of the identifier.
+
+        Returns:
+            A tuple of scope name and scope level.
+
+        Example:
+            >>> st = SymbolTable(lexer=lexer)
+            >>> scope = st.get_identifier_scope(12)
+            >>> scope
+            ("class_scope", 0)
+        """
+        return self.get(identifier_key)["scope"]
