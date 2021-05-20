@@ -75,8 +75,12 @@ class idTree(AST):
     def getName(self):
         return self.name
 class assignTree(AST):
-    def __init__(self):
+    def __init__(self, assignToken):
         super().__init__('Assignment')
+        self.assignToken = assignToken
+
+    def getAssignToken(self):
+        return self.assignToken
 
 
 class ifTree(AST):
