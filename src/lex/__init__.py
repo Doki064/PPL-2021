@@ -11,12 +11,14 @@
         >>>     print(token)
 """
 
-from typing import Iterable
+from typing import Iterator
 
 try:
-    from lex import token_names
+    from lex import _token_names
 except Exception:
-    from src.lex import token_names
+    from src.lex import _token_names
+
+token_names = _token_names
 
 
 class Token:
@@ -158,7 +160,7 @@ class Lexer:
                         start_position, f"EOL while scanning string literal at position {start_position}")
             self._next_char()
             token = Token(start_position, self.current_position,
-                          token_names.STRING, self.stream[start_position:self.current_position + 1])
+                          _token_names.STRING, self.stream[start_position:self.current_position + 1])
 
         # Checks double-quoted string.
         elif self.current_char == '"':
@@ -170,7 +172,7 @@ class Lexer:
                         start_position, f"EOL while scanning string literal at position {start_position}")
             self._next_char()
             token = Token(start_position, self.current_position,
-                          token_names.STRING, self.stream[start_position:self.current_position + 1])
+                          _token_names.STRING, self.stream[start_position:self.current_position + 1])
 
         # Checks number begins with a digit.
         elif self.current_char.isdigit():
@@ -184,7 +186,7 @@ class Lexer:
             if self._peek() in ["d", "D", "f", "F"]:
                 self._next_char()
             token = Token(start_position, self.current_position,
-                          token_names.NUMBER, self.stream[start_position:self.current_position + 1])
+                          _token_names.NUMBER, self.stream[start_position:self.current_position + 1])
 
         # Checks number begins with a dot.
         elif self.current_char == ".":
@@ -195,81 +197,81 @@ class Lexer:
                 if self._peek() in ["d", "D", "f", "F"]:
                     self._next_char()
                 token = Token(start_position, self.current_position,
-                              token_names.NUMBER, self.stream[start_position:self.current_position + 1])
+                              _token_names.NUMBER, self.stream[start_position:self.current_position + 1])
             else:
                 token = Token(self.current_position, self.current_position,
-                              token_names.Separators(self.current_char).name, self.current_char)
+                              _token_names.Separators(self.current_char).name, self.current_char)
 
         # Checks word begins with an alphabetic letter or an underscore.
         elif self.current_char.isalpha() or self.current_char == "_":
             start_position = self.current_position
             while (self._peek() not in [" ", "\t", "\r", "\n", "\0"]
-                   and self._peek() not in token_names.SEPARATORS
-                   and self._peek() not in token_names.OPERATORS):
+                   and self._peek() not in _token_names.SEPARATORS
+                   and self._peek() not in _token_names.OPERATORS):
                 self._next_char()
             word = self.stream[start_position:self.current_position + 1]
             # Checks if word is ignored.
-            if word in token_names.Ignored.Keywords.values():
+            if word in _token_names.Ignored.Keywords.values():
                 while self.current_char != ";":
                     self._next_char()
-            elif word in token_names.Ignored.KeywordsAttribute.values():
+            elif word in _token_names.Ignored.KeywordsAttribute.values():
                 self._next_char()
             # Checks if word is a keyword.
-            elif word in token_names.Keywords.values():
+            elif word in _token_names.Keywords.values():
                 token = Token(start_position, self.current_position,
-                              token_names.Keywords(word).name, word)
-            elif word in token_names.KeywordsType.values():
+                              _token_names.Keywords(word).name, word)
+            elif word in _token_names.KeywordsType.values():
                 token = Token(start_position, self.current_position,
-                              token_names.KeywordsType(word).name, word)
-            elif word in token_names.KeywordsAttribute.values():
+                              _token_names.KeywordsType(word).name, word)
+            elif word in _token_names.KeywordsAttribute.values():
                 token = Token(start_position, self.current_position,
-                              token_names.KeywordsAttribute(word).name, word)
+                              _token_names.KeywordsAttribute(word).name, word)
             # Otherwise put it as identifier.
             else:
                 token = Token(start_position, self.current_position,
-                              token_names.IDENTIFIER, word)
+                              _token_names.IDENTIFIER, word)
 
         # Checks if is a separator.
-        elif self.current_char in token_names.Separators.values():
+        elif self.current_char in _token_names.Separators.values():
             token = Token(self.current_position, self.current_position,
-                          token_names.Separators(self.current_char).name, self.current_char)
+                          _token_names.Separators(self.current_char).name, self.current_char)
 
         # Checks if is an operator.
-        elif self.current_char in token_names.Operators.values():
+        elif self.current_char in _token_names.Operators.values():
             last_position = self.current_position
             if self.current_char not in ["&", "|"] and self._peek() == "=":
                 val = self.current_char + self._peek()
                 self._next_char()
                 token = Token(last_position, self.current_position,
-                              token_names.Operators(val).name, val)
+                              _token_names.Operators(val).name, val)
             elif self.current_char == "+" and self._peek() == "+":
                 val = self.current_char + self._peek()
                 self._next_char()
                 token = Token(last_position, self.current_position,
-                              token_names.Operators(val).name, val)
+                              _token_names.Operators(val).name, val)
             elif self.current_char == "-" and self._peek() == "-":
                 val = self.current_char + self._peek()
                 self._next_char()
                 token = Token(last_position, self.current_position,
-                              token_names.Operators(val).name, val)
+                              _token_names.Operators(val).name, val)
             elif self.current_char == "&" and self._peek() == "&":
                 val = self.current_char + self._peek()
                 self._next_char()
                 token = Token(last_position, self.current_position,
-                              token_names.Operators(val).name, val)
+                              _token_names.Operators(val).name, val)
             elif self.current_char == "|" and self._peek() == "|":
                 val = self.current_char + self._peek()
                 self._next_char()
                 token = Token(last_position, self.current_position,
-                              token_names.Operators(val).name, val)
+                              _token_names.Operators(val).name, val)
             else:
                 token = Token(self.current_position, self.current_position,
-                              token_names.Operators(self.current_char).name, self.current_char)
+                              _token_names.Operators(self.current_char).name, self.current_char)
 
         # Checks if is EOF
         elif self.current_char == "\0":
             token = Token(self.current_position, self.current_position,
-                          token_names.EOF, self.current_char)
+                          _token_names.EOF, self.current_char)
 
         # Raise error if is an unknown token.
         else:
@@ -279,7 +281,7 @@ class Lexer:
         return token
 
     # Generator function.
-    def tokens(self) -> Iterable[Token]:
+    def tokens(self) -> Iterator[Token]:
         """ An generator to iterate over all of the tokens found in the character stream.
 
             Yields:
