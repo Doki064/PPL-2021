@@ -248,14 +248,8 @@ class Lexer:
                     break
                 self._next_char()
             word = self.stream[start_position:self.current_position + 1]
-            # Checks if word is ignored.
-            if word in _token_names.Ignored.Keywords.values():
-                while self.current_char != ";":
-                    self._next_char()
-            elif word in _token_names.Ignored.KeywordsAttribute.values():
-                self._next_char()
             # Checks if word is a keyword.
-            elif word in _token_names.Keywords.values():
+            if word in _token_names.Keywords.values():
                 token = Token(start_position, self.current_position,
                               _token_names.Keywords(word).name, word)
             elif word in _token_names.KeywordsType.values():
@@ -325,8 +319,11 @@ class Lexer:
         self.current_char = ""
         self._next_char()
 
-    def tokens(self) -> _Iterator[Token]:
+    def tokens(self, ignore=True) -> _Iterator[Token]:
         """ An generator to iterate over all of the tokens found in the character stream.
+
+        Args:
+            ignore (bool): If True, ignore all of the unsupported tokens.
 
         Yields:
             Token: A token object.
@@ -335,7 +332,15 @@ class Lexer:
             LexerError: An error occurred while getting tokens in the character stream.
         """
         self.reset()
+        header = True
         while not self.EOF:
             token = self._get_token()
             if token is not None:
+                if ignore:
+                    if header and not token.check_token(_token_names.KeywordsType("class")):
+                        continue
+                    else:
+                        header = False
+                    if token.check_token(_token_names.Ignored.names()):
+                        continue
                 yield token
