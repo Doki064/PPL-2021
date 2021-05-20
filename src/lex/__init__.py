@@ -332,10 +332,15 @@ class Lexer:
             LexerError: An error occurred while getting tokens in the character stream.
         """
         self.reset()
+        header = True
         while not self.EOF:
             token = self._get_token()
             if token is not None:
-                if token.check_token(_token_names.Ignored.names()):
-                    if ignore:
+                if ignore:
+                    if header and not token.check_token(_token_names.KeywordsType("class")):
+                        continue
+                    else:
+                        header = False
+                    if token.check_token(_token_names.Ignored.names()):
                         continue
                 yield token
