@@ -4,7 +4,31 @@ from lex import *
 from ast import *
 
 # Parser object keeps track of current token and checks if the code matches the grammar.
+
+
 class Parser:
+    assignOPs = [token_names.OPERATORS['='],
+                 token_names.OPERATORS['+='],
+                 token_names.OPERATORS['-='],
+                 token_names.OPERATORS['*='],
+                 token_names.OPERATORS['/='],
+                 token_names.OPERATORS['%=']]
+
+    relOPs = [token_names.OPERATORS['<'],
+              token_names.OPERATORS['<='],
+              token_names.OPERATORS['>'],
+              token_names.OPERATORS['>='],
+              token_names.OPERATORS['=='],
+              token_names.OPERATORS['!=']]
+
+    addOPs = [token_names.OPERATORS['+'],
+              token_names.OPERATORS['-'],
+              token_names.OPERATORS['|']]
+
+    multOPs = [token_names.OPERATORS['*'],
+              token_names.OPERATORS['/'],
+              token_names.OPERATORS['&']]
+
     def __init__(self, lexer):
         self.lexer = lexer
 
@@ -25,7 +49,8 @@ class Parser:
 
     # Try to match current token. If not, error. Advances the current token.
     def match(self, kinds):
-        if type(kinds) is not list: kinds = [kinds]
+        if type(kinds) is not list:
+            kinds = [kinds]
         doesMatch = False
         for kind in kinds:
             if self.checkToken(kind):
@@ -46,6 +71,10 @@ class Parser:
 
     def abort(self, message):
         sys.exit("Error. " + message)
+
+#             HELPER FUNCTION DECLARATIONS END HERE                   #
+# --------------------------------------------------------------------#
+#               PARSING LOGIC STARTS FROM HERE                        #
 
     def program(self):
         t = programTree()
@@ -79,13 +108,14 @@ class Parser:
             t.addKid(self.block())
             return t
         if self.checkToken(token_names.OPERATORS['=']):
-            t = declTreeWithAssign('Declaration with assignment').addKid(typ).addKid(name)
+            t = declTreeWithAssign(
+                'Declaration with assignment').addKid(typ).addKid(name)
             t.addKid(self.expr())
             return t
         self.match(token_names.SEPARATORS[';'])
         t = declrTree().addKid(typ).addKid(name)
         return t
-        
+
     def typ(self):
         t = typeTree()
         for key, types in token_names.KEYWORDS_TYPE:
@@ -102,7 +132,8 @@ class Parser:
             t = idTree(self.curToken.value)
             self.nextToken()
             return t
-        raise SyntaxError()
+        raise SyntaxError(
+            f'Expected: {token_names.IDENTIFIER}, got {self.curToken.token_name}, at {self.curToken.start_position}')
 
     def funcHead(self):
         self.match(token_names.SEPARATORS['('])
@@ -127,7 +158,7 @@ class Parser:
                 self.nextToken()
                 t.addKid(self.block())
             return t
-        
+
         if self.checkToken(token_names.KEYWORDS['while']):
             t = whileTree()
             self.nextToken()
@@ -144,12 +175,6 @@ class Parser:
         if self.checkToken(token_names.SEPARATORS['{']):
             return self.block()
 
-        assignOPs = [token_names.OPERATORS['='],
-                     token_names.OPERATORS['+='], 
-                     token_names.OPERATORS['-='], 
-                     token_names.OPERATORS['*='], 
-                     token_names.OPERATORS['/='], 
-                     token_names.OPERATORS['%=']]
         kid = self.name()
         t = assignTree(self.match(assignOPs)).addKid(kid)
         t.addKid(self.expr())
@@ -159,7 +184,7 @@ class Parser:
         if requireBracket or self.checkToken(token_names.SEPARATORS['(']):
             self.match(token_names.SEPARATORS['('])
             requireBracket = True
-        
+
         kid = self.simpleExpr()
         t = self.formRelationTree()
         if t is None:
@@ -170,10 +195,6 @@ class Parser:
         return t
 
     def simpleExpr(self):
-        addOPs = [token_names.OPERATORS['+'],
-                     token_names.OPERATORS['-'],
-                     token_names.OPERATORS['|']]
-
         kid = self.term()
         t = self.formAddOpTree()
         while t is not None:
@@ -183,12 +204,66 @@ class Parser:
             t = self.formAddOpTree()
         return kid
 
+    def term(self):
+        kid = self.factor()
+        t = self.formMultOpTree()
+        while t is not None:
+            t.addKid(kid)
+            t.addKid(self.factor)
+            kid = t
+            t = self.formMultOpTree()
+        return kid
+
+    def factor(self):
+        if self.checkToken(token_names.SEPARATORS['(']):
+            self.nextToken()
+            t = self.expr()
+            self.match(token_names.SEPARATORS[')'])
+            return t
+
+        if self.checkToken(token_names.NUMBER):
+            t = numberTree(self.curToken.value)
+            self.nextToken()
+            return t
+
+        t = self.name()
+        if not self.checkToken(token_names.SEPARATORS['(']):
+            return t
+
+        self.nextToken()
+        t = callTree().addKid(t)
+        if not self.checkToken(token_names.SEPARATORS[')']):
+            while True:
+                t.addKid(self.expr())
+                if self.checkToken(token_names.SEPARATORS[',']):
+                    self.nextToken()
+                else:
+                    break
+        self.match(token_names.SEPARATORS[')'])
+        return t
 
     def formRelationTree(self):
-        pass
+        if self.curToken.token_name in relOPs:
+            t = relOPTree(self.curToken.token_name)
+            self.nextToken()
+            return t
+        else:
+            return None
+
 
     def formAddOpTree(self):
-        pass
+        if self.curToken.token_name in addOPs:
+            t = addOPTree(self.curToken.token_name)
+            self.nextToken()
+            return t
+        else:
+            return None
 
-    def term(self):
-        pass
+    def formMultOpTree(self):
+        if self.curToken.token_name in multOPs:
+            t = addOPTree(self.curToken.token_name)
+            self.nextToken()
+            return t
+        else:
+            return None
+
