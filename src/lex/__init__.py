@@ -44,8 +44,10 @@ class Token:
 
     def check_token(self, *args):
         if len(args) == 1:
-            if isinstance(args[0], str) or isinstance(args[0], token_names.Enum):
+            if isinstance(args[0], str):
                 return self.token_name == args[0]
+            elif isinstance(args[0], token_names.Enum):
+                return self.token_name == args[0].name
             elif isinstance(args[0], Iterable):
                 return self.token_name in args[0]
         raise TypeError("_check_token() taking 1 argument, type: str, Enum or Iterable object")
