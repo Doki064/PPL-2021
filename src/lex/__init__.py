@@ -15,15 +15,18 @@ Example:
     >>>     print(token)
 """
 
-from typing import Iterator, Sequence
+__all__ = [
+    "token_names",
+    "Token",
+    "LexerError",
+    "Lexer",
+]
 
-try:
-    from lex import _token_names
-except Exception:
-    from src.lex import _token_names
+from enum import Enum as _Enum
+from typing import Iterator as _Iterator
+from typing import Sequence as _Sequence
 
-token_names = _token_names
-Enum = _token_names.Enum
+from lex import token_names as _token_names
 
 
 class Token:
@@ -67,9 +70,9 @@ class Token:
         if len(args) == 1:
             if isinstance(args[0], str):
                 return self.token_name == args[0]
-            elif isinstance(args[0], Enum):
+            elif isinstance(args[0], _Enum):
                 return self.token_name == args[0].name
-            elif isinstance(args[0], Sequence):
+            elif isinstance(args[0], _Sequence):
                 return self.token_name in args[0]
         raise TypeError("_check_token() taking 1 argument, type: str, Enum or Sequence")
 
@@ -237,10 +240,17 @@ class Lexer:
 
         # Checks word begins with an alphabetic letter or an underscore.
         elif self.current_char.isalpha() or self.current_char == "_":
-            start_position = self.current_position
-            while (self._peek() not in [" ", "\t", "\r", "\n", "\0"]
-                   and self._peek() not in _token_names.SEPARATORS
-                   and self._peek() not in _token_names.OPERATORS):
+            last_position = start_position = self.current_position
+            while True:
+                if (self.stream[last_position:self.current_position + 1] in ["Math", "System", ".in", ".out"]
+                        and self._peek() == "."):
+                    self._next_char()
+                    last_position = self.current_position
+                    continue
+                if (self._peek() in [" ", "\t", "\r", "\n", "\0"]
+                        or self._peek() in _token_names.SEPARATORS
+                        or self._peek() in _token_names.OPERATORS):
+                    break
                 self._next_char()
             word = self.stream[start_position:self.current_position + 1]
             # Checks if word is ignored.
@@ -313,7 +323,7 @@ class Lexer:
         self._next_char()
         return token
 
-    def tokens(self) -> Iterator[Token]:
+    def tokens(self) -> _Iterator[Token]:
         """ An generator to iterate over all of the tokens found in the character stream.
 
         Yields:
