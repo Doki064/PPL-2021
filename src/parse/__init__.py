@@ -118,7 +118,8 @@ class Parser:
 
     def typ(self):
         t = typeTree()
-        for key, types in token_names.KEYWORDS_TYPE:
+        for key in token_names.KEYWORDS_TYPE:
+            types = token_names.KEYWORDS_TYPE[key]
             if self.checkToken(types):
                 t.setLabel(key)
                 self.nextToken()

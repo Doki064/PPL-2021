@@ -23,7 +23,7 @@ class AST(ABC):
         return len(self._kids)
 
     def addKid(self, kidAST):
-        self._kids.add(kidAST)
+        self._kids.append(kidAST)
         return self
 
     def setLabel(self, label):
