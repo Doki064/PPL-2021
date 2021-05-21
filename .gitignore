@@ -2,6 +2,11 @@
 **/*.class
 **/*.pyc
 **/*.pyo
+**/*.exe
+**/build
+**/dist
+**/jcosim.spec
+**/__pycache__
 
 # IDE configs
 .idea/

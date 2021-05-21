@@ -5,7 +5,7 @@ set -o errexit
 # Script to permanently delete files/folders from your git repository.  To use 
 # it, cd to your repository's root and then run the script with a list of paths
 # you want to delete
-# Usage: ./git-remove-forever path1 path2 path3
+# Usage: ./git-remove-forever.sh path1 path2 path3
  
 if [ $# -eq 0 ]; then
     exit 0

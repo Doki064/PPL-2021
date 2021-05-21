@@ -1,0 +1,35 @@
+Compile simple Java source file to C then to executables.
+Usage: jcosim [OPTIONS]
+Options:
+    -i <file>,      --input <file>          input source file path and name
+    -o <file>,      --output <file>         output executable path and name
+    -s,             --symtable              generate symtable only
+    -t,             --token                 generate tokens only
+    -p,             --parsetree             generate parse tree only
+    -g,             --codegen               generate generated C code only
+    -c <option>,    --ccoption              C compiler options (GCC)
+    -v,             --verbose               generate all intermediate output
+    -h,             --help                  display this help and exit
+* Some C compiler options might not work as jcosim codegen does not cover all C syntax
+Examples:
+    - Compile a file to exe with no intermediate output:
+        jcosim -i Main.java -o Main
+        jcosim --input Main.java --output Main
+    - Compile a file to exe with intermediate output:
+        jcosim -i Main.java -o Main -v
+        jcosim --input Main.java --output Main --verbose
+    - Compile a file to exe with gcc options:
+        jcosim -i Main.java -o Main -c "-O1 -Wall"
+        jcosim --input Main.java --output Main --ccoption "-O1 -Wall"
+    - Show symtable:
+        jcosim -i Main.java -s
+        jcosim --input Main.java --symtable
+    - Show tokens:
+        jcosim -i Main.java -t
+        jcosim --input Main.java --token
+    - Show parse tree:
+        jcosim -i Main.java -p
+        jcosim --input Main.java --parsetree
+    - Show generated C code:
+        jcosim -i Main.java -g
+        jcosim --input Main.java --codegen
