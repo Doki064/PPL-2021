@@ -54,7 +54,7 @@ class Token:
             token_name (str): The name of the token.
             value (str): The value of the token.
         """
-        self.position = f"{line_number}:{start_position - line_start_position}"
+        self.position = f"{line_number:02d}:{(start_position - line_start_position):02d}"
         self._start_position = start_position
         self._end_position = end_position
         self.token_name = token_name
