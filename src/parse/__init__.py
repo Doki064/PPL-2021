@@ -109,10 +109,12 @@ class Parser:
             self.nextToken()
             t = declrTree().addKid(typ).addKid(name).addKid(self.expr())
             self.match(token_names.SEPARATORS[';'])
+            t.addKid(endTree())
             return t
-        if requireSemiColon: 
-            self.match(token_names.SEPARATORS[';'])
         t = declrTree().addKid(typ).addKid(name)
+        if requireSemiColon:
+            self.match(token_names.SEPARATORS[';'])
+            t.addKid(endTree())
         return t
 
     def typ(self):
@@ -179,6 +181,7 @@ class Parser:
             self.nextToken()
             t.addKid(self.expr())
             self.match(token_names.SEPARATORS[';'])
+            t.addKid(endTree())
             return t
 
         if self.checkToken(token_names.SEPARATORS['{']):
@@ -198,11 +201,13 @@ class Parser:
                         break
             self.match(token_names.SEPARATORS[')'])
             self.match(token_names.SEPARATORS[';'])
+            t.addKid(endTree())
             return t
 
         t = assignTree(self.match(Parser.assignOPs)).addKid(kid)
         t.addKid(self.expr())
         self.match(token_names.SEPARATORS[';'])
+        t.addKid(endTree())
         return t
 
     def expr(self, requireBracket=False):
