@@ -6,7 +6,7 @@ from parse import *
 from codegen import *
 
 
-def r2a(rpath): return path.join(path.dirname(__file__), rpath)
+def absPathFromFile(rpath): path.join(path.dirname(__file__), rpath)
 
 
 def section(title, work):
@@ -18,35 +18,35 @@ def section(title, work):
 
 def help_text():
     def work():
-        with open(r2a('./data/help.txt'), 'r') as f:
+        with open(absPathFromFile('./data/help.txt'), 'r') as f:
             print(f.read())
     return "Manual:", work
 
 
-def token_display():
+def token_display(lexer):
     def work():
-        with open(r2a('./data/help.txt'), 'r') as f:
-            print(f.read())
-    return "Manual:", work
+        for tk in lexer.tokens(ignore=False):
+            print(tk)
+    return "Tokens:", work
 
 
 def symtable_display():
     def work():
-        with open(r2a('./data/help.txt'), 'r') as f:
+        with open(absPathFromFile('./data/help.txt'), 'r') as f:
             print(f.read())
     return "Manual:", work
 
 
 def parsetree_display():
     def work():
-        with open(r2a('./data/help.txt'), 'r') as f:
+        with open(absPathFromFile('./data/help.txt'), 'r') as f:
             print(f.read())
     return "Manual:", work
 
 
 def codegen_display():
     def work():
-        with open(r2a('./data/help.txt'), 'r') as f:
+        with open(absPathFromFile('./data/help.txt'), 'r') as f:
             print(f.read())
     return "Manual:", work
 
@@ -83,9 +83,9 @@ def main():
             if opt in ('-h', '--help'):
                 raise GetoptError('')
             elif opt in ('-i', '--input'):
-                source = r2a(arg)
+                source = path.realpath(arg)
             elif opt in ('-o', '--output'):
-                exe = r2a(arg)
+                exe = path.realpath(arg)
             elif opt in ('-s', '--symtable'):
                 symtable = True
             elif opt in ('-t', '--token'):
@@ -105,22 +105,22 @@ def main():
         if not source:
             raise GetoptError('ERROR: Input file must be specified')
         if not exe:
-            exe = r2a(path.basename(source))
+            exe = path.realpath(path.basename(source))
 
         with open(source, 'r') as f:
             buffer = f.read()
             lexer = Lexer(buffer)
             parser = Parser(lexer)
             emitter = Emitter("cast1Main")
-            # p = parser.program()  # Start the parser.
-            code_gen = CodeGen(parser, emitter)
-            code_gen.generate_code()
-            print(code_gen.emitter.code)
-            print("Parsing completed.")
+            p = parser.program()  # Start the parser.
+            # code_gen = CodeGen(parser, emitter)
+            # code_gen.generate_code()
+            # print(code_gen.emitter.code)
+            # print("Parsing completed.")
             if token:
-                section(*token_display())
+                section(*token_display(lexer))
             if symtable:
-                section(*symtable_display())
+                section(*symtable_display(parser))
             if parsetree:
                 section(*parsetree_display())
             if codegen:
