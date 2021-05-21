@@ -285,7 +285,6 @@ class Parser:
         else:
             return None
 
-
     def formAddOpTree(self):
         if self.curToken.token_name in Parser.addOPs:
             t = addOPTree(self.curToken.token_name)

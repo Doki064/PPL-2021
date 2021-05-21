@@ -1,7 +1,6 @@
 from lex import *
 import sys
 
-
 def main():
     print("Mini Java Compiler - Lexer Test")
 
