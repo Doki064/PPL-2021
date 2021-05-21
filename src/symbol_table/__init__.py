@@ -14,7 +14,7 @@ __all__ = ["SymbolTable"]
 
 from collections import UserDict as _UserDict
 from typing import Tuple as _Tuple
-from typing import Optional as _Optional
+from typing import Union as _Union
 
 try:
     from lex import Lexer as _Lexer
@@ -144,7 +144,7 @@ class SymbolTable(_UserDict):
         """Returns the declaration type of the identifier with the given key. None if the identifier is not declared.
 
         Args:
-            key: The identifier_key to check.
+            key (int): The identifier_key to check.
         """
         return self.get_identifier_type(self.get_identifier_position(key))
 
@@ -170,7 +170,7 @@ class SymbolTable(_UserDict):
         """
         return self.get(identifier_key)["identifier_name"]
 
-    def get_identifier_type(self, identifier_key) -> _Optional[str]:
+    def get_identifier_type(self, identifier_key) -> _Union[str, None]:
         """Gets the type of the given identifier key.
 
         Args:
