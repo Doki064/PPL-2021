@@ -13,41 +13,39 @@ Example:
 __all__ = ["SymbolTable"]
 
 from collections import OrderedDict as _OrderedDict
-from typing import Iterator as _Iterator
 from typing import Tuple as _Tuple
 
-from lex import Lexer as _Lexer
-from lex import LexerError as _LexerError
-from lex import Token as _Token
-from lex import token_names as _token_names
+try:
+    from lex import Lexer as _Lexer
+    from lex import LexerError as _LexerError
+    from lex import Token as _Token
+    from lex import token_names as _token_names
+except ImportError:
+    from src.lex import Lexer as _Lexer
+    from src.lex import LexerError as _LexerError
+    from src.lex import Token as _Token
+    from src.lex import token_names as _token_names
 
 
 class SymbolTable(_OrderedDict):
     """The symbol table.
 
     Attributes:
-        tokens (_Iterator[_Token]): The iterator over the collection tokens.
         current_token (_Token): The current token in the iteration.
         next_token (_Token): The next token in the iteration.
     """
 
-    def __init__(self, lexer: _Lexer = None, tokens: _Iterator[_Token] = None):
+    def __init__(self, lexer: _Lexer):
         """SymbolTable constructor.
 
-        Takes lexer or tokens argument to get the collection of tokens. Prioritizes lexer if both are provided.
+        Takes lexer or tokens argument to get the collection of tokens. Prioritizes parser if both are provided.
 
         Args:
-            lexer: The lexer for generating collections of token. Defaults to None.
-            tokens: The iterator over the collection tokens. Defaults to None.
+            lexer: The lexer for generating collections of token.
 
         """
         super().__init__()
-        if lexer is not None:
-            self.tokens = lexer.tokens()
-        elif tokens is not None:
-            self.tokens = tokens
-        else:
-            raise TypeError("__init__() needs at least 1 argument: 'lexer' or 'tokens'.")
+        self.tokens = lexer.tokens()
         self.current_token = None
         self.next_token = None
         self._advance()
@@ -70,7 +68,7 @@ class SymbolTable(_OrderedDict):
 
         while self.current_token is not None:
             if self.current_token.check_token(_token_names.IDENTIFIER):
-                identifier_key = identifier_position = self.current_token.position
+                identifier_key = identifier_position = self.current_token.key()
                 identifier_name = self.current_token.value
                 if self.next_token.check_token(_token_names.Separators("[")):
                     while True:
@@ -92,7 +90,7 @@ class SymbolTable(_OrderedDict):
                 else:
                     raise _LexerError(self.current_token.position, "Out of scope!")
 
-                if identifier_type is None:
+                if not identifier_type:
                     try:
                         # A valid key must fulfill all the criteria below:
                         #   has the same identifier name,
@@ -102,8 +100,8 @@ class SymbolTable(_OrderedDict):
                         # If there is a valid key, pass it as the identifier_position for the current identifier.
                         latest_valid_key = next(key for key, value in reversed(self.items())
                                                 if (value["identifier_name"] == identifier_name
-                                                    and value["identifier_type"] is not None
-                                                    and value["scope"][1] <= scope_level))
+                                                    and value["identifier_type"]
+                                                    and value["identifier_scope"][1] <= scope_level))
                     except StopIteration:
                         pass
                     else:
@@ -146,6 +144,9 @@ class SymbolTable(_OrderedDict):
                 scope_level -= 1
 
             self._advance()
+
+    def get_declaration_data_type(self, key):
+        return self.get_identifier_type(self.get_identifier_position(key))[0]
 
     def get_identifier_position(self, identifier_key) -> int:
         """Gets the declared location of the given identifier key.
