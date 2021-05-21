@@ -4,6 +4,7 @@ from sys import argv
 from lex import *
 from parse import *
 from codegen import *
+from symbol_table import *
 
 
 def absPathFromFile(rpath): path.join(path.dirname(__file__), rpath)
@@ -25,16 +26,18 @@ def help_text():
 
 def token_display(lexer):
     def work():
-        for tk in lexer.tokens(ignore=False):
-            print(tk)
+        token_display = '\n'.join(
+            map(str, list(lexer.tokens(ignore=False))))
+        print(token_display)
+        with open(path.realpath('tokens.txt'), 'w') as f:
+            f.write(token_display)
     return "Tokens:", work
 
 
-def symtable_display():
+def symtable_display(stb):
     def work():
-        with open(absPathFromFile('./data/help.txt'), 'r') as f:
-            print(f.read())
-    return "Manual:", work
+        print(stb)
+    return "Symbol Table:", work
 
 
 def parsetree_display():
@@ -58,7 +61,7 @@ def main():
             raise GetoptError('ERROR: Input file must be specified')
         options, remainder = getopt(
             argv[1:],
-            'i:o:stpgc:vh',
+            'i:o:stpc:vh',
             [
                 'input',
                 'output',
@@ -66,7 +69,6 @@ def main():
                 'token',
                 'parsetree',
                 'codegen'
-                'ccoption',
                 'verbose',
                 'help',
             ])
@@ -77,7 +79,6 @@ def main():
         token = False
         parsetree = False
         codegen = False
-        ccoption = ""
 
         for opt, arg in options:
             if opt in ('-h', '--help'):
@@ -94,8 +95,6 @@ def main():
                 parsetree = True
             elif opt in ('-g', '--codegen'):
                 codegen = True
-            elif opt in ('-c', '--ccoption'):
-                ccoption = arg
             elif opt in ('-v', '--verbose'):
                 symtable = True
                 token = True
@@ -120,7 +119,7 @@ def main():
             if token:
                 section(*token_display(lexer))
             if symtable:
-                section(*symtable_display(parser))
+                section(*symtable_display(SymbolTable(lexer)))
             if parsetree:
                 section(*parsetree_display())
             if codegen:
@@ -131,4 +130,5 @@ def main():
         print(e)
 
 
-main()
+if __name__ == '__main__':
+    main()

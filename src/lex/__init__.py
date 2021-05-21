@@ -80,7 +80,7 @@ class Token:
         raise TypeError("_check_token() taking 1 argument, type: str, Enum or Sequence")
 
     def __str__(self):
-        return f"{self.position}\t {self._start_position}\t {self.token_name}\t {self.value}"
+        return f"{self.position:10}{self._start_position:<10}{self.token_name:20}{self.value:20}"
 
     def __hash__(self):
         return hash((self.position, self._end_position, self.token_name, self.value))

@@ -6,8 +6,7 @@ Options:
     -s,             --symtable              generate symtable only
     -t,             --token                 generate tokens only
     -p,             --parsetree             generate parse tree only
-    -g,             --codegen               generate generated C code only
-    -c <option>,    --ccoption              C compiler options (GCC)
+    -c,             --codegen               generate generated C code only
     -v,             --verbose               generate all intermediate output
     -h,             --help                  display this help and exit
 * Some C compiler options might not work as jcosim does not cover all C syntax
@@ -18,9 +17,6 @@ Examples:
     - Compile a file to exe with intermediate output:
         jcosim -i Main.java -o Main -v
         jcosim --input Main.java --output Main --verbose
-    - Compile a file to exe with gcc options:
-        jcosim -i Main.java -o Main -c "-O1 -Wall"
-        jcosim --input Main.java --output Main --ccoption "-O1 -Wall"
     - Show symtable:
         jcosim -i Main.java -s
         jcosim --input Main.java --symtable
@@ -31,5 +27,5 @@ Examples:
         jcosim -i Main.java -p
         jcosim --input Main.java --parsetree
     - Show generated C code:
-        jcosim -i Main.java -g
+        jcosim -i Main.java -c
         jcosim --input Main.java --codegen

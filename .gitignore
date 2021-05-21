@@ -17,3 +17,7 @@ env
 
 # dump
 dumps/
+
+# jcosim output
+**/tokens.txt
+**/parsetree.png
