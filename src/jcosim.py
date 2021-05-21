@@ -7,7 +7,7 @@ from codegen import *
 from symbol_table import *
 
 
-def absPathFromFile(rpath): path.join(path.dirname(__file__), rpath)
+def absPathFromFile(rpath): return path.join(path.dirname(__file__), rpath)
 
 
 def section(title, work):
@@ -29,7 +29,7 @@ def token_display(lexer):
         token_display = '\n'.join(
             map(str, list(lexer.tokens(ignore=False))))
         print(token_display)
-        with open(path.realpath('tokens.txt'), 'w') as f:
+        with open('tokens.txt', 'w') as f:
             f.write(token_display)
     return "Tokens:", work
 
@@ -84,16 +84,16 @@ def main():
             if opt in ('-h', '--help'):
                 raise GetoptError('')
             elif opt in ('-i', '--input'):
-                source = path.realpath(arg)
+                source = arg
             elif opt in ('-o', '--output'):
-                exe = path.realpath(arg)
+                exe = arg
             elif opt in ('-s', '--symtable'):
                 symtable = True
             elif opt in ('-t', '--token'):
                 token = True
             elif opt in ('-p', '--parsetree'):
                 parsetree = True
-            elif opt in ('-g', '--codegen'):
+            elif opt in ('-c', '--codegen'):
                 codegen = True
             elif opt in ('-v', '--verbose'):
                 symtable = True
@@ -104,7 +104,7 @@ def main():
         if not source:
             raise GetoptError('ERROR: Input file must be specified')
         if not exe:
-            exe = path.realpath(path.basename(source))
+            exe = path.basename(source)
 
         with open(source, 'r') as f:
             buffer = f.read()

@@ -17,7 +17,7 @@ class CCompiler:
         if (include_exe):
             for f in glob(f'{self.exe_file}.exe'):
                 remove(f)
-            for f in glob(f'{self.exe_file}'):
+            for f in glob(self.exe_file):
                 remove(f)
 
     def exe(self, clean=True):
