@@ -145,8 +145,10 @@ class SymbolTable(_UserDict):
 
             self._advance()
 
-    def get_declaration_data_type(self, key):
-        return self.get_identifier_type(self.get_identifier_position(key))
+    def get_declaration_data(self, key):
+        name = self.get_identifier_name(key)
+        type = self.get_identifier_type(self.get_identifier_position(key))
+        return name, type
 
     def get_identifier_position(self, identifier_key) -> int:
         """Gets the declared location of the given identifier key.
