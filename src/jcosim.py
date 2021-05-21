@@ -6,14 +6,56 @@ from parse import *
 from codegen import *
 
 
-def fRel(rpath): return path.join(path.dirname(__file__), rpath)
+def r2a(rpath): return path.join(path.dirname(__file__), rpath)
+
+
+def section(title, work):
+    print('-' * 80)
+    print(title)
+    work()
+    print('-' * 80)
+
+
+def help_text():
+    def work():
+        with open(r2a('./data/help.txt'), 'r') as f:
+            print(f.read())
+    return "Manual:", work
+
+
+def token_display():
+    def work():
+        with open(r2a('./data/help.txt'), 'r') as f:
+            print(f.read())
+    return "Manual:", work
+
+
+def symtable_display():
+    def work():
+        with open(r2a('./data/help.txt'), 'r') as f:
+            print(f.read())
+    return "Manual:", work
+
+
+def parsetree_display():
+    def work():
+        with open(r2a('./data/help.txt'), 'r') as f:
+            print(f.read())
+    return "Manual:", work
+
+
+def codegen_display():
+    def work():
+        with open(r2a('./data/help.txt'), 'r') as f:
+            print(f.read())
+    return "Manual:", work
 
 
 def main():
-    print("Mini Java Compiler")
+    print("JCOSIM: Java Compiler Simulator")
     try:
         if len(argv) < 2:
-            raise GetoptError('')
+            raise GetoptError('ERROR: Input file must be specified')
         options, remainder = getopt(
             argv[1:],
             'i:o:stpgc:vh',
@@ -28,39 +70,65 @@ def main():
                 'verbose',
                 'help',
             ])
-    
-    except GetoptError:
-        with open(fRel('./data/help.txt'), 'r') as f:
-            print(f.read())
 
-    # print('OPTIONS   :', options)
+        source = None
+        exe = None
+        symtable = False
+        token = False
+        parsetree = False
+        codegen = False
+        ccoption = ""
 
-    # for opt, arg in options:
-    #     if opt in ('-o', '--output'):
-    #         output_filename = arg
-    #     elif opt in ('-v', '--verbose'):
-    #         verbose = True
-    #     elif opt == '--version':
-    #         version = arg
+        for opt, arg in options:
+            if opt in ('-h', '--help'):
+                raise GetoptError('')
+            elif opt in ('-i', '--input'):
+                source = r2a(arg)
+            elif opt in ('-o', '--output'):
+                exe = r2a(arg)
+            elif opt in ('-s', '--symtable'):
+                symtable = True
+            elif opt in ('-t', '--token'):
+                token = True
+            elif opt in ('-p', '--parsetree'):
+                parsetree = True
+            elif opt in ('-g', '--codegen'):
+                codegen = True
+            elif opt in ('-c', '--ccoption'):
+                ccoption = arg
+            elif opt in ('-v', '--verbose'):
+                symtable = True
+                token = True
+                parsetree = True
+                codegen = True
 
-    # print('VERSION   :', version)
-    # print('VERBOSE   :', verbose)
-    # print('OUTPUT    :', output_filename)
-    # print('REMAINING :', remainder)
-#    if len(sys.argv) != 2:
-#         sys.exit("Error: Compiler needs source file as argument.")
-#     with pathlib.Path(sys.argv[1]).open(mode="r") as f:
-#         buffer = f.read()
+        if not source:
+            raise GetoptError('ERROR: Input file must be specified')
+        if not exe:
+            exe = r2a(path.basename(source))
 
-#     # Initialize the lexer and parser.
-#     lexer = Lexer(buffer)
-#     parser = Parser(lexer)
-#     emitter = Emitter("cast1Main")
-#     # p = parser.program()  # Start the parser.
-#     code_gen = CodeGen(parser, emitter)
-#     code_gen.generate_code()
-#     print(code_gen.emitter.code)
-#     print("Parsing completed.")
+        with open(source, 'r') as f:
+            buffer = f.read()
+            lexer = Lexer(buffer)
+            parser = Parser(lexer)
+            emitter = Emitter("cast1Main")
+            # p = parser.program()  # Start the parser.
+            code_gen = CodeGen(parser, emitter)
+            code_gen.generate_code()
+            print(code_gen.emitter.code)
+            print("Parsing completed.")
+            if token:
+                section(*token_display())
+            if symtable:
+                section(*symtable_display())
+            if parsetree:
+                section(*parsetree_display())
+            if codegen:
+                section(*codegen_display())
+
+    except GetoptError as e:
+        section(*help_text())
+        print(e)
 
 
 main()
