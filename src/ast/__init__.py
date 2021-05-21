@@ -263,7 +263,7 @@ class idTree(_AST):
 		return self.key
 
 	def getContent(self):
-		return self.getKey()
+		return f"{self.name} : {self.key}"
 
 
 class numberTree(_AST):
