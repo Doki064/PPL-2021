@@ -211,7 +211,7 @@ class Parser:
         return t
 
     def expr(self, requireBracket=False):
-        if requireBracket or self.checkToken(token_names.SEPARATORS['(']):
+        if requireBracket:
             self.match(token_names.SEPARATORS['('])
             requireBracket = True
 
