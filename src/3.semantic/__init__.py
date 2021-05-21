@@ -51,6 +51,15 @@ class Semantic:
                     raise Exception("Error: Variable '%s' is declared twice." % identifier_name)
                 else:
                     self.identifier_variable.add(identifier_name)
+        #################################
+        #################################
+        #################################
+        #################################
+        for tree in t.getKids():
+            self.traverse(tree)
+
+
+
 
 
 
