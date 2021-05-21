@@ -12,7 +12,7 @@ Example:
 
 __all__ = ["SymbolTable"]
 
-from collections import OrderedDict as _OrderedDict
+from collections import UserDict as _UserDict
 from typing import Tuple as _Tuple
 
 try:
@@ -27,7 +27,7 @@ except ImportError:
     from src.lex import token_names as _token_names
 
 
-class SymbolTable(_OrderedDict):
+class SymbolTable(_UserDict):
     """The symbol table.
 
     Attributes:
@@ -58,7 +58,7 @@ class SymbolTable(_OrderedDict):
         self.next_token = next(self.tokens, None)
 
     def last(self):
-        return next(reversed(self))
+        return next(reversed(self.data))
 
     def _generate(self):
         """Function for generating a symbol table."""
@@ -98,7 +98,7 @@ class SymbolTable(_OrderedDict):
                         #   has the same or larger scope as the current identifier,
                         #   is the most recent key.
                         # If there is a valid key, pass it as the identifier_position for the current identifier.
-                        latest_valid_key = next(key for key, value in reversed(self.items())
+                        latest_valid_key = next(key for key, value in reversed(self.data.items())
                                                 if (value["identifier_name"] == identifier_name
                                                     and value["identifier_type"]
                                                     and value["identifier_scope"][1] <= scope_level))
@@ -146,7 +146,7 @@ class SymbolTable(_OrderedDict):
             self._advance()
 
     def get_declaration_data_type(self, key):
-        return self.get_identifier_type(self.get_identifier_position(key))[0]
+        return self.get_identifier_type(self.get_identifier_position(key))
 
     def get_identifier_position(self, identifier_key) -> int:
         """Gets the declared location of the given identifier key.
@@ -177,7 +177,8 @@ class SymbolTable(_OrderedDict):
             identifier_key (int): The dictionary key of the identifier.
 
         Returns:
-            The value of identifier_type attribute of the identifier.
+            The tuple value of identifier_type attribute of the identifier.
+
         """
         return self.get(identifier_key)["identifier_type"]
 
