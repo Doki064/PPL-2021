@@ -57,8 +57,8 @@ def parsetree_display(program_tree: programTree):
 			if len(node.getKids()) > 0:
 				for kid in node.getKids(): start_graph(g, kid, node.getNodeNum())
 			else:
-				g.add_node(Node(name=f'{node.getNodeNum()}_name', shape='plaintext', label=node.getName()))
-				g.add_edge(Edge(f'{node.getNodeNum()}_name', node.getNodeNum()))
+				g.add_node(Node(name=f'{node.getNodeNum()}_content', shape='plaintext', label=node.getContent()))
+				g.add_edge(Edge(node.getNodeNum(), f'{node.getNodeNum()}_content'))
 
 		start_graph(graph, program_tree)
 		graph.write_png('parsetree.png')
