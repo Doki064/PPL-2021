@@ -1,0 +1,29 @@
+@startuml
+title Parser Class Diagram
+class Parser {
+    + assignOPs: list[str]
+    + relOPs: list[str]
+    + addOPs: list[str]
+    + multOPs: list[str]
+    + __init__(lexer: Lexer): Parser
+    + checkToken(kind): bool
+    + checkPeek(kind): bool
+    + match(kinds)
+    + nextToken()
+    + abort(message: str)
+    + program()
+    + block()
+    + decl(requireSemiColon: bool)
+    + typ()
+    + name()
+    + funcHead()
+    + statement()
+    + expr(requireBracket: bool)
+    + simpleExpr()
+    + term()
+    + factor()
+    + formRelationTree()
+    + formAddOpTree()
+    + formMultOpTree()
+}
+@enduml

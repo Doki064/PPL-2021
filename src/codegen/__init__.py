@@ -100,9 +100,9 @@ class CodeGen:
                     code += name + "("
                 else:
                     if self.travel_tree(t.getKid(idx + 1)) == ";\n":
-                        return code + ")" + self.travel_tree(t.getKid(idx + 1))
+                        return code[:-1] + ")" + self.travel_tree(t.getKid(idx + 1))
                     code += self.travel_tree(t.getKid(idx + 1))
-                    if idx != len(t.getKids()) - 1:
+                    if idx != t.kidCount() - 1:
                         code += ","
             code += ")"
             return code
