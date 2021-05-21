@@ -1,11 +1,11 @@
+__all__ = ["CodeGen"]
+
 try:
     from ast import *
     from lex.token_names import get_value_by_name as _get_value_by_name
 except ImportError:
     from src.ast import *
     from src.lex.token_names import get_value_by_name as _get_value_by_name
-
-__all__ = ["CodeGen"]
 
 MAPPER = {
     "Math.PI": "M_PI",
@@ -30,16 +30,23 @@ IGNORE = ["Scanner", "scanner.close"]
 
 
 class CodeGen:
-    def __init__(self, parser):
-        self.ast = parser.program()
+    def __init__(self, ast):
+        self.ast = ast
 
-    def travel_tree(self, t):
-        if isinstance(t, (programTree, funcDeclTree)):
+    def travel_tree(self, t, __main=False):
+        if isinstance(t, programTree):
             code = ""
             for tree in t.getKids():
                 code += self.travel_tree(tree)
             return code
 
+        elif isinstance(t, funcDeclTree):
+            if self.travel_tree(t.getKid(1)) + self.travel_tree(t.getKid(2)) == "void main":
+                return f"int main(void) {self.travel_tree(t.getKid(4), True)}"
+            code = ""
+            for tree in t.getKids():
+                code += self.travel_tree(tree)
+            return code
         elif isinstance(t, assignTree):
             code = self.travel_tree(t.getKid(1))
             code += f" {t.getToken()} "
@@ -49,6 +56,8 @@ class CodeGen:
         elif isinstance(t, declrTree):
             datatype = self.travel_tree(t.getKid(1))
             name = self.travel_tree(t.getKid(2))
+            if t.getKid(1).isArray:
+                name += "[]"
             code = datatype + name
             try:
                 if self.travel_tree(t.getKid(3)) in INPUT_FUNC.values():
@@ -99,8 +108,8 @@ class CodeGen:
             if t.getType() in TYPE_MAPPER:
                 code = TYPE_MAPPER[t.getType()]
             else:
-                code = t.getType() + " "
-            return code
+                code = t.getType()
+            return code + " "
 
         elif isinstance(t, idTree):
             name = t.getName()
@@ -125,6 +134,8 @@ class CodeGen:
             code = "\n{\n"
             for tree in t.getKids():
                 code += self.travel_tree(tree)
+            if __main:
+                code += "return 0;\n"
             code += "}\n"
             return code
 
@@ -132,7 +143,10 @@ class CodeGen:
             code = "("
             for idx, tree in enumerate(t.getKids()):
                 code += self.travel_tree(tree)
-                if idx != len(t.getKids())-1:
+                if isinstance(t.getKid(idx - 1), typeTree) and isinstance(t.getKid(idx), idTree):
+                    if t.getKid(1).isArray:
+                        code += "[]"
+                if idx != len(t.getKids()) - 1:
                     code += ", "
             code += ")"
             return code
@@ -140,7 +154,7 @@ class CodeGen:
         elif isinstance(t, ifTree):
             block_cond = self.travel_tree(t.getKids()[0])
             block_if = self.travel_tree(t.getKids()[1])
-            code = "if (" + block_cond + ")\n"
+            code = "if " + block_cond + "\n"
             code += block_if + "\n"
             if len(t.getKids()) == 3:
                 block_else = self.travel_tree(t.getKids()[2])

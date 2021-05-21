@@ -36,10 +36,7 @@ class Parser:
                _token_names.OPERATORS['&']]
 
     def __init__(self, lexer):
-        self.lexer = lexer
-
         self.tokens = lexer.tokens()
-
         self.curToken = None
         self.peekToken = None
         self.nextToken()
