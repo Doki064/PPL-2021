@@ -206,9 +206,10 @@ class idTree(_AST):
         Args:
             name (str): name of the identifier.
     """
-    def __init__(self, name):
+    def __init__(self, name, key):
         super().__init__('id')
         self.name = name
+        self.key = key
 
     def getName(self):
         """ Return the value of id's name.

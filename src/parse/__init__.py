@@ -1,7 +1,11 @@
 import sys
 
-from lex import *
-from ast import *
+try:
+    from lex import *
+    from ast import *
+except ImportError:
+    from src.lex import *
+    from src.ast import *
 
 # Parser object keeps track of current token and checks if the code matches the grammar.
 
@@ -131,7 +135,7 @@ class Parser:
 
     def name(self):
         if self.checkToken(token_names.IDENTIFIER):
-            t = idTree(self.curToken.value)
+            t = idTree(self.curToken.value, self.curToken.key())
             self.nextToken()
             return t
         raise SyntaxError(

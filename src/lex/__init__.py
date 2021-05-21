@@ -26,7 +26,10 @@ from enum import Enum as _Enum
 from typing import Iterator as _Iterator
 from typing import Sequence as _Sequence
 
-from lex import token_names as _token_names
+try:
+    from lex import token_names as _token_names
+except ImportError:
+    from src.lex import token_names as _token_names
 
 
 class Token:
@@ -56,6 +59,9 @@ class Token:
         self._end_position = end_position
         self.token_name = token_name
         self.value = value
+
+    def key(self):
+        return self._start_position
 
     def check_token(self, *args) -> bool:
         """Check the token type whether it matches that of the passed argument.
