@@ -5,13 +5,13 @@ name = "pypi"
 
 [packages]
 pipenv = "*"
+pydot = "*"
 
 [dev-packages]
 pyinstaller = "*"
 autopep8 = "*"
 
 [requires]
-python_version = "3.7"
 
 [scripts]
 build = "pyinstaller ./src/jcosim.py --add-data \"src/data;data\" --onefile --clean --noconfirm"
