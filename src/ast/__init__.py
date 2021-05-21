@@ -413,7 +413,7 @@ class addOPTree(_AST):
 	""" An AST for a addition operation structure.
 
 		GRAMMAR:
-			addOp   :-  *expr rel_op *expr
+			addOp   :-  *expr add_op *expr
 
 		Args:
 			addToken (str): the addition operator token name.
@@ -439,7 +439,7 @@ class multOPTree(_AST):
 	""" An AST for a multiplication operation structure.
 
 		GRAMMAR:
-			addOp   :-  *expr rel_op *expr
+			multOp   :-  *expr mult_op *expr
 
 		Args:
 			multToken (str): the multiplication operator token name.
