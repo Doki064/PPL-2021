@@ -19,7 +19,7 @@ __all__ = [
 	"multOPTree",
 ]
 
-from abc import ABC as _ABC, abstractmethod
+from abc import ABC as _ABC
 
 
 class _AST(_ABC):
@@ -210,7 +210,7 @@ class typeTree(_AST):
 		return self.__type
 
 	def getContent(self):
-	 return self.getType()
+		return self.getType()
 
 	def setArray(self):
 		""" Set the value of isList to True
