@@ -1,7 +1,27 @@
-from abc import ABC
+__all__ = [
+    "programTree",
+    "blockTree",
+    "declrTree",
+    "funcDeclTree",
+    "funcHeadTree",
+    "typeTree",
+    "idTree",
+    "numberTree",
+    "stringTree",
+    "assignTree",
+    "ifTree",
+    "whileTree",
+    "returnTree",
+    "callTree",
+    "relOPTree",
+    "addOPTree",
+    "multOPTree",
+]
+
+from abc import ABC as _ABC
 
 
-class AST(ABC):
+class _AST(_ABC):
     """ A simple Abstract Syntax Tree structure.
 
     Contains the root label and children ASTs.
@@ -24,22 +44,22 @@ class AST(ABC):
 
         super().__init__()
         self._kids = []
-        AST.nodeCount += 1
-        self._nodeNum = AST.nodeCount
+        _AST.nodeCount += 1
+        self._nodeNum = _AST.nodeCount
         self._label = label
 
     def getKid(self, idx):
         """Return the child AST at the given index.
 
         Args:
-            idx (str): The index of the child AST.
+            idx (int): The index of the child AST.
 
         Returns:
             (AST) The child AST if exists, None if index out of bounds.
         """
-        if idx <= 0 or idx > kidCount():
+        if idx <= 0 or idx > self.kidCount():
             return None
-        return _kids[idx - 1]
+        return self._kids[idx - 1]
 
     def getKids(self):
         """Return a list containing the children ASTs of the root node.
@@ -92,7 +112,7 @@ class AST(ABC):
 # --------------------------------------------------------------------#
 #               Children trees are noted by '*'                       #
 #                   [] stands for a list of                           #
-class programTree(AST):
+class programTree(_AST):
     """ An AST for the program structure.
 
         GRAMMAR:
@@ -102,7 +122,7 @@ class programTree(AST):
         super().__init__('Program/Class')
 
 
-class blockTree(AST):
+class blockTree(_AST):
     """ An AST for a codeblock structure.
 
         GRAMMAR:
@@ -112,7 +132,7 @@ class blockTree(AST):
         super().__init__('Code block')
 
 
-class declrTree(AST):
+class declrTree(_AST):
     """ An AST for a declaration statement structure.
 
         GRAMMAR:
@@ -124,7 +144,7 @@ class declrTree(AST):
         super().__init__('Declaration')
 
 
-class funcDeclTree(AST):
+class funcDeclTree(_AST):
     """ An AST for a function declaration structure.
 
         GRAMMAR:
@@ -134,7 +154,7 @@ class funcDeclTree(AST):
         super().__init__('Function Declaration')
 
 
-class funcHeadTree(AST):
+class funcHeadTree(_AST):
     """ An AST for a function header structure.
 
         GRAMMAR:
@@ -144,7 +164,7 @@ class funcHeadTree(AST):
     def __init__(self):
         super().__init__('Function header')
 
-class typeTree(AST):
+class typeTree(_AST):
     """ An AST for a type structure.
         ATOMIC/LEAF
 
@@ -176,7 +196,7 @@ class typeTree(AST):
         return self.isArray
 
 
-class idTree(AST):
+class idTree(_AST):
     """ An AST for a identifier or name.
         ATOMIC/LEAF
 
@@ -199,7 +219,7 @@ class idTree(AST):
         return self.name
 
 
-class numberTree(AST):
+class numberTree(_AST):
     """ An AST for a literal number.
         ATOMIC/LEAF
 
@@ -223,7 +243,7 @@ class numberTree(AST):
         return self.value
 
 
-class stringTree(AST):
+class stringTree(_AST):
     """ An AST for a literal string.
         ATOMIC/LEAF
 
@@ -246,7 +266,7 @@ class stringTree(AST):
         return self.value
 
 
-class assignTree(AST):
+class assignTree(_AST):
     """ An AST for a assignment structure.
 
         GRAMMAR:
@@ -268,7 +288,7 @@ class assignTree(AST):
         return self.assignToken
 
 
-class ifTree(AST):
+class ifTree(_AST):
     """ An AST for a ifStatement structure.
 
         GRAMMAR:
@@ -279,7 +299,7 @@ class ifTree(AST):
         super().__init__('if statement')
         
 
-class whileTree(AST):
+class whileTree(_AST):
     """ An AST for a whileStatement structure.
 
         GRAMMAR:
@@ -289,7 +309,7 @@ class whileTree(AST):
         super().__init__('while statement')
 
 
-class returnTree(AST):
+class returnTree(_AST):
     """ An AST for a returnStatement structure.
 
         GRAMMAR:
@@ -299,7 +319,7 @@ class returnTree(AST):
         super().__init__('return statement')
 
 
-class callTree(AST):
+class callTree(_AST):
     """ An AST for a function call structure.
 
         GRAMMAR:
@@ -310,7 +330,7 @@ class callTree(AST):
         super().__init__('function call')
 
 
-class relOPTree(AST):
+class relOPTree(_AST):
     """ An AST for a relation operation structure.
 
         GRAMMAR:
@@ -332,7 +352,7 @@ class relOPTree(AST):
         return self.relToken
 
 
-class addOPTree(AST):
+class addOPTree(_AST):
     """ An AST for a addition operation structure.
 
         GRAMMAR:
@@ -354,7 +374,7 @@ class addOPTree(AST):
         return self.addToken
 
 
-class multOPTree(AST):
+class multOPTree(_AST):
     """ An AST for a multiplication operation structure.
 
         GRAMMAR:
