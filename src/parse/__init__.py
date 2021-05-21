@@ -120,11 +120,11 @@ class Parser:
         for key in token_names.KEYWORDS_TYPE:
             typ = token_names.KEYWORDS_TYPE[key]
             if self.checkToken(typ):
-                t.setLabel(key)
+                t.setType(key)
                 self.nextToken()
                 break
 
-        if t.getLabel() == 'Type':
+        if t.getType == 'Type':
             raise SyntaxError(f'Unrecognized type: {token_names.get_value_by_name(self.curToken.token_name)}')
 
         if self.checkToken(token_names.SEPARATORS['[']):

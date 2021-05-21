@@ -200,6 +200,16 @@ class typeTree(_AST):
 	def __init__(self, isList=False):
 		super().__init__('Type')
 		self.isArray = isList
+		self.__type = '-1'
+
+	def setType(self, typ):
+		self.__type = typ
+
+	def getType(self):
+		return self.__type
+
+	def getContent(self):
+	 return self.getType()
 
 	def setArray(self):
 		""" Set the value of isList to True
@@ -399,7 +409,7 @@ class relOPTree(_AST):
 
 	def getToken(self):
 		""" Return the relation operator token name.
-
+		
 		Returns:
 			(str) the relation operator token name.
 		"""
