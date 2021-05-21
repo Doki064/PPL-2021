@@ -1,24 +1,11 @@
 try:
     from ast import *
-    from lex import *
+    from lex.token_names import get_value_by_name as _get_value_by_name
 except ImportError:
     from src.ast import *
-    from src.lex import *
+    from src.lex.token_names import get_value_by_name as _get_value_by_name
 
-
-class Emitter:
-    def __init__(self, name):
-        self.file_path = name + ".c"
-        self.header = ""
-        self.code = ""
-
-    def emitLine(self, code):
-        self.code += code + "\n"
-
-    def writeFile(self):
-        with open(self.file_path, "w+") as file:
-            file.write(self.header + self.code)
-
+__all__ = ["CodeGen"]
 
 MAPPER = {
     "Math.PI": "M_PI",
@@ -43,12 +30,8 @@ IGNORE = ["Scanner", "scanner.close"]
 
 
 class CodeGen:
-    def __init__(self, parser, emitter):
+    def __init__(self, parser):
         self.ast = parser.program()
-        self.emitter = emitter
-        header = """#include <stdio.h> \n#include <math.h>"""
-        self.codegen = ""
-        self.emitter.emitLine(header)
 
     def travel_tree(self, t):
         if isinstance(t, (programTree, funcDeclTree)):
@@ -58,15 +41,14 @@ class CodeGen:
             return code
 
         elif isinstance(t, assignTree):
-            code = ""
-            code += self.travel_tree(t.getKid(1)) + " "
-            code += t.getToken() + " "
-            code += self.travel_tree(t.getKid(2)) + " "
+            code = self.travel_tree(t.getKid(1))
+            code += f" {t.getToken()} "
+            code += self.travel_tree(t.getKid(2))
             return code
 
         elif isinstance(t, declrTree):
-            datatype = self.travel_tree(t.getKid(1)) + " "
-            name = self.travel_tree(t.getKid(2)) + " "
+            datatype = self.travel_tree(t.getKid(1))
+            name = self.travel_tree(t.getKid(2))
             code = datatype + name
             try:
                 if self.travel_tree(t.getKid(3)) in INPUT_FUNC.values():
@@ -100,25 +82,25 @@ class CodeGen:
                     code += name + "("
                 else:
                     if self.travel_tree(t.getKid(idx + 1)) == ";\n":
-                        return code[:-1] + ")" + self.travel_tree(t.getKid(idx + 1))
+                        return code + ")" + self.travel_tree(t.getKid(idx + 1))
                     code += self.travel_tree(t.getKid(idx + 1))
-                    if idx != t.kidCount() - 1:
-                        code += ","
+                    if idx != t.kidCount() - 1 and self.travel_tree(t.getKid(idx + 2)) != ";\n":
+                        code += ", "
             code += ")"
             return code
 
         elif isinstance(t, (addOPTree, multOPTree, relOPTree)):
-            code = self.travel_tree(t.getKid(1))
-            code += token_names.get_value_by_name(t.getToken())
-            code += self.travel_tree(t.getKid(2))
+            code = (f"({self.travel_tree(t.getKid(1))} "
+                    f"{_get_value_by_name(t.getToken())} "
+                    f"{self.travel_tree(t.getKid(2))})")
             return code
 
         elif isinstance(t, typeTree):
             if t.getType() in TYPE_MAPPER:
                 code = TYPE_MAPPER[t.getType()]
             else:
-                code = t.getType()
-            return code + " "
+                code = t.getType() + " "
+            return code
 
         elif isinstance(t, idTree):
             name = t.getName()
@@ -133,17 +115,17 @@ class CodeGen:
 
         elif isinstance(t, numberTree):
             code = t.getValue()
-            return code + " "
+            return code
 
         elif isinstance(t, stringTree):
             code = t.getValue()
-            return code + " "
+            return code
 
         elif isinstance(t, blockTree):
-            code = "{ \n"
+            code = "\n{\n"
             for tree in t.getKids():
                 code += self.travel_tree(tree)
-            code += "}"
+            code += "}\n"
             return code
 
         elif isinstance(t, funcHeadTree):
@@ -153,23 +135,23 @@ class CodeGen:
                 if idx != len(t.getKids())-1:
                     code += ", "
             code += ")"
-            return code + " "
+            return code
 
         elif isinstance(t, ifTree):
-            blockCond = self.travel_tree(t.getKids()[0])
-            blockIf = self.travel_tree(t.getKids()[1])
-            code = "if (" + blockCond + ")\n "
-            code += blockIf + "\n"
+            block_cond = self.travel_tree(t.getKids()[0])
+            block_if = self.travel_tree(t.getKids()[1])
+            code = "if (" + block_cond + ")\n"
+            code += block_if + "\n"
             if len(t.getKids()) == 3:
-                blockElse = self.travel_tree(t.getKids()[2])
-                code += "else\n" + blockElse + "\n "
+                block_else = self.travel_tree(t.getKids()[2])
+                code += "else " + block_else + "\n"
             return code
 
         elif isinstance(t, whileTree):
-            blockCond = self.travel_tree(t.getKids()[0])
-            blockWhile = self.travel_tree(t.getKids()[1])
-            code = "while " + blockCond + "{ \n "
-            code += blockWhile + "} \n "
+            block_cond = self.travel_tree(t.getKids()[0])
+            block_while = self.travel_tree(t.getKids()[1])
+            code = "while " + block_cond + "{\n"
+            code += block_while + "}\n"
             return code
 
         elif isinstance(t, returnTree):
@@ -180,13 +162,14 @@ class CodeGen:
 
         elif isinstance(t, endTree):
             return ";\n"
+
         else:
             if t is None:
                 raise TypeError(type(t))
             raise SyntaxError(f"UwU What's dis error? {type(t)}")
 
-    def generate_code(self):
+    def generate_code(self, header=None):
+        header = """#include <stdio.h> \n#include <math.h>\n""" if header is None else header
         code = self.travel_tree(self.ast)
-        self.emitter.emitLine(code[1:-1])
-        # Add whitespace
-
+        code = "\n".join(line for line in code.split("\n") if line.strip() != "")
+        return header + code[1:-1]
