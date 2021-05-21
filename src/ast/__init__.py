@@ -201,6 +201,16 @@ class typeTree(_AST):
 	def __init__(self, isList=False):
 		super().__init__('Type')
 		self.isArray = isList
+		self.__type = '-1'
+
+	def setType(self, typ):
+		self.__type = typ
+
+	def getType(self):
+		return self.__type
+
+	def getContent(self):
+	 return self.getType()
 
 	def setArray(self):
 		""" Set the value of isList to True
@@ -411,7 +421,7 @@ class relOPTree(_AST):
 
 	def getToken(self):
 		""" Return the relation operator token name.
-
+		
 		Returns:
 			(str) the relation operator token name.
 		"""
@@ -425,7 +435,7 @@ class addOPTree(_AST):
 	""" An AST for a addition operation structure.
 
 		GRAMMAR:
-			addOp   :-  *expr rel_op *expr
+			addOp   :-  *expr add_op *expr
 
 		Args:
 			addToken (str): the addition operator token name.
@@ -451,7 +461,7 @@ class multOPTree(_AST):
 	""" An AST for a multiplication operation structure.
 
 		GRAMMAR:
-			addOp   :-  *expr rel_op *expr
+			multOp   :-  *expr mult_op *expr
 
 		Args:
 			multToken (str): the multiplication operator token name.
