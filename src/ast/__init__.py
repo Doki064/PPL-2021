@@ -222,6 +222,14 @@ class idTree(_AST):
         """
         return self.name
 
+    def getKey(self):
+        """Return the identifier_key of the identifier in symbol table.
+
+        Returns:
+            (int) value of the key.
+        """
+        return self.key
+
 
 class numberTree(_AST):
     """ An AST for a literal number.
