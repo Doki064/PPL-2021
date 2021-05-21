@@ -1,5 +1,5 @@
 import ast
-from os import path
+from os import path, remove
 from getopt import *
 from sys import argv
 from lex import *
@@ -63,10 +63,10 @@ def parsetree_display(program_tree: programTree):
 		start_graph(graph, program_tree)
 		graph.write_png('parsetree.png')
 
-	return "Parse Tree:", work
+	return "Generating Parse Tree . . .", work
 
 
-def codegen_display():
+def gencode_display():
 	def work():
 		with open(absPathFromFile('./data/help.txt'), 'r') as f:
 			print(f.read())
@@ -81,14 +81,15 @@ def main():
 			raise GetoptError('ERROR: Input file must be specified')
 		options, remainder = getopt(
 			argv[1:],
-			'i:o:stpc:vh',
+			'i:o:stpgc:vh',
 			[
-				'input',
-				'output',
+				'input=',
+				'output=',
 				'symtable',
 				'token',
 				'parsetree',
-				'codegen'
+				'gencode',
+				'clean=',
 				'verbose',
 				'help',
 			])
@@ -98,7 +99,9 @@ def main():
 		symtable = False
 		token = False
 		parsetree = False
-		codegen = False
+		gencode = False
+		clean = False
+		clean_path = '.'
 
 		for opt, arg in options:
 			if opt in ('-h', '--help'):
@@ -113,18 +116,21 @@ def main():
 				token = True
 			elif opt in ('-p', '--parsetree'):
 				parsetree = True
-			elif opt in ('-c', '--codegen'):
-				codegen = True
+			elif opt in ('-g', '--gencode'):
+				gencode = True
+			elif opt in ('-c', '--clean'):
+				clean = True
+				clean_path = arg
 			elif opt in ('-v', '--verbose'):
 				symtable = True
 				token = True
 				parsetree = True
-				codegen = True
+				gencode = True
 
 		if not source:
 			raise GetoptError('ERROR: Input file must be specified')
 		if not exe:
-			exe = path.basename(source)
+			exe = path.basename(source).split('.')[0]
 
 		with open(source, 'r') as f:
 			buffer = f.read()
@@ -133,19 +139,31 @@ def main():
 			program_tree = parser.program()  # Start the parser.
 			lexer.reset()
 			stb = SymbolTable(lexer)
-			# emitter = Emitter("cast1Main")
-			# code_gen = CodeGen(parser, emitter)
-			# code_gen.generate_code()
-			# print(code_gen.emitter.code)
-			# print("Parsing completed.")
+			lexer.reset()
+
 			if token:
 				section(*token_display(lexer))
 			if symtable:
 				section(*symtable_display(stb))
 			if parsetree:
 				section(*parsetree_display(program_tree))
-			if codegen:
-				section(*codegen_display())
+			if gencode:
+				section(*gencode_display())
+		if clean:
+			files = [
+				'tokens.txt',
+				'parsetree.png',
+				'symtable.txt',
+				f'{exe}.c',
+				f'{exe}.exe',
+				f'{exe}',
+				f'{exe}.o',
+				f'{exe}.obj'
+			]
+			for file in files:
+				_path = path.join(clean_path, file)
+				if path.exists(_path): remove(_path)
+
 
 	except GetoptError as e:
 		section(*help_text())

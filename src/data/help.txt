@@ -7,7 +7,7 @@ Options:
     -t,             --token                 generate tokens only
     -p,             --parsetree             generate parse tree only
     -g,             --gencode               generate generated C code only
-    -c,             --clean                 clean all outputs in current dir
+    -c <path>,      --clean <path>          clean all outputs in <path>
     -v,             --verbose               generate all intermediate output
     -h,             --help                  display this help and exit
 Examples:
@@ -30,5 +30,5 @@ Examples:
         jcosim -i Main.java -g
         jcosim --input Main.java --gencode
     - Clean outputsL
-        jcosim -i Main.java -c
-        jcosim --input Main.java --clean
+        jcosim -i Main.java -c .
+        jcosim --input Main.java --clean .
