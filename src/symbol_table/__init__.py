@@ -14,6 +14,7 @@ __all__ = ["SymbolTable"]
 
 from collections import UserDict as _UserDict
 from typing import Tuple as _Tuple
+from typing import Optional as _Optional
 
 try:
     from lex import Lexer as _Lexer
@@ -57,13 +58,10 @@ class SymbolTable(_UserDict):
         self.current_token = self.next_token
         self.next_token = next(self.tokens, None)
 
-    def last(self):
-        return next(reversed(self.data))
-
     def _generate(self):
         """Function for generating a symbol table."""
         scope_level = -1
-        identifier_type = []
+        identifier_type = None
         identifier_attribute = []
 
         while self.current_token is not None:
@@ -77,9 +75,6 @@ class SymbolTable(_UserDict):
                         if (self.current_token.check_token(_token_names.Separators("]"))
                                 and not self.next_token.check_token(_token_names.Separators("["))):
                             break
-
-                if self.next_token.check_token(_token_names.Separators("(")):
-                    identifier_type.append("function")
 
                 if scope_level == -1:
                     scope = "outer_scope"
@@ -110,11 +105,11 @@ class SymbolTable(_UserDict):
                 self[identifier_key] = {
                     "identifier_position": identifier_position,
                     "identifier_name": identifier_name,
-                    "identifier_type": tuple(identifier_type),
+                    "identifier_type": identifier_type,
                     "identifier_attribute": tuple(identifier_attribute),
                     "identifier_scope": (scope, scope_level),
                 }
-                identifier_type.clear()
+                identifier_type = None
                 identifier_attribute.clear()
 
             elif self.current_token.check_token(_token_names.KeywordsType.names()):
@@ -126,9 +121,9 @@ class SymbolTable(_UserDict):
                         if (self.current_token.check_token(_token_names.Separators("]"))
                                 and not self.next_token.check_token(_token_names.Separators("["))):
                             break
-                    identifier_type.append(id_type)
+                    identifier_type = id_type
                 elif self.next_token.check_token(_token_names.IDENTIFIER):
-                    identifier_type.append(self.current_token.value)
+                    identifier_type = self.current_token.value
 
             elif self.current_token.check_token(_token_names.KeywordsAttribute.names()):
                 if (self.next_token.check_token(_token_names.KeywordsAttribute.names())
@@ -145,10 +140,13 @@ class SymbolTable(_UserDict):
 
             self._advance()
 
-    def get_declaration_data(self, key):
-        name = self.get_identifier_name(key)
-        type = self.get_identifier_type(self.get_identifier_position(key))
-        return name, type
+    def get_declaration_type(self, key):
+        """Returns the declaration type of the identifier with the given key. None if the identifier is not declared.
+
+        Args:
+            key: The identifier_key to check.
+        """
+        return self.get_identifier_type(self.get_identifier_position(key))
 
     def get_identifier_position(self, identifier_key) -> int:
         """Gets the declared location of the given identifier key.
@@ -172,7 +170,7 @@ class SymbolTable(_UserDict):
         """
         return self.get(identifier_key)["identifier_name"]
 
-    def get_identifier_type(self, identifier_key) -> _Tuple[str, ...]:
+    def get_identifier_type(self, identifier_key) -> _Optional[str]:
         """Gets the type of the given identifier key.
 
         Args:
