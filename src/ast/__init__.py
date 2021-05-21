@@ -12,6 +12,7 @@ __all__ = [
 	"ifTree",
 	"whileTree",
 	"returnTree",
+	"endTree",
 	"callTree",
 	"relOPTree",
 	"addOPTree",
@@ -39,7 +40,7 @@ class _AST(_ABC):
 		"""AST constructor.
 
 		Args:
-			label (int): The root node's label.
+			label (str): The root node's label.
 		"""
 
 		super().__init__()
@@ -379,6 +380,17 @@ class returnTree(_AST):
 
 	def __init__(self):
 		super().__init__('return statement')
+
+
+class endTree(_AST):
+	"""An AST for indicating the end of a Statement structure."
+
+		GRAMMAR:
+			semicolon :- ;
+	"""
+
+	def __init__(self):
+		super().__init__("semicolon")
 
 
 class callTree(_AST):

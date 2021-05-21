@@ -68,12 +68,22 @@ class CodeGen:
             datatype = self.travel_tree(t.getKid(1)) + " "
             name = self.travel_tree(t.getKid(2)) + " "
             code = datatype + name
-            if len(t.getKids()) == 3:
+            try:
                 if self.travel_tree(t.getKid(3)) in INPUT_FUNC.values():
-                    return self.travel_tree(t.getKid(3))[0] + " " + name + ";\n" + self.travel_tree(t.getKid(3))[1] + name + ");\n"
+                    return (f"{self.travel_tree(t.getKid(3))[0]} {name}\n"
+                            f"{self.travel_tree(t.getKid(3)[1]) + name})"
+                            f"{self.travel_tree(t.getKid(4))}")
                 if self.travel_tree(t.getKid(3)) == "":
                     return "\n"
-                code += " = " + self.travel_tree(t.getKid(3)) + ";\n"
+                if self.travel_tree(t.getKid(3)) == ";\n":
+                    return code + self.travel_tree(t.getKid(3))
+                code += f" = {self.travel_tree(t.getKid(3))}"
+            except TypeError:
+                pass
+            try:
+                code += self.travel_tree(t.getKid(4))
+            except TypeError:
+                pass
             return code
 
         elif isinstance(t, callTree):
@@ -89,6 +99,8 @@ class CodeGen:
                         return ""
                     code += name + "("
                 else:
+                    if self.travel_tree(t.getKid(idx + 1)) == ";\n":
+                        return code + ")" + self.travel_tree(t.getKid(idx + 1))
                     code += self.travel_tree(t.getKid(idx + 1))
                     if idx != len(t.getKids()) - 1:
                         code += ","
@@ -164,8 +176,13 @@ class CodeGen:
             code = "return "
             for tree in t.getKids():
                 code += self.travel_tree(tree)
-            return code + ";"
+            return code
+
+        elif isinstance(t, endTree):
+            return ";\n"
         else:
+            if t is None:
+                raise TypeError(type(t))
             raise SyntaxError(f"UwU What's dis error? {type(t)}")
 
     def generate_code(self):
