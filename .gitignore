@@ -1,6 +1,14 @@
+# binaries
 **/*.class
 **/*.pyc
 **/*.pyo
+
+# IDE configs
 .idea/
-dumps/
 .vscode/
+
+# python virtual env
+env
+
+# dump
+dumps/
