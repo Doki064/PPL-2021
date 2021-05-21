@@ -102,10 +102,10 @@ class CodeGen:
             return code
 
         elif isinstance(t, typeTree):
-            if t.getLabel() in TYPE_MAPPER:
-                code = TYPE_MAPPER[t.getLabel()]
+            if t.getType() in TYPE_MAPPER:
+                code = TYPE_MAPPER[t.getType()]
             else:
-                code = t.getLabel()
+                code = t.getType()
             return code + " "
 
         elif isinstance(t, idTree):
