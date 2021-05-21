@@ -140,13 +140,13 @@ def values():
 
 
 def items():
-    return dict(
-            Keywords.items() +
-            KeywordsType.items() +
-            KeywordsAttribute.items() +
-            Operators.items() +
-            Separators.items()
-    )
+    return {
+        **Keywords.items(),
+        **KeywordsType.items(),
+        **KeywordsAttribute.items(),
+        **Operators.items(),
+        **Separators.items(),
+    }
 
 
 def get_value_by_name(name):
@@ -167,7 +167,7 @@ class _BaseEnum(_Enum):
 
     @classmethod
     def items(cls):
-        return [(member.name, member.value) for member in cls]
+        return dict((member.name, member.value) for member in cls)
 
 
 class Ignored(_BaseEnum):
