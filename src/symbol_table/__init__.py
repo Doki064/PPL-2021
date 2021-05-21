@@ -35,6 +35,27 @@ class SymbolTable(_UserDict):
         current_token (_Token): The current token in the iteration.
         next_token (_Token): The next token in the iteration.
     """
+    __Double_Java_Math = [
+        "Math.E",
+        "Math.PI",
+        "Math.sqrt",
+        "Math.cbrt",
+        "Math.pow",
+        "Math.signum",
+        "Math.ceil",
+        "Math.floor",
+        "Math.random",
+        "Math.rint",
+        "Math.log",
+        "Math.log10",
+        "Math.log1p",
+        "Math.exp",
+        "Math.expm1",
+        "Math.sin",
+        "Math.cos",
+        "Math.tan",
+    ]
+    __Int_Java_Math = ["Math.round"]
 
     def __init__(self, lexer: _Lexer):
         """SymbolTable constructor.
@@ -102,6 +123,11 @@ class SymbolTable(_UserDict):
                     else:
                         identifier_position = latest_valid_key
 
+                    if identifier_name in SymbolTable.__Double_Java_Math:
+                        identifier_type = "double"
+                    elif identifier_name in SymbolTable.__Int_Java_Math:
+                        identifier_type = "int"
+
                 self[identifier_key] = {
                     "identifier_position": identifier_position,
                     "identifier_name": identifier_name,
@@ -141,15 +167,19 @@ class SymbolTable(_UserDict):
             self._advance()
 
     def get_declaration_type(self, key):
-        """Returns the declaration type of the identifier with the given key. None if the identifier is not declared.
+        """Returns the declaration type of the identifier with the given key.
 
         Args:
-            key (int): The identifier_key to check.
+            key (int): The dictionary key of the identifier.
+
+        Returns:
+            Returns the declaration type of the identifier with the given key.
+                None if the identifier is not declared.
         """
         return self.get_identifier_type(self.get_identifier_position(key))
 
     def get_identifier_position(self, identifier_key) -> int:
-        """Gets the declared location of the given identifier key.
+        """Gets the declared position of the identifier with the given key.
 
         Args:
             identifier_key (int): The dictionary key of the identifier.
