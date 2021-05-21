@@ -1,5 +1,9 @@
-from ast import *
-from lex import *
+try:
+    from ast import *
+    from lex import *
+except ImportError:
+    from src.ast import *
+    from src.lex import *
 
 
 class Emitter:
@@ -26,7 +30,9 @@ MAPPER = {
 }
 
 INPUT_FUNC = {
-    "scanner.nextDouble": ("double", "scanf(\"%lf\", &")
+    "scanner.nextDouble": ("double", "scanf(\"%lf\", &"),
+    "scanner.nextFloat": ("float", "scanf(\"%f\", &"),
+    "scanner.nextInt": ("int", "scanf(\"%d\", &"),
 }
 
 TYPE_MAPPER = {
