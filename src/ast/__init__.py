@@ -225,6 +225,8 @@ class idTree(_AST):
     def getKey(self):
         """Return the identifier_key of the identifier in symbol table.
 
+            The identifier_key of an identifier takes from the start_position of that token.
+
         Returns:
             (int) value of the key.
         """
