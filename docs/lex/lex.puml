@@ -1,0 +1,34 @@
+@startuml
+title Lexer/Scanner Class Diagram
+class Token {
+    + position: str
+    + token_name: str
+    + value: str
+    + __init__(): Token
+    + check_token(*args): bool
+    + __str__(): str
+    + __hash__(): str
+    + __eq__(): bool
+}
+class LexerError {
+    + position: int
+    + message: str
+    + __init__(): LexerError
+}
+class Lexer {
+    + stream: str
+    + EOF: bool
+    + current_position: int
+    + current_char: str
+    + __init__(): Lexer
+    ~ _next_char()
+    ~ _peek(): str
+    ~ _skip()
+    ~ _get_token(): Token
+    + reset()
+    + tokens(ignore): _Iterator[Token]
+}
+class Exception
+
+Exception <|-- LexerError
+@enduml

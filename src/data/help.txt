@@ -10,6 +10,7 @@ Options:
     -c <path>,      --clean <path>          clean all outputs in <path>
     -v,             --verbose               generate all intermediate output
     -h,             --help                  display this help and exit
+* NOTE: to generate parse tree, graphviz needs to be installed on the system
 Examples:
     - Compile a file to exe with no intermediate output:
         jcosim -i Main.java -o Main
