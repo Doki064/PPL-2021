@@ -61,6 +61,10 @@ class Token:
         self.value = value
 
     def key(self):
+        """Returns the key for this token.
+
+            This will be used as identifier_key in the symbol table and key attribute in the idTree AST.
+        """
         return self._start_position
 
     def check_token(self, *args) -> bool:
