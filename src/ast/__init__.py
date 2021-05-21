@@ -44,7 +44,6 @@ class _AST(_ABC):
 		"""
 
 		super().__init__()
-		self._parent = None
 		self._kids = []
 		_AST.nodeCount += 1
 		self._nodeNum = _AST.nodeCount
@@ -88,7 +87,6 @@ class _AST(_ABC):
 		Returns:
 			(AST) The AST of the root node.
 		"""
-		kidAST._parent = self
 		self._kids.append(kidAST)
 		return self
 
@@ -386,7 +384,7 @@ class endTree(_AST):
 	"""An AST for indicating the end of a Statement structure."
 
 		GRAMMAR:
-			semicolon :- ;
+			semicolon  :-  ;
 	"""
 
 	def __init__(self):
