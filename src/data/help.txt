@@ -9,7 +9,6 @@ Options:
     -c,             --codegen               generate generated C code only
     -v,             --verbose               generate all intermediate output
     -h,             --help                  display this help and exit
-* Some C compiler options might not work as jcosim does not cover all C syntax
 Examples:
     - Compile a file to exe with no intermediate output:
         jcosim -i Main.java -o Main

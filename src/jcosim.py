@@ -5,6 +5,7 @@ from lex import *
 from parse import *
 from codegen import *
 from symbol_table import *
+from pprint import pprint
 
 
 def absPathFromFile(rpath): return path.join(path.dirname(__file__), rpath)
@@ -36,7 +37,7 @@ def token_display(lexer):
 
 def symtable_display(stb):
     def work():
-        print(stb)
+        pprint(stb)
     return "Symbol Table:", work
 
 
@@ -109,9 +110,10 @@ def main():
         with open(source, 'r') as f:
             buffer = f.read()
             lexer = Lexer(buffer)
-            parser = Parser(lexer)
+            # parser = Parser(lexer)
+            symtable = SymbolTable(lexer)
             emitter = Emitter("cast1Main")
-            p = parser.program()  # Start the parser.
+            # p = parser.program()  # Start the parser.
             # code_gen = CodeGen(parser, emitter)
             # code_gen.generate_code()
             # print(code_gen.emitter.code)
@@ -119,7 +121,7 @@ def main():
             if token:
                 section(*token_display(lexer))
             if symtable:
-                section(*symtable_display(SymbolTable(lexer)))
+                section(*symtable_display(symtable))
             if parsetree:
                 section(*parsetree_display())
             if codegen:
