@@ -57,6 +57,7 @@ class SymbolTable(_UserDict):
     def _generate(self):
         """Function for generating a symbol table."""
         scope_level = -1
+        scope_idx = 0
         identifier_type = None
         identifier_attribute = []
 
@@ -81,7 +82,15 @@ class SymbolTable(_UserDict):
                 else:
                     raise _LexerError(self.__current_token.position, "Out of scope!")
 
-                if not identifier_type:
+                try:
+                    if self.get_identifier_scope(list(self.data.keys())[-1]) == (scope, scope_level, scope_idx):
+                        scope_idx += 1
+                    else:
+                        scope_idx = 0
+                except IndexError:
+                    pass
+
+                if identifier_type is None:
                     try:
                         # A valid key must fulfill all the criteria below:
                         #   has the same identifier name,
@@ -91,7 +100,7 @@ class SymbolTable(_UserDict):
                         # If there is a valid key, pass it as the identifier_position for the current identifier.
                         latest_valid_key = next(key for key, value in reversed(self.data.items())
                                                 if (value["identifier_name"] == identifier_name
-                                                    and value["identifier_type"]
+                                                    and value["identifier_type"] is not None
                                                     and value["identifier_scope"][1] <= scope_level))
                     except StopIteration:
                         pass
@@ -118,7 +127,7 @@ class SymbolTable(_UserDict):
                     "identifier_name": identifier_name,
                     "identifier_type": identifier_type,
                     "identifier_attribute": tuple(identifier_attribute),
-                    "identifier_scope": (scope, scope_level),
+                    "identifier_scope": (scope, scope_level, scope_idx),
                 }
                 identifier_type = None
                 identifier_attribute.clear()
@@ -168,6 +177,16 @@ class SymbolTable(_UserDict):
         name = self.get_identifier_name(key)
         typ = self.get_identifier_type(self.get_identifier_position(key))
         return name, typ
+
+    def compare_scope(self, key_a, key_b):
+        a_scope = self.get_identifier_scope(key_a)
+        b_scope = self.get_identifier_scope(key_b)
+        if a_scope[1] > b_scope[1]:
+            return key_a
+        elif a_scope[1] == b_scope[1]:
+            if a_scope[2] > b_scope[2]:
+                return key_a
+        return key_b
 
     def get_identifier_position(self, identifier_key) -> int:
         """Gets the declared position of the identifier with the given key.
