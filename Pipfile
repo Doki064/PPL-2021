@@ -16,4 +16,5 @@ autopep8 = "*"
 python_version = "3.8"
 
 [scripts]
-build = "pyinstaller ./src/jcosim.py --add-data \"src/data:data\" --onefile --clean --noconfirm"
+build-unix = "pyinstaller ./src/jcosim.py --add-data \"src/data:data\" --onefile --clean --noconfirm"
+build-win = "pyinstaller ./src/jcosim.py --add-data \"src/data;data\" --onefile --clean --noconfirm"

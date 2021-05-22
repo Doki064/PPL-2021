@@ -1,0 +1,178 @@
+@startuml
+left to right direction
+title Class Diagram All
+
+' CodeGen -----------------------
+package CodeGen #f0f0f0 {
+    class CodeGen {
+        + __init__(ast: _AST): CodeGen
+        + travel_tree(t, __main: bool)
+        + generate_code(header: str)
+    }
+}
+' CodeGen -----------------------
+
+' Parser -----------------------
+package Parse #f0f0f0 {
+    class Parser {
+        + assignOPs: list[str]
+        + relOPs: list[str]
+        + addOPs: list[str]
+        + multOPs: list[str]
+        + __init__(lexer: Lexer): Parser
+        + checkToken(kind): bool
+        + checkPeek(kind): bool
+        + match(kinds)
+        + nextToken()
+        + abort(message: str)
+        + program()
+        + block()
+        + decl(requireSemiColon: bool)
+        + typ()
+        + name()
+        + funcHead()
+        + statement()
+        + expr(requireBracket: bool)
+        + simpleExpr()
+        + term()
+        + factor()
+        + formRelationTree()
+        + formAddOpTree()
+        + formMultOpTree()
+    }
+}
+' Parser -----------------------
+
+' LEX -----------------------
+package Lex #f0f0f0 {
+    class Token {
+        + position: str
+        + token_name: str
+        + value: str
+        + __init__(): Token
+        + check_token(*args): bool
+        + __str__(): str
+        + __hash__(): str
+        + __eq__(): bool
+    }
+    class LexerError {
+        + position: int
+        + message: str
+        + __init__(): LexerError
+    }
+    class Lexer {
+        + stream: str
+        + EOF: bool
+        + current_position: int
+        + current_char: str
+        + __init__(): Lexer
+        ~ _next_char()
+        ~ _peek(): str
+        ~ _skip()
+        ~ _get_token(): Token
+        + reset()
+        + tokens(ignore): _Iterator[Token]
+    }
+    class Exception
+
+    Exception <|-- LexerError
+}
+' LEX -----------------------
+
+' AST -----------------------
+package _AST #f0f0f0 {
+    abstract class  _AST {
+        + {static} nodeCount
+        # _kids: list[_AST]
+        # _label: abstract
+        # _nodeNum: int
+        + __init__(): _AST
+        + getKid(idx: int): _AST
+        + getKids(): list[_AST]
+        + kidCount(): int
+        + addKid(kidAST: _AST)
+        + setLabel(label: str)
+        + getLabel(): str
+        + getNodeNum(): int
+        + getContent(): str
+    }
+    class ProgramTree
+    class BlockTree
+    class DeclrTree
+    class FuncDeclTree
+    class FuncHeadTree
+    class TypeTree {
+        + setType(typ)
+        + getType()
+        + setArray()
+        + isArray(): bool
+    }
+    class IdTree
+    class NumberTree {
+        + getValue(): str
+    }
+    class StringTree {
+        + getValue(): str
+    }
+    class AssignTree {
+        + getToken(): Token
+    }
+    class IfTree
+    class WhileTree
+    class ReturnTree
+    class CallTree
+    class RelOpTree {
+        + getToken(): Token
+    }
+    class AddOpTree {
+        + getToken(): Token
+    }
+    class MultOpTree {
+        + getToken(): Token
+    }
+
+    _AST <|-- ProgramTree
+    _AST <|-- BlockTree
+    _AST <|-- DeclrTree
+    _AST <|-- FuncDeclTree
+    _AST <|-- FuncHeadTree
+    _AST <|-- TypeTree
+    _AST <|-- IdTree
+    _AST <|-- NumberTree
+    _AST <|-- StringTree
+    _AST <|-- AssignTree
+    _AST <|-- IfTree
+    _AST <|-- WhileTree
+    _AST <|-- ReturnTree
+    _AST <|-- CallTree
+    _AST <|-- RelOpTree
+    _AST <|-- AddOpTree
+    _AST <|-- MultOpTree
+}
+
+' AST -----------------------
+
+' SymbolTable -----------------------
+package SymbolTable #f0f0f0 {
+    class SymbolTable {
+        + __init__(lexer: Lexer): SymbolTable
+        # _advanced()
+        # _generate()
+        # get_declaration_type(key: str)
+        # get_identifier_position(key: str)
+        # get_identifier_name(key: str)
+        # get_identifier_type(key: str)
+        # get_identifier_attribute(key: str)
+        # get_identifier_scope(key: str)
+    }
+}
+' SymbolTable -----------------------
+
+' ALL -----------------------
+Lexer *-- Parser
+Lexer *-- SymbolTable
+ProgramTree *-- Parser
+ProgramTree *-- CodeGen
+Token <-- Lexer
+' ALL -----------------------
+@enduml

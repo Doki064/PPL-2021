@@ -1,13 +1,12 @@
 from getopt import getopt, GetoptError
 from os import path, remove
 from sys import argv
-
 from pydot import Dot, Node, Edge
-
 from codegen import CodeGen
 from lex import Lexer
 from parse import Parser
 from symbol_table import SymbolTable
+from c_compiler import CCompiler
 
 
 def absolute_from_file(rpath):
@@ -34,7 +33,7 @@ def token_display(lexer):
         tokens = '\n'.join(
             map(str, list(lexer.tokens(ignore=False))))
         print(tokens)
-        with open(absolute_from_file('tokens.txt'), 'w') as f:
+        with open('tokens.txt', 'w') as f:
             f.write(tokens)
 
     return "Tokens:", work
@@ -71,14 +70,18 @@ def parsetree_display(program_tree):
     return "Generating Parse Tree . . .", work
 
 
-def gencode_display(code_gen, file):
+def gencode_display(code):
     def work():
-        code = code_gen.generate_code()
         print(code)
-        with open(absolute_from_file(file), "w") as f:
-            f.write(code)
 
     return "Generating code . . .", work
+
+
+def clean_display(files):
+    def work():
+        print(files)
+
+    return "Cleaning files", work
 
 
 def main():
@@ -148,6 +151,9 @@ def main():
             stb = SymbolTable(lexer)
             lexer.reset()
             code_gen = CodeGen(program_tree)
+            code = code_gen.generate_code()
+            with open(f"{exe}.c", "w") as f:
+                f.write(code)
 
             if token:
                 section(*token_display(lexer))
@@ -156,22 +162,24 @@ def main():
             if parsetree:
                 section(*parsetree_display(program_tree))
             if gencode:
-                section(*gencode_display(code_gen, f"{exe}.c"))
-        if clean:
-            files = [
-                'tokens.txt',
-                'parsetree.png',
-                'symtable.txt',
-                f'{exe}.c',
-                f'{exe}.exe',
-                f'{exe}',
-                f'{exe}.o',
-                f'{exe}.obj'
-            ]
-            for file in files:
-                _path = path.join(clean_path, file)
-                if path.exists(_path):
-                    remove(_path)
+                section(*gencode_display(code))
+            if clean:
+                files = [
+                    'tokens.txt',
+                    'parsetree.png',
+                    'symtable.txt',
+                    f'{exe}.c',
+                    f'{exe}.exe',
+                    f'{exe}',
+                    f'{exe}.o',
+                    f'{exe}.obj'
+                ]
+                section(*clean_display(files))
+                for file in files:
+                    _path = path.join(clean_path, file)
+                    if path.exists(_path):
+                        remove(_path)
+            # CCompiler(src_file=f"{exe}.c", exe_file=exe).exe()
 
     except GetoptError as e:
         section(*help_text())
