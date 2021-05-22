@@ -1,5 +1,4 @@
 Double_Java = {
-    "scanner.nextDouble": 'scanf("%lf", &',
     "Math.E": "M_E",
     "Math.PI": "M_PI",
     "Math.sqrt": "sqrt",
@@ -19,14 +18,12 @@ Double_Java = {
 }
 Float_Java = {"scanner.nextFloat": 'scanf("%f", &'}
 Long_Java = {"scanner.nextLong": 'scanf("%ld", &'}
-Int_Java = {
-    "scanner.nextInt": 'scanf("%d", &',
-}
+Int_Java = {"scanner.nextInt": 'scanf("%d", &'}
 Short_Java = {"scanner.nextShort": 'scanf("%hd", &'}
 Byte_Java = {"scanner.nextByte": 'scanf(" %c", &'}
 String_Java = {"scanner.nextLine": 'scanf("%s", '}
 
-MAPPER = {
+__MAPPER = {
     "System.out.println": "printf",
     "System.out.printf": "printf",
 }
@@ -42,3 +39,5 @@ TYPE_MAPPER = {
 }
 
 IGNORE = ["Scanner", "scanner.close"]
+
+MAPPER = {**Double_Java, **__MAPPER}
