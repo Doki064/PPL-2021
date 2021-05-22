@@ -179,8 +179,8 @@ class Semantic:
 		#           *expr
 		#################################
 		elif isinstance(t, multOPTree):
-			_, identifier_type_left, _ = self.traverse(t.getKid(1))[1]
-			_, identifier_type_right, _ = self.traverse(t.getKid(2))[1]
+			_, identifier_type_left, _ = self.traverse(t.getKid(1))
+			_, identifier_type_right, _ = self.traverse(t.getKid(2))
 
 			# if identifier_type_left == 'double' and (identifier_type_right in ['double', 'float', 'long', 'int']):
 			# 	return identifier_type_left
