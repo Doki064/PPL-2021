@@ -184,7 +184,7 @@ class SymbolTable(_UserDict):
         """
         a_scope = self.get(key_a)["scope_label"]
         b_scope = self.get(key_b)["scope_label"]
-        return b_scope - a_scope
+        return (b_scope - a_scope) == 0
 
     def get_identifier_position(self, identifier_key) -> int:
         """Gets the declared position of the identifier with the given key.
