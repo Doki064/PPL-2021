@@ -19,6 +19,9 @@ class Semantic:
             identifier_name, identifier_type = self.symbolTable.get_declaration_data(identifier_key)
             if identifier_type is None:
                 raise Exception("Error: Function not found '%s'" % identifier_name)
+
+            for tree in t.getKids():
+                self.traverse(tree)
         #################################
         #   check function is declared twice?
         #       declrTree kid:
@@ -34,6 +37,9 @@ class Semantic:
                 raise Exception("Error: Function '%s' is declared twice." % identifier_name)
             else:
                 self.identifier_function.add(identifier_name)
+
+            for tree in t.getKids():
+                self.traverse(tree)
         #################################
         #   check variable is declared?
         #   check variable is declared twice?
@@ -51,12 +57,72 @@ class Semantic:
                     raise Exception("Error: Variable '%s' is declared twice." % identifier_name)
                 else:
                     self.identifier_variable.add(identifier_name)
+
+            for tree in t.getKids():
+                self.traverse(tree)
+        # check if function receive enough parameters
+        elif isinstance(t, funcHeadTree):
+            num_of_function_variables = len(t.getKids())
+            if num_of_function_variables is 0:
+                return "void"
+            else:
+                for tree in t.getKids():
+        #################################
+        #   check if assign has type mismatched.
+        #       assignTree kid:
+        #           *idTree
+        #           assign_op
+        #           *expr
+        #################################
+        elif isinstance(t, assignTree):
+        #################################
+        #   check if relation has type mismatched.
+        #       relOPTree kid:
+        #           *expr
+        #           rel_op
+        #           *expr
+        #################################
+        elif isinstance(t, relOPTree):
+            identifier_type_left = self.traverse(t.getKid(1))
+            identifier_type_right = self.traverse(t.getKid(2))
+            if identifier_type_left != identifier_type_right:
+                raise Exception("Type mismatched between '%s' and '%s'" % (identifier_type_left, identifier_type_right))
+            else:
+                return 'boolean'
+        #################################
+        #   check if addOPTree has type mismatched.
+        #       addOPTree kid:
+        #           *expr
+        #           add_op
+        #           *expr
+        #################################
+        elif isinstance(t, addOPTree):
+            identifier_type_left = self.traverse(t.getKid(1))
+            identifier_type_right = self.traverse(t.getKid(2))
+
+            if identifier_type_left == 'double' and (identifier_type_right in ['double', 'float', 'long', 'int']):
+                return identifier_type_left
+            elif identifier_type_left == 'String' and identifier_type_right == 'char':
+                return identifier_type_left
+            elif identifier_type_left == 'int' and identifier_type_right == 'char':
+                return identifier_type_left
+            else:
+                raise Exception("Type mismatched between '%s' and '%s'" % (identifier_type_left, identifier_type_right))
         #################################
         #################################
         #################################
         #################################
-        for tree in t.getKids():
-            self.traverse(tree)
+        elif isinstance(t, numberTree):
+            identifier_type = "int"
+            return identifier_type
+        elif isinstance(t, stringTree):
+            identifier_type = "string"
+            return identifier_type
+
+
+
+
+
 
 
 
