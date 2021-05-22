@@ -139,7 +139,7 @@ class Semantic:
         #           mult_op
         #           *expr
         #################################
-        elif isinstance(t, addOPTree):
+        elif isinstance(t, multOPTree):
             identifier_type_left = self.traverse(t.getKid(1))
             identifier_type_right = self.traverse(t.getKid(2))
 
