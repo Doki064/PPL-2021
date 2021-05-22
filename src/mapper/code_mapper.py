@@ -41,3 +41,9 @@ TYPE_MAPPER = {
 IGNORE = ["Scanner", "scanner.close"]
 
 MAPPER = {**Double_Java, **__MAPPER}
+
+SUPPORTED_FUNC = ["System.out.println",
+                  "System.out.printf", 
+                  "Scanner", 
+                  "scanner.close", 
+                  "Math.abs"]

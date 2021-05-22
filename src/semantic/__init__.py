@@ -40,14 +40,14 @@ class Semantic:
 		#           *idTree
 		#################################
 		if isinstance(t, callTree):
-			identifier_name, identifier_type, _ = self.traverse(t.getKid(1))
-			if identifier_type is None and identifier_name not in _code_mapper.IGNORE:
+			identifier_name, identifier_type, identifier_key = self.traverse(t.getKid(1))
+			if identifier_type is None and identifier_name not in _code_mapper.SUPPORTED_FUNC:
 				raise Exception("Error: Function not found '%s'" % identifier_name)
 			else:
 				for tree in t.getKids():
 					if tree is not t.getKid(1):
 						self.traverse(tree)
-			return [identifier_name, identifier_type]
+			return [identifier_name, identifier_type, identifier_key]
 		#################################
 		#   check function is declared twice?
 		#       declrTree kid:
@@ -90,7 +90,9 @@ class Semantic:
 					self.identifier_variable[identifier_name].append(identifier_key)
 				else:
 					if identifier_type == 'var':
-						identifier_type = self.traverse(t.getKid(3))
+						_, identifier_type, _ = self.traverse(t.getKid(3))
+						if identifier_type is None: 
+							identifier_type = "void"
 						t.getKid(1).setType(identifier_type)
 					self.identifier_variable[identifier_name] = [identifier_key]
 
@@ -140,14 +142,14 @@ class Semantic:
 		#           *expr
 		################################# 
 		elif isinstance(t, relOPTree):
-			identifier_type_left = self.traverse(t.getKid(1))
-			identifier_type_right = self.traverse(t.getKid(2))
+			_, identifier_type_left, _ = self.traverse(t.getKid(1))
+			_, identifier_type_right, _ = self.traverse(t.getKid(2))
 
 			if identifier_type_left != identifier_type_right:
 				raise Exception("Type mismatched between '%s' and '%s'" % (
 					identifier_type_left, identifier_type_right))
 			else:
-				return 'boolean'
+				return [None, 'boolean', None]
 		#################################
 		#   check if addOPTree has type mismatched.
 		#       addOPTree kid:
@@ -156,8 +158,13 @@ class Semantic:
 		#           *expr
 		#################################
 		elif isinstance(t, addOPTree):
-			identifier_type_left = self.traverse(t.getKid(1))
-			identifier_type_right = self.traverse(t.getKid(2))
+			_, identifier_type_left, _ = self.traverse(t.getKid(1))
+			_, identifier_type_right, _ = self.traverse(t.getKid(2))
+
+			try:
+				return [None, compare(identifier_type_left, identifier_type_right), None]
+			except NotImplemented:
+				raise SyntaxError(f"Addition Operation between `{identifier_type_left}` and `{identifier_type_right}` are unsupported")
 
 		#################################
 		#   check if multOPTree has type mismatched
@@ -167,8 +174,8 @@ class Semantic:
 		#           *expr
 		#################################
 		elif isinstance(t, multOPTree):
-			identifier_type_left = self.traverse(t.getKid(1))[1]
-			identifier_type_right = self.traverse(t.getKid(2))[1]
+			_, identifier_type_left, _ = self.traverse(t.getKid(1))[1]
+			_, identifier_type_right, _ = self.traverse(t.getKid(2))[1]
 
 			# if identifier_type_left == 'double' and (identifier_type_right in ['double', 'float', 'long', 'int']):
 			# 	return identifier_type_left
@@ -182,20 +189,30 @@ class Semantic:
 			# 	raise Exception(
 			# 		"Type mismatched between '%s' and '%s'" % (identifier_type_left, identifier_type_right))
 			try:
-				return compare(identifier_type_left, identifier_type_right)
+				return [None, compare(identifier_type_left, identifier_type_right), None]
 			except NotImplemented:
-				raise SyntaxError(f"`{identifier_type_left}` and `{identifier_type_right}` are unsupported")
+				raise SyntaxError(f"Multiplication operation between `{identifier_type_left}` and `{identifier_type_right}` are unsupported")
 
 		#################################
 		#################################
 		#################################
 		#################################
 		elif isinstance(t, numberTree):
-			identifier_type = "int"
-			return identifier_type
+			value = t.getContent()
+			if '.' in value:
+				if 'f' in value:
+					identifier_type = 'float'
+				else:
+					identifier_type = 'double'
+			else:
+				if 'l' in value:
+					identifier_type = 'long'
+				else:
+					identifier_type = 'int'
+			return [value, identifier_type, None]
 		elif isinstance(t, stringTree):
 			identifier_type = "string"
-			return identifier_type
+			return [t.getContent(), identifier_type, None]
 		elif isinstance(t, idTree):
 			identifier_name, identifier_type = self.symbolTable.get_declaration_data(t.getKey())
 			return [identifier_name, identifier_type, t.getKey()]
