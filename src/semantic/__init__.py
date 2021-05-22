@@ -18,9 +18,11 @@ class Semantic:
             identifier_name, identifier_type = self.traverse(t.getKid(1))
             if identifier_type is None:
                 raise Exception("Error: Function not found '%s'" % identifier_name)
-
-            for tree in t.getKids():
-                self.traverse(tree)
+            else:
+                for tree in t.getKids():
+                    if tree is not t.getKid(1):
+                        self.traverse(tree)
+            return identifier_type
         #################################
         #   check function is declared twice?
         #       declrTree kid:
@@ -35,10 +37,11 @@ class Semantic:
             if identifier_name in self.identifier_function:
                 raise Exception("Error: Function '%s' is declared twice." % identifier_name)
             else:
-                self.identifier_function.add(identifier_name)
+                self.identifier_function.add[identifier_name] = identifier_type
 
             for tree in t.getKids():
-                self.traverse(tree)
+                if tree is not t.getKid(2):
+                    self.traverse(tree)
         #################################
         #   check variable is declared?
         #   check variable is declared twice?
@@ -55,10 +58,15 @@ class Semantic:
                 if identifier_name in self.identifier_variable:
                     raise Exception("Error: Variable '%s' is declared twice." % identifier_name)
                 else:
-                    self.identifier_variable.add(identifier_name)
+                    if identifier_type == 'var':
+                        identifier_type = self.traverse(t.getKid(3))
+                    self.identifier_variable[identifier_name] = identifier_type
 
             for tree in t.getKids():
-                self.traverse(tree)
+                if tree is not t.getKid(2):
+                    self.traverse(tree)
+
+            return identifier_type
         # check if function receive enough parameters
         # elif isinstance(t, funcHeadTree):
         #     num_of_function_variables = len(t.getKids())
