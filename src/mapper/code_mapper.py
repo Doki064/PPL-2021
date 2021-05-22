@@ -1,44 +1,40 @@
-Double_Java = [
-    "scanner.nextDouble",
-    "Math.E",
-    "Math.PI",
-    "Math.sqrt",
-    "Math.cbrt",
-    "Math.pow",
-    "Math.signum",
-    "Math.ceil",
-    "Math.floor",
-    "Math.random",
-    "Math.rint",
-    "Math.log",
-    "Math.log10",
-    "Math.log1p",
-    "Math.exp",
-    "Math.expm1",
-    "Math.sin",
-    "Math.cos",
-    "Math.tan",
-]
-Float_Java = ["scanner.nextFloat"]
-Long_Java = ["scanner.nextLong"]
-Int_Java = ["scanner.nextInt", "Math.round"]
-Short_Java = ["scanner.nextShort"]
-Byte_Java = ["scanner.nextByte"]
-String_Java = ["scanner.nextLine"]
+Double_Java = {
+    "scanner.nextDouble": 'scanf("%lf", &',
+    "Math.E": "M_E",
+    "Math.PI": "M_PI",
+    "Math.sqrt": "sqrt",
+    "Math.cbrt": "cbrt",
+    "Math.pow": "pow",
+    "Math.ceil": "ceil",
+    "Math.floor": "floor",
+    "Math.rint": "rint",
+    "Math.log": "log",
+    "Math.log10": "log10",
+    "Math.log1p": "log1p",
+    "Math.exp": "exp",
+    "Math.expm1": "expm1",
+    "Math.sin": "sin",
+    "Math.cos": "cos",
+    "Math.tan": "tan",
+}
+Float_Java = {"scanner.nextFloat": 'scanf("%f", &'}
+Long_Java = {"scanner.nextLong": 'scanf("%ld", &'}
+Int_Java = {
+    "scanner.nextInt": 'scanf("%d", &',
+}
+Short_Java = {"scanner.nextShort": 'scanf("%hd", &'}
+Byte_Java = {"scanner.nextByte": 'scanf(" %c", &'}
+String_Java = {"scanner.nextLine": 'scanf("%s", '}
 
 MAPPER = {
-    "Math.PI": "M_PI",
-    "Math.pow": "pow",
-    "Math.sqrt": "sqrt",
-    "Math.abs": "abs",
-    "System.out.println": "println",
+    "System.out.println": "printf",
     "System.out.printf": "printf",
 }
 
 INPUT_FUNC = {
-    "scanner.nextDouble": 'scanf("%lf", &',
-    "scanner.nextFloat": 'scanf("%f", &',
-    "scanner.nextInt": 'scanf("%d", &',
+    "scanner.nextDouble": ("double", 'scanf("%lf", &'),
+    "scanner.nextFloat": ("float", 'scanf("%f", &'),
+    "scanner.nextInt": ("int", 'scanf("%d", &'),
 }
 
 TYPE_MAPPER = {
