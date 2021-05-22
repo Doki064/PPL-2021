@@ -178,7 +178,17 @@ class SymbolTable(_UserDict):
         typ = self.get_identifier_type(self.get_identifier_position(key))
         return name, typ
 
-    def compare_scope(self, key_a, key_b):
+    def compare_scope(self, key_a, key_b) -> int:
+        """Returns the key with the smaller scope.
+
+        Args:
+            key_a (int): The first key.
+            key_b (int): The second key.
+
+        Returns:
+            Returns back the key with smaller scope.
+                If they are at the same scope, returns the bigger key.
+        """
         a_scope = self.get_identifier_scope(key_a)
         b_scope = self.get_identifier_scope(key_b)
         if a_scope[1] > b_scope[1]:
@@ -186,6 +196,8 @@ class SymbolTable(_UserDict):
         elif a_scope[1] == b_scope[1]:
             if a_scope[2] > b_scope[2]:
                 return key_a
+            if a_scope[2] == b_scope[2]:
+                return max(key_a, key_b)
         return key_b
 
     def get_identifier_position(self, identifier_key) -> int:
