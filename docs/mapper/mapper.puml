@@ -1,0 +1,27 @@
+@startuml
+class Mapper {
+    + names
+    + values
+    + to_dict()
+    + items()
+}
+abstract class BaseEnum  {
+    + {static} names()
+    + {static} values()
+    + {static} to_dict()
+    + {static} items()
+}
+class Ignored
+class Keywords
+class KeywordsType
+class KeywordsAttribute
+class Operators
+class Separators
+BaseEnum *-- Mapper
+Ignored *-- Mapper
+Keywords *-- Mapper
+KeywordsType *-- Mapper
+KeywordsAttribute *-- Mapper
+Operators *-- Mapper
+Separators *-- Mapper
+@enduml

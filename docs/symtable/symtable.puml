@@ -1,4 +1,5 @@
 @startuml
+title Symbol Table Class Diagram
 class SymbolTable {
     + __init__(lexer: Lexer): SymbolTable
     # _advanced()
@@ -10,4 +11,5 @@ class SymbolTable {
     # get_identifier_attribute(key: str)
     # get_identifier_scope(key: str)
 }
+UserDict <|-- SymbolTable
 @enduml
