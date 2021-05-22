@@ -6,6 +6,7 @@ Options:
     -s,             --symtable              generate symtable only
     -t,             --token                 generate tokens only
     -p,             --parsetree             generate parse tree only
+    -a,             --analyzedtree          generate analyzed parse tree only
     -g,             --gencode               generate generated C code only
     -c <path>,      --clean <path>          clean all outputs in <path>
     -v,             --verbose               generate all intermediate output
@@ -27,6 +28,9 @@ Examples:
     - Show parse tree:
         jcosim -i Main.java -p
         jcosim --input Main.java --parsetree
+    - Show analyzed parse tree:
+        jcosim -i Main.java -a
+        jcosim --input Main.java --analyzedtree
     - Show generated C code:
         jcosim -i Main.java -g
         jcosim --input Main.java --gencode

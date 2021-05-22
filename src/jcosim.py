@@ -51,7 +51,7 @@ def symtable_display(stb):
     return "Symbol Table:", work
 
 
-def parsetree_display(program_tree):
+def parsetree_display(program_tree, outputFilePath):
     def work():
         graph = Dot(graph_name='Parse Tree', graph_type='graph')
 
@@ -65,7 +65,7 @@ def parsetree_display(program_tree):
                 g.add_edge(Edge(node.getNodeNum(), f'{node.getNodeNum()}_content'))
 
         start_graph(graph, program_tree)
-        graph.write_png('parsetree.png')
+        graph.write_png(outputFilePath if outputFilePath[-4:] == '.png' else outputFilePath + '.png')
 
     return "Generating Parse Tree . . .", work
 
@@ -129,6 +129,7 @@ def main():
         symtable = False
         token = False
         parsetree = False
+        analyzedtree = False
         gencode = False
         clean = False
         clean_path = '.'
@@ -146,6 +147,8 @@ def main():
                 token = True
             elif opt in ('-p', '--parsetree'):
                 parsetree = True
+            elif opt in ('-a', '--analyzedtree'):
+                analyzedtree = True
             elif opt in ('-g', '--gencode'):
                 gencode = True
             elif opt in ('-c', '--clean'):
@@ -155,6 +158,7 @@ def main():
                 symtable = True
                 token = True
                 parsetree = True
+                analyzedtree = True
                 gencode = True
 
         # No source no life
@@ -182,7 +186,7 @@ def main():
 
         # Semantic
         semantic = Semantic(program_tree, stb)
-        # semantic.analyze()
+        analyzed_tree = semantic.analyze()
 
         # Generate C code
         code_gen = CodeGen(program_tree)
@@ -197,7 +201,9 @@ def main():
         if symtable:
             section(*symtable_display(stb))
         if parsetree:
-            section(*parsetree_display(program_tree))
+            section(*parsetree_display(program_tree, 'parsetree.png'))
+        if analyzedtree:
+            section(*parsetree_display(analyzed_tree, 'analyzedtree.png'))
         if gencode:
             section(*gencode_display(code, exe))
         if clean:
