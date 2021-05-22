@@ -1,5 +1,24 @@
-from symbol_table import *
-from parse import *
+from ast import *
+from mapper import code_mapper as _code_mapper
+
+def compare(a, b):
+	mark = {
+		"byte": 0,
+		"short": 0,
+		"int": 0,
+		"long": 1,
+		"float": 2,
+		"double": 3,
+	}
+	if isinstance(a, str) and isinstance(b, str):
+		if mark.get(a, None) is not None and mark.get(b, None) is not None:
+			if mark[a] == mark[b] == 0:
+				return "int"
+			elif mark[a] > mark[b]:
+				return a
+			else:
+				return b
+		return NotImplemented
 
 
 class Semantic:
@@ -20,7 +39,7 @@ class Semantic:
 		#################################
 		if isinstance(t, callTree):
 			identifier_name, identifier_type = self.traverse(t.getKid(1))
-			if identifier_type is None:
+			if identifier_type is None and identifier_name not in _code_mapper.IGNORE:
 				raise Exception("Error: Function not found '%s'" % identifier_name)
 			else:
 				for tree in t.getKids():
@@ -41,7 +60,7 @@ class Semantic:
 			if identifier_name in self.identifier_function:
 				raise Exception("Error: Function '%s' is declared twice." % identifier_name)
 			else:
-				self.identifier_function.add[identifier_name] = identifier_type
+				self.identifier_function[identifier_name] = identifier_type
 
 			for tree in t.getKids():
 				if tree is not t.getKid(2):
@@ -152,20 +171,25 @@ class Semantic:
 		#           *expr
 		#################################
 		elif isinstance(t, multOPTree):
-			identifier_type_left = self.traverse(t.getKid(1))
-			identifier_type_right = self.traverse(t.getKid(2))
+			identifier_type_left = self.traverse(t.getKid(1))[1]
+			identifier_type_right = self.traverse(t.getKid(2))[1]
 
-			if identifier_type_left == 'double' and (identifier_type_right in ['double', 'float', 'long', 'int']):
-				return identifier_type_left
-			elif identifier_type_left == 'float' and (identifier_type_right in ['float', 'long', 'int']):
-				return identifier_type_left
-			elif identifier_type_left == 'long' and (identifier_type_right in ['long', 'int']):
-				return identifier_type_left
-			elif identifier_type_left == 'int' and identifier_type_right == 'int':
-				return identifier_type_left
-			else:
-				raise Exception(
-					"Type mismatched between '%s' and '%s'" % (identifier_type_left, identifier_type_right))
+			# if identifier_type_left == 'double' and (identifier_type_right in ['double', 'float', 'long', 'int']):
+			# 	return identifier_type_left
+			# elif identifier_type_left == 'float' and (identifier_type_right in ['float', 'long', 'int']):
+			# 	return identifier_type_left
+			# elif identifier_type_left == 'long' and (identifier_type_right in ['long', 'int']):
+			# 	return identifier_type_left
+			# elif identifier_type_left == 'int' and identifier_type_right == 'int':
+			# 	return identifier_type_left
+			# else:
+			# 	raise Exception(
+			# 		"Type mismatched between '%s' and '%s'" % (identifier_type_left, identifier_type_right))
+			try:
+				return compare(identifier_type_left, identifier_type_right)
+			except NotImplemented:
+				raise SyntaxError(f"`{identifier_type_left}` and `{identifier_type_right}` are unsupported")
+
 		#################################
 		#################################
 		#################################
