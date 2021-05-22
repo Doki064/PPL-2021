@@ -72,7 +72,8 @@ class Parser:
         self.peekToken = next(self.tokens, _token_names.EOF)
         # No need to worry about passing the EOF, lexer handles that.
 
-    def abort(self, message):
+    @staticmethod
+    def abort(message):
         exit("Error. " + message)
 
 #             HELPER FUNCTION DECLARATIONS END HERE                   #
