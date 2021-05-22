@@ -13,27 +13,27 @@ except ImportError:
 
 
 class Parser:
-    assignOPs = [_token_names.OPERATORS['='],
-                 _token_names.OPERATORS['+='],
-                 _token_names.OPERATORS['-='],
-                 _token_names.OPERATORS['*='],
-                 _token_names.OPERATORS['/='],
-                 _token_names.OPERATORS['%=']]
+    assignOPs = [_token_names.Operators("=").name,
+                 _token_names.Operators("+=").name,
+                 _token_names.Operators("-=").name,
+                 _token_names.Operators("*=").name,
+                 _token_names.Operators("/=").name,
+                 _token_names.Operators("%=").name]
 
-    relOPs = [_token_names.OPERATORS['<'],
-              _token_names.OPERATORS['<='],
-              _token_names.OPERATORS['>'],
-              _token_names.OPERATORS['>='],
-              _token_names.OPERATORS['=='],
-              _token_names.OPERATORS['!=']]
+    relOPs = [_token_names.Operators("<").name,
+              _token_names.Operators("<=").name,
+              _token_names.Operators(">").name,
+              _token_names.Operators(">=").name,
+              _token_names.Operators("==").name,
+              _token_names.Operators("!=").name]
 
-    addOPs = [_token_names.OPERATORS['+'],
-              _token_names.OPERATORS['-'],
-              _token_names.OPERATORS['|']]
+    addOPs = [_token_names.Operators("+").name,
+              _token_names.Operators("-").name,
+              _token_names.Operators("|").name]
 
-    multOPs = [_token_names.OPERATORS['*'],
-               _token_names.OPERATORS['/'],
-               _token_names.OPERATORS['&']]
+    multOPs = [_token_names.Operators("*").name,
+               _token_names.Operators("/").name,
+               _token_names.Operators("&").name]
 
     def __init__(self, lexer):
         self.tokens = lexer.tokens()
@@ -83,56 +83,56 @@ class Parser:
     def program(self):
         t = programTree()
         # match(_token_names.KEYWORDS_ATTRIBUTE['public'])
-        self.match(_token_names.KEYWORDS_TYPE['class'])
+        self.match(_token_names.KeywordsType("class").name)
         self.match(_token_names.IDENTIFIER)
         t.addKid(self.block())
         return t
 
     def block(self):
-        self.match(_token_names.SEPARATORS['{'])
+        self.match(_token_names.Separators("{").name)
         t = blockTree()
         while True:
             try:
                 t.addKid(self.statement())
             except SyntaxError:
                 break
-        self.match(_token_names.SEPARATORS['}'])
+        self.match(_token_names.Separators("}").name)
         return t
 
     def decl(self, requireSemiColon=True):
         typ, name = self.typ(), self.name()
-        if self.checkToken(_token_names.SEPARATORS['(']):
+        if self.checkToken(_token_names.Separators("(").name):
             t = funcDeclTree().addKid(typ).addKid(name)
             t.addKid(self.funcHead())
             t.addKid(self.block())
             return t
-        if self.checkToken(_token_names.OPERATORS['=']) and requireSemiColon:
+        if self.checkToken(_token_names.Operators("=").name) and requireSemiColon:
             self.nextToken()
             t = declrTree().addKid(typ).addKid(name).addKid(self.expr())
-            self.match(_token_names.SEPARATORS[';'])
+            self.match(_token_names.Separators(";").name)
             t.addKid(endTree())
             return t
         t = declrTree().addKid(typ).addKid(name)
         if requireSemiColon:
-            self.match(_token_names.SEPARATORS[';'])
+            self.match(_token_names.Separators(";").name)
             t.addKid(endTree())
         return t
 
     def typ(self):
         t = typeTree()
-        for key in _token_names.KEYWORDS_TYPE:
-            typ = _token_names.KEYWORDS_TYPE[key]
-            if self.checkToken(typ):
-                t.setType(key)
+        for name, value in _token_names.KeywordsType.items():
+            # key = _token_names.get_value_by_name(name)
+            if self.checkToken(name):
+                t.setType(value)
                 self.nextToken()
                 break
 
         if t.getType == 'Type':
-            raise SyntaxError(f'Unrecognized type: {_token_names.get_value_by_name(self.curToken.token_name)}')
+            raise SyntaxError(f"Unrecognized type: {_token_names.get_value_by_name(self.curToken.token_name)}")
 
-        if self.checkToken(_token_names.SEPARATORS['[']):
+        if self.checkToken(_token_names.Separators("[").name):
             self.nextToken()
-            self.match(_token_names.SEPARATORS[']'])
+            self.match(_token_names.Separators("]").name)
             t.setArray()
         return t
 
@@ -145,89 +145,89 @@ class Parser:
             f'Expected: {_token_names.IDENTIFIER}, got {_token_names.get_value_by_name(self.curToken.token_name)}, at line {self.curToken.position}')
 
     def funcHead(self):
-        self.match(_token_names.SEPARATORS['('])
+        self.match(_token_names.Separators("(").name)
         t = funcHeadTree()
-        if not self.checkToken(_token_names.SEPARATORS[')']):
+        if not self.checkToken(_token_names.Separators(")").name):
             while True:
                 t.addKid(self.decl(requireSemiColon=False))
-                if self.checkToken(_token_names.SEPARATORS[',']):
+                if self.checkToken(_token_names.Separators(",").name):
                     self.nextToken()
                 else:
                     break
-        self.match(_token_names.SEPARATORS[')'])
+        self.match(_token_names.Separators(")").name)
         return t
 
     def statement(self):
-        if self.curToken.token_name in _token_names.KEYWORDS_TYPE.values():
+        if self.curToken.token_name in _token_names.KeywordsType.names():
             return self.decl()
-        if self.checkToken(_token_names.KEYWORDS['if']):
+        if self.checkToken(_token_names.Keywords("if").name):
             t = ifTree()
             self.nextToken()
             t.addKid(self.expr(True))
             t.addKid(self.block())
-            if self.checkToken(_token_names.KEYWORDS['else']):
+            if self.checkToken(_token_names.Keywords("else").name):
                 self.nextToken()
                 t.addKid(self.block())
             return t
 
-        if self.checkToken(_token_names.KEYWORDS['while']):
+        if self.checkToken(_token_names.Keywords("while").name):
             t = whileTree()
             self.nextToken()
             t.addKid(self.expr(True))
             t.addKid(self.block())
             return t
 
-        if self.checkToken(_token_names.KEYWORDS['return']):
+        if self.checkToken(_token_names.Keywords("return").name):
             t = returnTree()
             self.nextToken()
             t.addKid(self.expr())
-            self.match(_token_names.SEPARATORS[';'])
+            self.match(_token_names.Separators(";").name)
             t.addKid(endTree())
             return t
 
-        if self.checkToken(_token_names.SEPARATORS['{']):
+        if self.checkToken(_token_names.Separators("{").name):
             return self.block()
 
         kid = self.name()
 
-        if self.checkToken(_token_names.SEPARATORS['(']):
+        if self.checkToken(_token_names.Separators("(").name):
             self.nextToken()
             t = callTree().addKid(kid)
-            if not self.checkToken(_token_names.SEPARATORS[')']):
+            if not self.checkToken(_token_names.Separators(")").name):
                 while True:
                     t.addKid(self.expr())
-                    if self.checkToken(_token_names.SEPARATORS[',']):
+                    if self.checkToken(_token_names.Separators(",").name):
                         self.nextToken()
                     else:
                         break
-            self.match(_token_names.SEPARATORS[')'])
-            self.match(_token_names.SEPARATORS[';'])
+            self.match(_token_names.Separators(")").name)
+            self.match(_token_names.Separators(";").name)
             t.addKid(endTree())
             return t
 
         t = assignTree(self.match(Parser.assignOPs)).addKid(kid)
         t.addKid(self.expr())
-        self.match(_token_names.SEPARATORS[';'])
+        self.match(_token_names.Separators(";").name)
         t.addKid(endTree())
         return t
 
     def expr(self, requireBracket=False):
         if requireBracket:
-            self.match(_token_names.SEPARATORS['('])
+            self.match(_token_names.Separators("(").name)
             requireBracket = True
 
         kid = self.simpleExpr()
         t = self.formRelationTree()
         if t is None:
             if requireBracket:
-                self.match(_token_names.SEPARATORS[')'])
+                self.match(_token_names.Separators(")").name)
             return kid
 
         t.addKid(kid)
         t.addKid(self.simpleExpr())
 
         if requireBracket:
-            self.match(_token_names.SEPARATORS[')'])
+            self.match(_token_names.Separators(")").name)
         return t
 
     def simpleExpr(self):
@@ -251,10 +251,10 @@ class Parser:
         return kid
 
     def factor(self):
-        if self.checkToken(_token_names.SEPARATORS['(']):
+        if self.checkToken(_token_names.Separators("(").name):
             self.nextToken()
             t = self.expr()
-            self.match(_token_names.SEPARATORS[')'])
+            self.match(_token_names.Separators(")").name)
             return t
 
         if self.checkToken(_token_names.NUMBER):
@@ -268,19 +268,19 @@ class Parser:
             return t
 
         t = self.name()
-        if not self.checkToken(_token_names.SEPARATORS['(']):
+        if not self.checkToken(_token_names.Separators("(").name):
             return t
 
         self.nextToken()
         t = callTree().addKid(t)
-        if not self.checkToken(_token_names.SEPARATORS[')']):
+        if not self.checkToken(_token_names.Separators(")").name):
             while True:
                 t.addKid(self.expr())
-                if self.checkToken(_token_names.SEPARATORS[',']):
+                if self.checkToken(_token_names.Separators(",").name):
                     self.nextToken()
                 else:
                     break
-        self.match(_token_names.SEPARATORS[')'])
+        self.match(_token_names.Separators(")").name)
         return t
 
     def formRelationTree(self):

@@ -63,7 +63,10 @@ class Token:
     def key(self):
         """Returns the key for this token.
 
-            This will be used as identifier_key in the symbol table and key attribute in the idTree AST.
+        This will be used as identifier_key in the symbol table and key attribute in the idTree AST.
+
+        Returns:
+            int: The key for this token.
         """
         return self.__start_position
 
@@ -213,8 +216,7 @@ class Lexer:
             while not (self.__current_char != "\\" and self._peek() == '"'):
                 self.__next_char()
                 if self.__EOF:
-                    raise LexerError(
-                        start_position, f"EOL while scanning string literal at position {start_position}")
+                    raise LexerError(start_position, f"EOL while scanning string literal at position {start_position}")
             self.__next_char()
             token = Token(self.__line_number, self.__line_start_position, start_position, self.__current_position,
                           _token_names.STRING, self.__stream[start_position:self.__current_position + 1])
@@ -253,8 +255,8 @@ class Lexer:
             start_position = self.__current_position
             while True:
                 if (self._peek() in [" ", "\t", "\r", "\n", "\0"]
-                        or self._peek() in _token_names.SEPARATORS
-                        or self._peek() in _token_names.OPERATORS):
+                        or self._peek() in _token_names.Separators.values()
+                        or self._peek() in _token_names.Separators.values()):
                     break
                 self.__next_char()
             word = self.__stream[start_position:self.__current_position + 1]
