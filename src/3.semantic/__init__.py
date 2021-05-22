@@ -61,12 +61,12 @@ class Semantic:
             for tree in t.getKids():
                 self.traverse(tree)
         # check if function receive enough parameters
-        elif isinstance(t, funcHeadTree):
-            num_of_function_variables = len(t.getKids())
-            if num_of_function_variables is 0:
-                return "void"
-            else:
-                for tree in t.getKids():
+        # elif isinstance(t, funcHeadTree):
+        #     num_of_function_variables = len(t.getKids())
+        #     if num_of_function_variables is 0:
+        #         return "void"
+        #     else:
+        #         for tree in t.getKids():
         #################################
         #   check if assign has type mismatched.
         #       assignTree kid:
@@ -75,6 +75,23 @@ class Semantic:
         #           *expr
         #################################
         elif isinstance(t, assignTree):
+            _, identifier_type_left = self.symbolTable.get_declaration_data(t.getKid(1).getKey())
+            identifier_type_right = self.traverse(t.getKid(2))
+
+            if identifier_type_left == identifier_type_right:
+                pass
+            elif identifier_type_left in ['int', 'long', 'float', 'double'] and identifier_type_right == 'int':
+                pass
+            elif identifier_type_left in ['long', 'float', 'double'] and identifier_type_right in ['int', 'long']:
+                pass
+            elif identifier_type_left in ['float', 'double'] and identifier_type_right in ['int', 'long', 'float']:
+                pass
+            elif identifier_type_left in ['double'] and identifier_type_right in ['int', 'long', 'float', 'double']:
+                pass
+            elif identifier_type_left == 'int' and identifier_type_right == 'char':
+                pass
+            else:
+                raise Exception("Type mismatched between '%s' and '%s'" % (identifier_type_left, identifier_type_right))
         #################################
         #   check if relation has type mismatched.
         #       relOPTree kid:
@@ -85,6 +102,7 @@ class Semantic:
         elif isinstance(t, relOPTree):
             identifier_type_left = self.traverse(t.getKid(1))
             identifier_type_right = self.traverse(t.getKid(2))
+
             if identifier_type_left != identifier_type_right:
                 raise Exception("Type mismatched between '%s' and '%s'" % (identifier_type_left, identifier_type_right))
             else:
@@ -100,14 +118,43 @@ class Semantic:
             identifier_type_left = self.traverse(t.getKid(1))
             identifier_type_right = self.traverse(t.getKid(2))
 
-            if identifier_type_left == 'double' and (identifier_type_right in ['double', 'float', 'long', 'int']):
+            if identifier_type_left == identifier_type_right:
                 return identifier_type_left
-            elif identifier_type_left == 'String' and identifier_type_right == 'char':
+            elif identifier_type_left == 'double' and (identifier_type_right in ['float', 'long', 'int']):
+                return identifier_type_left
+            elif identifier_type_left == 'float' and (identifier_type_right in ['long', 'int']):
+                return identifier_type_left
+            elif identifier_type_left == 'long' and identifier_type_right == 'int':
                 return identifier_type_left
             elif identifier_type_left == 'int' and identifier_type_right == 'char':
                 return identifier_type_left
+            elif identifier_type_left == 'String' and identifier_type_right == 'char':
+                return identifier_type_left
             else:
                 raise Exception("Type mismatched between '%s' and '%s'" % (identifier_type_left, identifier_type_right))
+
+        #################################
+        #   check if multOPTree has type mismatched
+        #       multOPTree kid:
+        #           *expr
+        #           mult_op
+        #           *expr
+        #################################
+        elif isinstance(t, addOPTree):
+            identifier_type_left = self.traverse(t.getKid(1))
+            identifier_type_right = self.traverse(t.getKid(2))
+
+            if identifier_type_left == 'double' and (identifier_type_right in ['double', 'float', 'long', 'int']):
+                return identifier_type_left
+            elif identifier_type_left == 'float' and (identifier_type_right in ['float', 'long', 'int']):
+                return identifier_type_left
+            elif identifier_type_left == 'long' and (identifier_type_right in ['long', 'int']):
+                return identifier_type_left
+            elif identifier_type_left == 'int' and identifier_type_right == 'int':
+                return identifier_type_left
+            else:
+                raise Exception(
+                    "Type mismatched between '%s' and '%s'" % (identifier_type_left, identifier_type_right))
         #################################
         #################################
         #################################
@@ -118,6 +165,9 @@ class Semantic:
         elif isinstance(t, stringTree):
             identifier_type = "string"
             return identifier_type
+        else:
+            for tree in t.getKids():
+                self.traverse(tree)
 
 
 
