@@ -1,7 +1,6 @@
 from getopt import getopt, GetoptError
-from os import path, remove, PathLike
+from os import path, remove
 from sys import argv
-from typing import Union
 
 from pydot import Dot, Node, Edge
 
@@ -9,7 +8,6 @@ from codegen import CodeGen
 from lex import Lexer
 from parse import Parser
 from symbol_table import SymbolTable
-from ast import programTree
 
 
 def absolute_from_file(rpath):
@@ -25,7 +23,7 @@ def section(title, work):
 
 def help_text():
     def work():
-        with open(absolute_from_file('./data/help.txt'), 'r') as f:
+        with open(absolute_from_file('data/help.txt'), 'r') as f:
             print(f.read())
 
     return "Manual:", work
@@ -36,20 +34,20 @@ def token_display(lexer):
         tokens = '\n'.join(
             map(str, list(lexer.tokens(ignore=False))))
         print(tokens)
-        with open(absolute_from_file('./tokens.txt'), 'w') as f:
+        with open(absolute_from_file('tokens.txt'), 'w') as f:
             f.write(tokens)
 
     return "Tokens:", work
 
 
 def symtable_display(stb):
-    import json
+    from json import dump
     from pprint import pprint
 
     def work():
-        pprint(stb.data)
-        with open(absolute_from_file("./symtable.json"), "w+") as f:
-            json.dump(stb.data, f, indent=4)
+        pprint(stb.data, indent=4, sort_dicts=False)
+        with open(absolute_from_file("symtable.json"), "w") as f:
+            dump(stb.data, f, indent=4)
 
     return "Symbol Table:", work
 
@@ -68,16 +66,16 @@ def parsetree_display(program_tree):
                 g.add_edge(Edge(node.getNodeNum(), f'{node.getNodeNum()}_content'))
 
         start_graph(graph, program_tree)
-        graph.write_png('./parsetree.png')
+        graph.write_png('parsetree.png')
 
     return "Generating Parse Tree . . .", work
 
 
-def gencode_display(code_gen: CodeGen, file: Union[str, PathLike]):
+def gencode_display(code_gen, file):
     def work():
         code = code_gen.generate_code()
         print(code)
-        with open(absolute_from_file(file), "w+") as f:
+        with open(absolute_from_file(file), "w") as f:
             f.write(code)
 
     return "Generating code . . .", work
