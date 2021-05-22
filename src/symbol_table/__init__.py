@@ -98,7 +98,7 @@ class SymbolTable(_UserDict):
                     else:
                         identifier_position = latest_valid_key
 
-                    if identifier_name in _code_mapper.Double_Java:
+                    if identifier_name in _code_mapper.Double_Java or identifier_name == "scanner.nextDouble":
                         identifier_type = "double"
                     elif identifier_name in _code_mapper.Float_Java:
                         identifier_type = "float"

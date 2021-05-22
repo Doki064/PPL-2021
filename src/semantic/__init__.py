@@ -1,5 +1,24 @@
-from symbol_table import *
 from ast import *
+from mapper import code_mapper as _code_mapper
+
+def compare(a, b):
+	mark = {
+		"byte": 0,
+		"short": 0,
+		"int": 0,
+		"long": 1,
+		"float": 2,
+		"double": 3,
+	}
+	if isinstance(a, str) and isinstance(b, str):
+		if mark.get(a, None) is not None and mark.get(b, None) is not None:
+			if mark[a] == mark[b] == 0:
+				return "int"
+			elif mark[a] > mark[b]:
+				return a
+			else:
+				return b
+		return NotImplemented
 
 
 class Semantic:
@@ -13,38 +32,36 @@ class Semantic:
         self.traverse(self.ast)
         return self.ast
 
-    def traverse(self, t):
-        #################################
-        #   check function is declared?
-        #       callTree kid:
-        #           *idTree
-        #################################
-        if isinstance(t, callTree):
-            identifier_name, identifier_type = self.traverse(t.getKid(1))
-            if identifier_type is None:
-                raise Exception("Error: Function not found '%s'" %
-                                identifier_name)
-            else:
-                for tree in t.getKids():
-                    if tree is not t.getKid(1):
-                        self.traverse(tree)
-            return identifier_type
-        #################################
-        #   check function is declared twice?
-        #       declrTree kid:
-        #           *typeTree
-        #           *idTree
-        #           *funcHead
-        #           *block
-        #################################
-        elif isinstance(t, funcDeclTree):
-            identifier_name, identifier_type = self.traverse(t.getKid(2))
+	def traverse(self, t):
+		#################################
+		#   check function is declared?
+		#       callTree kid:
+		#           *idTree
+		#################################
+		if isinstance(t, callTree):
+			identifier_name, identifier_type = self.traverse(t.getKid(1))
+			if identifier_type is None and identifier_name not in _code_mapper.IGNORE:
+				raise Exception("Error: Function not found '%s'" % identifier_name)
+			else:
+				for tree in t.getKids():
+					if tree is not t.getKid(1):
+						self.traverse(tree)
+			return identifier_type
+		#################################
+		#   check function is declared twice?
+		#       declrTree kid:
+		#           *typeTree
+		#           *idTree
+		#           *funcHead
+		#           *block
+		#################################
+		elif isinstance(t, funcDeclTree):
+			identifier_name, identifier_type = self.traverse(t.getKid(2))
 
-            if identifier_name in self.identifier_function:
-                raise Exception(
-                    "Error: Function '%s' is declared twice." % identifier_name)
-            else:
-                self.identifier_function[identifier_name] = identifier_type
+			if identifier_name in self.identifier_function:
+				raise Exception("Error: Function '%s' is declared twice." % identifier_name)
+			else:
+				self.identifier_function[identifier_name] = identifier_type
 
             for tree in t.getKids():
                 if tree is not t.getKid(2):
@@ -138,58 +155,46 @@ class Semantic:
             identifier_type_left = self.traverse(t.getKid(1))
             identifier_type_right = self.traverse(t.getKid(2))
 
-            if identifier_type_left == identifier_type_right:
-                return identifier_type_left
-            elif identifier_type_left == 'double' and (identifier_type_right in ['float', 'long', 'int']):
-                return identifier_type_left
-            elif identifier_type_left == 'float' and (identifier_type_right in ['long', 'int']):
-                return identifier_type_left
-            elif identifier_type_left == 'long' and identifier_type_right == 'int':
-                return identifier_type_left
-            elif identifier_type_left == 'int' and identifier_type_right == 'char':
-                return identifier_type_left
-            elif identifier_type_left == 'String' and identifier_type_right == 'char':
-                return identifier_type_left
-            else:
-                raise Exception("Type mismatched between '%s' and '%s'" % (
-                    identifier_type_left, identifier_type_right))
+		#################################
+		#   check if multOPTree has type mismatched
+		#       multOPTree kid:
+		#           *expr
+		#           mult_op
+		#           *expr
+		#################################
+		elif isinstance(t, multOPTree):
+			identifier_type_left = self.traverse(t.getKid(1))[1]
+			identifier_type_right = self.traverse(t.getKid(2))[1]
 
-        #################################
-        #   check if multOPTree has type mismatched
-        #       multOPTree kid:
-        #           *expr
-        #           mult_op
-        #           *expr
-        #################################
-        elif isinstance(t, multOPTree):
-            identifier_type_left = self.traverse(t.getKid(1))
-            identifier_type_right = self.traverse(t.getKid(2))
+			# if identifier_type_left == 'double' and (identifier_type_right in ['double', 'float', 'long', 'int']):
+			# 	return identifier_type_left
+			# elif identifier_type_left == 'float' and (identifier_type_right in ['float', 'long', 'int']):
+			# 	return identifier_type_left
+			# elif identifier_type_left == 'long' and (identifier_type_right in ['long', 'int']):
+			# 	return identifier_type_left
+			# elif identifier_type_left == 'int' and identifier_type_right == 'int':
+			# 	return identifier_type_left
+			# else:
+			# 	raise Exception(
+			# 		"Type mismatched between '%s' and '%s'" % (identifier_type_left, identifier_type_right))
+			try:
+				return compare(identifier_type_left, identifier_type_right)
+			except NotImplemented:
+				raise SyntaxError(f"`{identifier_type_left}` and `{identifier_type_right}` are unsupported")
 
-            if identifier_type_left == 'double' and (identifier_type_right in ['double', 'float', 'long', 'int']):
-                return identifier_type_left
-            elif identifier_type_left == 'float' and (identifier_type_right in ['float', 'long', 'int']):
-                return identifier_type_left
-            elif identifier_type_left == 'long' and (identifier_type_right in ['long', 'int']):
-                return identifier_type_left
-            elif identifier_type_left == 'int' and identifier_type_right == 'int':
-                return identifier_type_left
-            else:
-                raise Exception(
-                    "Type mismatched between '%s' and '%s'" % (identifier_type_left, identifier_type_right))
-        #################################
-        #################################
-        #################################
-        #################################
-        elif isinstance(t, numberTree):
-            identifier_type = "int"
-            return identifier_type
-        elif isinstance(t, stringTree):
-            identifier_type = "string"
-            return identifier_type
-        elif isinstance(t, idTree):
-            identifier_name, identifier_type = self.symbolTable.get_declaration_data(
-                t.getKey())
-            return identifier_name, identifier_type
-        else:
-            for tree in t.getKids():
-                self.traverse(tree)
+		#################################
+		#################################
+		#################################
+		#################################
+		elif isinstance(t, numberTree):
+			identifier_type = "int"
+			return identifier_type
+		elif isinstance(t, stringTree):
+			identifier_type = "string"
+			return identifier_type
+		elif isinstance(t, idTree):
+			identifier_name, identifier_type = self.symbolTable.get_declaration_data(t.getKey())
+			return identifier_name, identifier_type
+		else:
+			for tree in t.getKids():
+				self.traverse(tree)

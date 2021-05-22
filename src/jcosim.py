@@ -1,17 +1,15 @@
 from getopt import getopt, GetoptError
-from os import path, remove
+from pathlib import Path
 from sys import argv
+
 from pydot import Dot, Node, Edge
+
+from c_compiler import CCompiler
 from codegen import CodeGen
 from lex import Lexer
 from parse import Parser
-from symbol_table import SymbolTable
 from semantic import Semantic
-from c_compiler import CCompiler
-
-
-def absolute_from_file(rpath):
-    return path.join(path.dirname(__file__), rpath)
+from symbol_table import SymbolTable
 
 
 def section(title, work):
@@ -23,7 +21,7 @@ def section(title, work):
 
 def help_text():
     def work():
-        with open(absolute_from_file('data/help.txt'), 'r') as f:
+        with Path('data/help.txt').resolve().open('r') as f:
             print(f.read())
 
     return "Manual:", work
@@ -35,7 +33,7 @@ def token_display(lexer):
         tokens = '\n'.join(
             map(str, list(lexer.tokens(ignore=False))))
         print(tokens)
-        with open('tokens.txt', 'w') as f:
+        with Path('tokens.txt').resolve().open('w') as f:
             f.write(tokens)
 
     return "Tokens:", work
@@ -47,7 +45,7 @@ def symtable_display(stb):
 
     def work():
         pprint(stb.data, indent=4, sort_dicts=False)
-        with open(absolute_from_file("symtable.json"), "w") as f:
+        with Path("symtable.json").resolve().open("w") as f:
             dump(stb.data, f, indent=4)
 
     return "Symbol Table:", work
@@ -75,7 +73,7 @@ def parsetree_display(program_tree, outputFilePath):
 def gencode_display(code, exe):
     def work():
         print(code)
-        with open(f"{exe}.c", "w") as f:
+        with Path(f"{exe}.c").resolve().open("w") as f:
             f.write(code)
 
     return "Generating code . . .", work
@@ -90,18 +88,18 @@ def clean_display(files):
 
 def native_compile_display(code, exe):
     def work():
-        ## Save code to source file first
+        # Save code to source file first
         with open(f"{exe}.c", "w") as f:
             f.write(code)
-        ## Call native C compiler
+        # Call native C compiler
         try:
             CCompiler(src_file=f"{exe}.c", exe_file=exe).exe()
         except Exception as e:
             print(e)
         finally:
-            ## Remove source code after finish
-            if path.exists(f'{exe}.c'):
-                remove(f'{exe}.c')
+            # Remove source code after finish
+            if Path(f'{exe}.c').exists():
+                Path(f'{exe}.c').unlink()
 
     return "Compiling with native C compiler", work
 
@@ -169,7 +167,7 @@ def main():
 
         # Smartly get exe file name
         if not exe:
-            exe = path.basename(source).split('.')[0]
+            exe = Path(source).stem
 
         # Read Java source file
         with open(source, 'r') as f:
@@ -186,7 +184,7 @@ def main():
         lexer.reset()
         stb = SymbolTable(lexer)
 
-         # Semantic
+        # Semantic
         semantic = Semantic(program_tree, stb)
         analyzed_tree = semantic.analyze()
 
@@ -221,9 +219,9 @@ def main():
             ]
             section(*clean_display(files))
             for file in files:
-                _path = path.join(clean_path, file)
-                if path.exists(_path):
-                    remove(_path)
+                _path = Path(clean_path).joinpath(file).resolve()
+                if Path(_path).exists():
+                    Path(_path).unlink()
 
     except GetoptError as e:
         section(*help_text())
