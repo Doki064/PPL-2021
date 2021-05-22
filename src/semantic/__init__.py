@@ -3,11 +3,14 @@ from parse import *
 
 
 class Semantic:
-	def __init__(self, parser, symbolTable):
-		self.ast = parser.program()
+	def __init__(self, ast, symbolTable):
+		self.ast = ast
 		self.symbolTable = symbolTable
 		self.identifier_variable = {}
 		self.identifier_function = {}
+
+	def analyze(self):
+		self.traverse(self.ast)
 
 	def traverse(self, t):
 		#################################
