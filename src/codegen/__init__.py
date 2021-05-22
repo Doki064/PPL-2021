@@ -34,8 +34,9 @@ IGNORE = ["Scanner", "scanner.close"]
 
 
 class CodeGen:
-	def __init__(self, ast):
+	def __init__(self, ast, symtable):
 		self.ast = ast
+		self.symtable = symtable
 
 	def travel_tree(self, t, __main=False):
 		if isinstance(t, programTree):
@@ -64,15 +65,19 @@ class CodeGen:
 				name += "[]"
 			code = datatype + name
 			try:
-				if self.travel_tree(t.getKid(3)) in _code_mapper.INPUT_FUNC.values():
-					code = (self.travel_tree(t.getKid(3))[0] + " " + name + ";\n" +
-					        self.travel_tree(t.getKid(3))[1] + name + ")" + self.travel_tree(t.getKid(4)))
-					return code
-				if self.travel_tree(t.getKid(3)) == "":
-					return "\n"
-				if self.travel_tree(t.getKid(3)) == ";\n":
-					return code + self.travel_tree(t.getKid(3))
-				code += f" = {self.travel_tree(t.getKid(3))}"
+				expr = self.travel_tree(t.getKid(3))
+				if len(expr) == 2:
+					if expr[0] in _code_mapper.INPUT_FUNC.values():
+						code = expr[1] + " " + name + ";\n" + expr[0] + name + ")" + self.travel_tree(t.getKid(4))
+						return code
+					if datatype == "var ":
+						print("\n\n\n\n\n\n\n{True,|n\n")
+				else:
+					if expr == "":
+						return "\n"
+					if expr == ";\n":
+						return code + expr
+					code += f" = {expr}"
 			except TypeError:
 				pass
 			try:
@@ -80,22 +85,22 @@ class CodeGen:
 			except TypeError:
 				pass
 			return code
-
 		elif isinstance(t, callTree):
 			code = ""
 			for idx, kid in enumerate(t.getKids()):
 				if idx == 0:
 					name = self.travel_tree(t.getKid(1))
+					typ = self.symtable.get_declaration_data(t.getKid(1).getKey())[1]
 					if name in _code_mapper.MAPPER:
 						name = _code_mapper.MAPPER[name]
 					elif name in _code_mapper.INPUT_FUNC:
-						return _code_mapper.INPUT_FUNC[name]
+						return _code_mapper.INPUT_FUNC[name], typ
 					elif name in _code_mapper.IGNORE:
 						return ""
 					code += name + "("
 				else:
 					if self.travel_tree(t.getKid(idx + 1)) == ";\n":
-						return code + ")" + self.travel_tree(t.getKid(idx + 1))
+						return (code + ");\n"), typ
 					code += self.travel_tree(t.getKid(idx + 1))
 					if idx != t.kidCount() - 1 and self.travel_tree(t.getKid(idx + 2)) != ";\n":
 						code += ", "
@@ -103,9 +108,8 @@ class CodeGen:
 			return code
 
 		elif isinstance(t, (addOPTree, multOPTree, relOPTree)):
-			code = (f"({self.travel_tree(t.getKid(1))} "
-			        f"{_get_value_by_name(t.getToken())} "
-			        f"{self.travel_tree(t.getKid(2))})")
+			code = " ".join(
+				[self.travel_tree(t.getKid(1)), _get_value_by_name(t.getToken()), self.travel_tree(t.getKid(2))])
 			return code
 
 		elif isinstance(t, typeTree):
@@ -137,7 +141,11 @@ class CodeGen:
 		elif isinstance(t, blockTree):
 			code = "\n{\n"
 			for tree in t.getKids():
-				code += self.travel_tree(tree)
+				expr = self.travel_tree(tree)
+				if len(expr) == 2:
+					code += expr[0]
+				else:
+					code += expr
 			if __main:
 				code += "return 0;\n"
 			code += "}\n"
