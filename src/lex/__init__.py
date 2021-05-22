@@ -308,6 +308,10 @@ class Lexer:
                 self.__next_char()
                 token = Token(self.__line_number, self.__line_start_position, last_position, self.__current_position,
                               _mapper.Operators(val).name, val)
+            elif self.__current_char == "/" and self._peek() == "/":
+                while self.__current_char != "\n":
+                    self.__next_char()
+                return None
             else:
                 token = Token(self.__line_number, self.__line_start_position,
                               self.__current_position, self.__current_position,
