@@ -29,12 +29,7 @@ except ImportError:
 
 
 class SymbolTable(_UserDict):
-    """The symbol table.
-
-    Attributes:
-        current_token (_Token): The current token in the iteration.
-        next_token (_Token): The next token in the iteration.
-    """
+    """The symbol table."""
     __Double_Java_Math = [
         "Math.E",
         "Math.PI",
@@ -64,20 +59,19 @@ class SymbolTable(_UserDict):
 
         Args:
             lexer: The lexer for generating collections of token.
-
         """
         super().__init__()
-        self.tokens = lexer.tokens()
-        self.current_token = None
-        self.next_token = None
+        self.__tokens = lexer.tokens()
+        self.__current_token = None
+        self.__next_token = None
         self._advance()
         self._advance()
         self._generate()
 
     def _advance(self):
         """Advances the token collection."""
-        self.current_token = self.next_token
-        self.next_token = next(self.tokens, None)
+        self.__current_token = self.__next_token
+        self.__next_token = next(self.__tokens, None)
 
     def _generate(self):
         """Function for generating a symbol table."""
@@ -85,16 +79,16 @@ class SymbolTable(_UserDict):
         identifier_type = None
         identifier_attribute = []
 
-        while self.current_token is not None:
-            if self.current_token.check_token(_token_names.IDENTIFIER):
-                identifier_key = identifier_position = self.current_token.key()
-                identifier_name = self.current_token.value
-                if self.next_token.check_token(_token_names.Separators("[")):
+        while self.__current_token is not None:
+            if self.__current_token.check_token(_token_names.IDENTIFIER):
+                identifier_key = identifier_position = self.__current_token.key()
+                identifier_name = self.__current_token.value
+                if self.__next_token.check_token(_token_names.Separators("[")):
                     while True:
                         self._advance()
-                        identifier_name += self.current_token.value
-                        if (self.current_token.check_token(_token_names.Separators("]"))
-                                and not self.next_token.check_token(_token_names.Separators("["))):
+                        identifier_name += self.__current_token.value
+                        if (self.__current_token.check_token(_token_names.Separators("]"))
+                                and not self.__next_token.check_token(_token_names.Separators("["))):
                             break
 
                 if scope_level == -1:
@@ -104,7 +98,7 @@ class SymbolTable(_UserDict):
                 elif scope_level >= 1:
                     scope = f"inner_scope_{scope_level}"
                 else:
-                    raise _LexerError(self.current_token.position, "Out of scope!")
+                    raise _LexerError(self.__current_token.position, "Out of scope!")
 
                 if not identifier_type:
                     try:
@@ -138,30 +132,30 @@ class SymbolTable(_UserDict):
                 identifier_type = None
                 identifier_attribute.clear()
 
-            elif self.current_token.check_token(_token_names.KeywordsType.names()):
-                if self.next_token.check_token(_token_names.Separators("[")):
-                    id_type = self.current_token.value
+            elif self.__current_token.check_token(_token_names.KeywordsType.names()):
+                if self.__next_token.check_token(_token_names.Separators("[")):
+                    id_type = self.__current_token.value
                     while True:
                         self._advance()
-                        id_type += self.current_token.value
-                        if (self.current_token.check_token(_token_names.Separators("]"))
-                                and not self.next_token.check_token(_token_names.Separators("["))):
+                        id_type += self.__current_token.value
+                        if (self.__current_token.check_token(_token_names.Separators("]"))
+                                and not self.__next_token.check_token(_token_names.Separators("["))):
                             break
                     identifier_type = id_type
-                elif self.next_token.check_token(_token_names.IDENTIFIER):
-                    identifier_type = self.current_token.value
+                elif self.__next_token.check_token(_token_names.IDENTIFIER):
+                    identifier_type = self.__current_token.value
 
-            elif self.current_token.check_token(_token_names.KeywordsAttribute.names()):
-                if (self.next_token.check_token(_token_names.KeywordsAttribute.names())
-                        or self.next_token.check_token(_token_names.KeywordsType.names())):
-                    identifier_attribute.append(self.current_token.value)
+            elif self.__current_token.check_token(_token_names.KeywordsAttribute.names()):
+                if (self.__next_token.check_token(_token_names.KeywordsAttribute.names())
+                        or self.__next_token.check_token(_token_names.KeywordsType.names())):
+                    identifier_attribute.append(self.__current_token.value)
 
-            elif (self.current_token.check_token(_token_names.Separators("{"))
-                  or self.current_token.check_token(_token_names.Separators("("))):
+            elif (self.__current_token.check_token(_token_names.Separators("{"))
+                  or self.__current_token.check_token(_token_names.Separators("("))):
                 scope_level += 1
 
-            elif (self.current_token.check_token(_token_names.Separators("}"))
-                  or self.current_token.check_token(_token_names.Separators(")"))):
+            elif (self.__current_token.check_token(_token_names.Separators("}"))
+                  or self.__current_token.check_token(_token_names.Separators(")"))):
                 scope_level -= 1
 
             self._advance()
