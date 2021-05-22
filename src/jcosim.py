@@ -183,7 +183,7 @@ def main():
         stb = SymbolTable(lexer)
 
          # Semantic
-        # semantic = Semantic(program_tree, stb)
+        semantic = Semantic(program_tree, stb)
 
         # Generate C code
         code_gen = CodeGen(program_tree)
