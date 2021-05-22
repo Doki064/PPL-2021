@@ -40,7 +40,7 @@ class Semantic:
 		#           *idTree
 		#################################
 		if isinstance(t, callTree):
-			identifier_name, identifier_type = self.traverse(t.getKid(1))
+			identifier_name, identifier_type, _ = self.traverse(t.getKid(1))
 			if identifier_type is None and identifier_name not in _code_mapper.IGNORE:
 				raise Exception("Error: Function not found '%s'" % identifier_name)
 			else:
@@ -57,12 +57,15 @@ class Semantic:
 		#           *block
 		#################################
 		elif isinstance(t, funcDeclTree):
-			identifier_name, identifier_type = self.traverse(t.getKid(2))
+			identifier_name, identifier_type, identifier_key = self.traverse(t.getKid(2))
 
 			if identifier_name in self.identifier_function:
-				raise Exception("Error: Function '%s' is declared twice." %identifier_name)
+				for key in self.identifier_function[identifier_name]:
+					if self.symbolTable.compare_scope(identifier_key, key):
+						raise Exception("Error: Function '%s' is declared twice." %identifier_name)
+				self.identifier_function[identifier_name].append(identifier_key)
 			else:
-				self.identifier_function[identifier_name] = identifier_type
+				self.identifier_function[identifier_name] = [identifier_key]
 
 			for tree in t.getKids():
 				if tree is not t.getKid(2):
@@ -75,19 +78,21 @@ class Semantic:
 		#           *idTree
 		#################################
 		elif isinstance(t, declrTree):
-			identifier_name, identifier_type = self.traverse(t.getKid(2))
+			identifier_name, identifier_type, identifier_key = self.traverse(t.getKid(2))
 
 			if identifier_type is None:
-				raise Exception("Error: Variable not found '%s'" %
-								identifier_name)
+				raise Exception("Error: Variable not found '%s'" % identifier_name)
 			else:
 				if identifier_name in self.identifier_variable:
-					raise Exception("Error: Variable '%s' is declared twice." % identifier_name)
+					for key in self.identifier_variable[identifier_name]:
+						if self.symbolTable.compare_scope(identifier_key, key):
+							raise Exception("Error: Variable '%s' is declared twice." % identifier_name)
+					self.identifier_variable[identifier_name].append(identifier_key)
 				else:
 					if identifier_type == 'var':
 						identifier_type = self.traverse(t.getKid(3))
 						t.getKid(1).setType(identifier_type)
-					self.identifier_variable[identifier_name] = identifier_type
+					self.identifier_variable[identifier_name] = [identifier_key]
 
 			for tree in t.getKids():
 				if tree is not t.getKid(2):
@@ -109,7 +114,7 @@ class Semantic:
 		#           *expr
 		#################################
 		elif isinstance(t, assignTree):
-			_, identifier_type_left = self.traverse(t.getKid(1))
+			_, identifier_type_left, _ = self.traverse(t.getKid(1))
 			identifier_type_right = self.traverse(t.getKid(2))
 
 			if identifier_type_left == identifier_type_right:
@@ -193,7 +198,7 @@ class Semantic:
 			return identifier_type
 		elif isinstance(t, idTree):
 			identifier_name, identifier_type = self.symbolTable.get_declaration_data(t.getKey())
-			return identifier_name, identifier_type
+			return [identifier_name, identifier_type, t.getKey()]
 		else:
 			for tree in t.getKids():
 				self.traverse(tree)
