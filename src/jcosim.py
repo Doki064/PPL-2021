@@ -31,6 +31,7 @@ def help_text():
 
 def token_display(lexer):
     def work():
+        lexer.reset()
         tokens = '\n'.join(
             map(str, list(lexer.tokens(ignore=False))))
         print(tokens)
@@ -71,9 +72,11 @@ def parsetree_display(program_tree):
     return "Generating Parse Tree . . .", work
 
 
-def gencode_display(code):
+def gencode_display(code, exe):
     def work():
         print(code)
+        with open(f"{exe}.c", "w") as f:
+            f.write(code)
 
     return "Generating code . . .", work
 
@@ -83,6 +86,24 @@ def clean_display(files):
         print(files)
 
     return "Cleaning files", work
+
+
+def native_compile_display(code, exe):
+    def work():
+        ## Save code to source file first
+        with open(f"{exe}.c", "w") as f:
+            f.write(code)
+        ## Call native C compiler
+        try:
+            CCompiler(src_file=f"{exe}.c", exe_file=exe).exe()
+        except Exception as e:
+            print(e)
+        finally:
+            ## Remove source code after finish
+            if path.exists(f'{exe}.c'):
+                remove(f'{exe}.c')
+
+    return "Compiling with native C compiler", work
 
 
 def main():
@@ -138,50 +159,64 @@ def main():
                 parsetree = True
                 gencode = True
 
+        # No source no life
         if not source:
             raise GetoptError('ERROR: Input file must be specified')
+
+        # Smartly get exe file name
         if not exe:
             exe = path.basename(source).split('.')[0]
 
+        # Read Java source file
         with open(source, 'r') as f:
             buffer = f.read()
-            lexer = Lexer(buffer)
-            parser = Parser(lexer)
-            program_tree = parser.program()  # Start the parser.
-            lexer.reset()
-            stb = SymbolTable(lexer)
-            lexer.reset()
-            semantic = Semantic(program_tree, stb)
-            code_gen = CodeGen(program_tree)
-            code = code_gen.generate_code()
-            with open(f"{exe}.c", "w") as f:
-                f.write(code)
 
-            if token:
-                section(*token_display(lexer))
-            if symtable:
-                section(*symtable_display(stb))
-            if parsetree:
-                section(*parsetree_display(program_tree))
-            if gencode:
-                section(*gencode_display(code))
-            if clean:
-                files = [
-                    'tokens.txt',
-                    'parsetree.png',
-                    'symtable.txt',
-                    f'{exe}.c',
-                    f'{exe}.exe',
-                    f'{exe}',
-                    f'{exe}.o',
-                    f'{exe}.obj'
-                ]
-                section(*clean_display(files))
-                for file in files:
-                    _path = path.join(clean_path, file)
-                    if path.exists(_path):
-                        remove(_path)
-            # CCompiler(src_file=f"{exe}.c", exe_file=exe).exe()
+        # Lexing
+        lexer = Lexer(buffer)
+
+        # Parsing
+        parser = Parser(lexer)
+        program_tree = parser.program()
+
+        # Generate symbol table
+        lexer.reset()
+        stb = SymbolTable(lexer)
+
+         # Semantic
+        # semantic = Semantic(program_tree, stb)
+
+        # Generate C code
+        code_gen = CodeGen(program_tree)
+        code = code_gen.generate_code()
+
+        # Compile the code and output native binary
+        section(*native_compile_display(code, exe))
+
+        # do things based on flags
+        if token:
+            section(*token_display(lexer))
+        if symtable:
+            section(*symtable_display(stb))
+        if parsetree:
+            section(*parsetree_display(program_tree))
+        if gencode:
+            section(*gencode_display(code, exe))
+        if clean:
+            files = [
+                'tokens.txt',
+                'parsetree.png',
+                'symtable.txt',
+                f'{exe}.c',
+                f'{exe}.exe',
+                f'{exe}',
+                f'{exe}.o',
+                f'{exe}.obj'
+            ]
+            section(*clean_display(files))
+            for file in files:
+                _path = path.join(clean_path, file)
+                if path.exists(_path):
+                    remove(_path)
 
     except GetoptError as e:
         section(*help_text())
