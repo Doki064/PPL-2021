@@ -186,8 +186,8 @@ class CodeGen:
 				raise TypeError(type(t))
 			raise SyntaxError(f"UwU What's dis error? {type(t)}")
 
-	def generate_code(self, header=None):
-		header = """#include <stdio.h> \n#include <math.h>\n""" if header is None else header
+	def generate_code(self):
+		header = """#include <stdio.h> \n#include <stdlib.h> \n#include <math.h>\n"""
 		code = self.travel_tree(self.ast)
 		code = "\n".join(line for line in code.split("\n") if line.strip() != "")
 		return header + code[1:-1]
