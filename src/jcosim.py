@@ -10,6 +10,9 @@ from lex import Lexer
 from parse import Parser
 from semantic import Semantic
 from symbol_table import SymbolTable
+import os
+
+os.environ["PATH"] += os.pathsep + os.path.abspath("./lib/bin")
 
 
 def section(title, work):
@@ -189,7 +192,7 @@ def main():
         analyzed_tree = semantic.analyze()
 
         # Generate C code
-        code_gen = CodeGen(program_tree)
+        code_gen = CodeGen(analyzed_tree, stb)
         code = code_gen.generate_code()
 
         # Compile the code and output native binary
