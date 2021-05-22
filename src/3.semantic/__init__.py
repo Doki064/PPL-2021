@@ -15,8 +15,7 @@ class Semantic:
         #           *idTree
         #################################
         if isinstance(t, callTree):
-            identifier_key = t.getKid(1).getKey()
-            identifier_name, identifier_type = self.symbolTable.get_declaration_data(identifier_key)
+            identifier_name, identifier_type = self.traverse(t.getKid(1))
             if identifier_type is None:
                 raise Exception("Error: Function not found '%s'" % identifier_name)
 
@@ -31,8 +30,8 @@ class Semantic:
         #           *block
         #################################
         elif isinstance(t, funcDeclTree):
-            identifier_key = t.getKid(2).getKey()
-            identifier_name, identifier_type = self.symbolTable.get_declaration_data(identifier_key)
+            identifier_name, identifier_type = self.traverse(t.getKid(2))
+
             if identifier_name in self.identifier_function:
                 raise Exception("Error: Function '%s' is declared twice." % identifier_name)
             else:
@@ -48,8 +47,8 @@ class Semantic:
         #           *idTree
         #################################
         elif isinstance(t, declrTree):
-            identifier_key = t.getKid(2).getKey()
-            identifier_name, identifier_type = self.symbolTable.get_declaration_data(identifier_key)
+            identifier_name, identifier_type = self.traverse(t.getKid(2))
+
             if identifier_type is None:
                 raise Exception("Error: Variable not found '%s'" % identifier_name)
             else:
@@ -75,7 +74,7 @@ class Semantic:
         #           *expr
         #################################
         elif isinstance(t, assignTree):
-            _, identifier_type_left = self.symbolTable.get_declaration_data(t.getKid(1).getKey())
+            _, identifier_type_left = self.traverse(t.getKid(1))
             identifier_type_right = self.traverse(t.getKid(2))
 
             if identifier_type_left == identifier_type_right:
@@ -165,6 +164,9 @@ class Semantic:
         elif isinstance(t, stringTree):
             identifier_type = "string"
             return identifier_type
+        elif isinstance(t, idTree):
+            identifier_name, identifier_type = self.symbolTable.get_declaration_data(t.getKey())
+            return identifier_name, identifier_type
         else:
             for tree in t.getKids():
                 self.traverse(tree)
