@@ -33,7 +33,7 @@ class Semantic:
 		try:
 			self.traverse(self.ast)
 		except Exception as e:
-			exit("Error. " + e)
+			exit("Error. " + str(e))
 		return self.ast
 
 	def traverse(self, t):
