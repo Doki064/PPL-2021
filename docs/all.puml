@@ -1,6 +1,6 @@
 @startuml
 left to right direction
-title Class Diagram All
+title JCOSIM Class Diagram
 
 ' CodeGen -----------------------
 package CodeGen #f0f0f0 {
@@ -168,11 +168,71 @@ package SymbolTable #f0f0f0 {
 }
 ' SymbolTable -----------------------
 
+' CCompiler -----------------------
+package c_compiler #f0f0f0 {
+    class CCompiler {
+        - compiler
+        + __init__(src: str, exe: str): CCompiler
+        + clean(include_exe: bool)
+        + exe(clean: bool)
+        + obj()
+    }
+}
+' CCompiler -----------------------
+
+' Semantic -----------------------
+package semantic #f0f0f0 {
+    class Semantic {
+        + __init__(ast: _AST, symbolTable: SymbolTable): Semantic
+        + analyze()
+        + traverse(t)
+    }
+}
+' Semantic -----------------------
+
+' Mapper  -----------------------
+package mapper #f0f0f0 {
+    class Mapper {
+    + names
+    + values
+    + to_dict()
+    + items()
+    }
+    abstract class BaseEnum  {
+        + {static} names()
+        + {static} values()
+        + {static} to_dict()
+        + {static} items()
+    }
+    class Ignored
+    class Keywords
+    class KeywordsType
+    class KeywordsAttribute
+    class Operators
+    class Separators
+    BaseEnum *-- Mapper
+    Ignored *-- Mapper
+    Keywords *-- Mapper
+    KeywordsType *-- Mapper
+    KeywordsAttribute *-- Mapper
+    Operators *-- Mapper
+    Separators *-- Mapper
+}
+' Mapper -----------------------
+
 ' ALL -----------------------
 Lexer *-- Parser
 Lexer *-- SymbolTable
 ProgramTree *-- Parser
 ProgramTree *-- CodeGen
 Token <-- Lexer
+SymbolTable *-- Semantic
+ProgramTree *-- Semantic
+UserDict <|-- SymbolTable
+Mapper <-- CodeGen
+Mapper <-- Semantic
+'Mapper *-- Lexer
+'Mapper *-- Parser
+'Mapper *-- SymbolTable
 ' ALL -----------------------
 @enduml

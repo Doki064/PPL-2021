@@ -1,0 +1,10 @@
+@startuml
+title Semantic Analyzer \n Class Diagram
+class Semantic {
+    + identifier_variable: dict
+    + identifier_function: dict
+    + __init__(ast: _AST, symbolTable: SymbolTable): Semantic
+    + analyze()
+    + traverse(t)
+}
+@enduml

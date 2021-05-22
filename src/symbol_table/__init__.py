@@ -83,22 +83,19 @@ class SymbolTable(_UserDict):
                     raise _LexerError(self.__current_token.position, "Out of scope!")
 
                 if identifier_type is None:
-                    try:
-                        # A valid key must fulfill all the criteria below:
-                        #   has the same identifier name,
-                        #   its identifier type cannot be NoneType,
-                        #   has the same or larger scope as the current identifier,
-                        #   is the most recent key.
-                        # If there is a valid key, pass it as the identifier_position for the current identifier.
-                        latest_valid_key = next(key for key, value in reversed(self.data.items())
-                                                if (value["identifier_name"] == identifier_name
-                                                    and value["identifier_type"] is not None
-                                                    and value["identifier_scope"][1] <= scope_level))
-                    except StopIteration:
-                        pass
-                    else:
-                        identifier_position = latest_valid_key
-
+                    # try:
+                    #     # A valid key must fulfill all the criteria below:
+                    #     #   has the same identifier name,
+                    #     #   its identifier type cannot be NoneType,
+                    #     #   has the same or larger scope as the current identifier,
+                    #     #   is the most recent key.
+                    for key, value in reversed(self.data.items()):
+                        if (value["identifier_name"] == identifier_name
+                                and value["identifier_type"] is not None
+                                and value["identifier_scope"][1] <= scope_level):
+                            if value["identifier_scope"][1] == scope_level and abs(value["scope_label"] - 1) > 1:
+                                continue
+                            identifier_position = key
                     if identifier_name in _code_mapper.Double_Java or identifier_name == "scanner.nextDouble":
                         identifier_type = "double"
                     elif identifier_name in _code_mapper.Float_Java:

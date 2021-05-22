@@ -1,0 +1,10 @@
+@startuml
+title C Compiler Class Diagram
+class CCompiler {
+    - compiler
+    + __init__(src: str, exe: str): CCompiler
+    + clean(include_exe: bool)
+    + exe(clean: bool)
+    + obj()
+}
+@enduml
