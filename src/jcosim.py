@@ -54,7 +54,7 @@ def symtable_display(stb):
     return "Symbol Table:", work
 
 
-def parsetree_display(program_tree: programTree):
+def parsetree_display(program_tree):
     def work():
         graph = Dot(graph_name='Parse Tree', graph_type='graph')
 
