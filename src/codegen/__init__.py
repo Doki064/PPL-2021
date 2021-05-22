@@ -61,9 +61,9 @@ class CodeGen:
             code = datatype + name
             try:
                 if self.travel_tree(t.getKid(3)) in INPUT_FUNC.values():
-                    return (f"{self.travel_tree(t.getKid(3))[0]} {name}\n"
-                            f"{self.travel_tree(t.getKid(3)[1]) + name})"
-                            f"{self.travel_tree(t.getKid(4))}")
+                    innercode = self.travel_tree(t.getKid(3))[0] + " " + name + ";\n" + \
+                                self.travel_tree(t.getKid(3))[1] + name + ")" + self.travel_tree(t.getKid(4))
+                    return innercode
                 if self.travel_tree(t.getKid(3)) == "":
                     return "\n"
                 if self.travel_tree(t.getKid(3)) == ";\n":
