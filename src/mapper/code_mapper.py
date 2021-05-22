@@ -29,9 +29,12 @@ __MAPPER = {
 }
 
 INPUT_FUNC = {
-    "scanner.nextDouble": ("double", 'scanf("%lf", &'),
-    "scanner.nextFloat": ("float", 'scanf("%f", &'),
-    "scanner.nextInt": ("int", 'scanf("%d", &'),
+    "scanner.nextDouble": 'scanf("%lf", &',
+    "scanner.nextFloat": 'scanf("%f", &',
+    "scanner.nextLong": 'scanf("%ld", &',
+    "scanner.nextInt": 'scanf("%d", &',
+    "scanner.nextShort": 'scanf("%hd", &',
+    "scanner.nextLine": 'scanf("%s", ',
 }
 
 TYPE_MAPPER = {
