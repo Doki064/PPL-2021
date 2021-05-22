@@ -155,7 +155,7 @@ class SymbolTable(_UserDict):
 
             self._advance()
 
-    def get_declaration_type(self, key):
+    def get_declaration_data(self, key):
         """Returns the declaration type of the identifier with the given key.
 
         Args:
@@ -165,7 +165,9 @@ class SymbolTable(_UserDict):
             Returns the declaration type of the identifier with the given key.
                 None if the identifier is not declared.
         """
-        return self.get_identifier_type(self.get_identifier_position(key))
+        name = self.get_identifier_name(key)
+        typ = self.get_identifier_type(self.get_identifier_position(key))
+        return name, typ
 
     def get_identifier_position(self, identifier_key) -> int:
         """Gets the declared position of the identifier with the given key.

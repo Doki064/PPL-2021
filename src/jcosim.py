@@ -6,6 +6,7 @@ from codegen import CodeGen
 from lex import Lexer
 from parse import Parser
 from symbol_table import SymbolTable
+from semantic import Semantic
 from c_compiler import CCompiler
 
 
@@ -150,6 +151,7 @@ def main():
             lexer.reset()
             stb = SymbolTable(lexer)
             lexer.reset()
+            semantic = Semantic(program_tree, stb)
             code_gen = CodeGen(program_tree)
             code = code_gen.generate_code()
             with open(f"{exe}.c", "w") as f:
