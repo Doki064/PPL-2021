@@ -57,7 +57,6 @@ class SymbolTable(_UserDict):
     def _generate(self):
         """Function for generating a symbol table."""
         scope_level = -1
-        scope_idx = 0
         scope_label = 0
         identifier_type = None
         identifier_attribute = []
@@ -82,14 +81,6 @@ class SymbolTable(_UserDict):
                     scope = f"inner_scope_{scope_level}"
                 else:
                     raise _LexerError(self.__current_token.position, "Out of scope!")
-
-                try:
-                    if self.get_identifier_scope(list(self.data.keys())[-1]) == (scope, scope_level, scope_idx):
-                        scope_idx += 1
-                    else:
-                        scope_idx = 0
-                except IndexError:
-                    pass
 
                 if identifier_type is None:
                     try:
@@ -128,7 +119,7 @@ class SymbolTable(_UserDict):
                     "identifier_name": identifier_name,
                     "identifier_type": identifier_type,
                     "identifier_attribute": tuple(identifier_attribute),
-                    "identifier_scope": (scope, scope_level, scope_idx),
+                    "identifier_scope": (scope, scope_level),
                     "scope_label": scope_label,
                 }
                 identifier_type = None
@@ -181,7 +172,7 @@ class SymbolTable(_UserDict):
         typ = self.get_identifier_type(self.get_identifier_position(key))
         return name, typ
 
-    def compare_scope(self, key_a, key_b) -> bool:
+    def compare_scope(self, key_a, key_b) -> int:
         """Returns True if the same scope.
 
         Args:
@@ -189,20 +180,11 @@ class SymbolTable(_UserDict):
             key_b (int): The second key.
 
         Returns:
-            Returns True if the same scope.
+            Returns positive if scope A > scope B, 0 if equal, and negative if scope A < scope B.
         """
-        a_scope = self.get_identifier_scope(key_a)
-        b_scope = self.get_identifier_scope(key_b)
-        if a_scope[1] == b_scope[1] and a_scope[2] == b_scope[2]:
-            return True
-        if a_scope[1] == b_scope[1] or self.get(key_a)["scope_label"] == self.get(key_b)["scope_label"]:
-            return True
-        if a_scope[2] == b_scope[2] and self.get(key_a)["scope_label"] == self.get(key_b)["scope_label"]:
-            return True
-        if abs(self.get(key_a)["scope_label"] - self.get(key_b)["scope_label"]) == 1:
-            if abs(a_scope[1] - b_scope[1]) == 1 or abs(a_scope[2] - b_scope[2]) == 1:
-                return True
-        return False
+        a_scope = self.get(key_a)["scope_label"]
+        b_scope = self.get(key_b)["scope_label"]
+        return b_scope - a_scope
 
     def get_identifier_position(self, identifier_key) -> int:
         """Gets the declared position of the identifier with the given key.
