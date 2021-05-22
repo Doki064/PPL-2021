@@ -16,7 +16,6 @@ Example:
 """
 
 __all__ = [
-    "token_names",
     "Token",
     "LexerError",
     "Lexer",
@@ -27,9 +26,9 @@ from typing import Iterator as _Iterator
 from typing import Sequence as _Sequence
 
 try:
-    from lex import token_names as _token_names
+    import mapper as _mapper
 except ImportError:
-    from src.lex import token_names as _token_names
+    import src.mapper as _mapper
 
 
 class Token:
@@ -208,7 +207,7 @@ class Lexer:
                         start_position, f"EOL while scanning string literal at position {start_position}")
             self.__next_char()
             token = Token(self.__line_number, self.__line_start_position, start_position, self.__current_position,
-                          _token_names.STRING, self.__stream[start_position:self.__current_position + 1])
+                          _mapper.STRING, self.__stream[start_position:self.__current_position + 1])
 
         # Checks double-quoted string.
         elif self.__current_char == '"':
@@ -219,7 +218,7 @@ class Lexer:
                     raise LexerError(start_position, f"EOL while scanning string literal at position {start_position}")
             self.__next_char()
             token = Token(self.__line_number, self.__line_start_position, start_position, self.__current_position,
-                          _token_names.STRING, self.__stream[start_position:self.__current_position + 1])
+                          _mapper.STRING, self.__stream[start_position:self.__current_position + 1])
 
         # Checks number begins with a digit.
         elif self.__current_char.isdigit():
@@ -233,7 +232,7 @@ class Lexer:
             if self._peek() in ["d", "D", "f", "F"]:
                 self.__next_char()
             token = Token(self.__line_number, self.__line_start_position, start_position, self.__current_position,
-                          _token_names.NUMBER, self.__stream[start_position:self.__current_position + 1])
+                          _mapper.NUMBER, self.__stream[start_position:self.__current_position + 1])
 
         # Checks number begins with a dot.
         elif self.__current_char == ".":
@@ -244,81 +243,81 @@ class Lexer:
                 if self._peek() in ["d", "D", "f", "F"]:
                     self.__next_char()
                 token = Token(self.__line_number, self.__line_start_position, start_position, self.__current_position,
-                              _token_names.NUMBER, self.__stream[start_position:self.__current_position + 1])
+                              _mapper.NUMBER, self.__stream[start_position:self.__current_position + 1])
             else:
                 token = Token(self.__line_number, self.__line_start_position,
                               self.__current_position, self.__current_position,
-                              _token_names.Separators(self.__current_char).name, self.__current_char)
+                              _mapper.Separators(self.__current_char).name, self.__current_char)
 
         # Checks word begins with an alphabetic letter or an underscore.
         elif self.__current_char.isalpha() or self.__current_char == "_":
             start_position = self.__current_position
             while True:
                 if (self._peek() in [" ", "\t", "\r", "\n", "\0"]
-                        or self._peek() in _token_names.Separators.values()
-                        or self._peek() in _token_names.Separators.values()):
+                        or self._peek() in _mapper.Separators.values()
+                        or self._peek() in _mapper.Separators.values()):
                     break
                 self.__next_char()
             word = self.__stream[start_position:self.__current_position + 1]
             # Checks if word is a keyword.
-            if word in _token_names.Keywords.values():
+            if word in _mapper.Keywords.values():
                 token = Token(self.__line_number, self.__line_start_position, start_position, self.__current_position,
-                              _token_names.Keywords(word).name, word)
-            elif word in _token_names.KeywordsType.values():
+                              _mapper.Keywords(word).name, word)
+            elif word in _mapper.KeywordsType.values():
                 token = Token(self.__line_number, self.__line_start_position, start_position, self.__current_position,
-                              _token_names.KeywordsType(word).name, word)
-            elif word in _token_names.KeywordsAttribute.values():
+                              _mapper.KeywordsType(word).name, word)
+            elif word in _mapper.KeywordsAttribute.values():
                 token = Token(self.__line_number, self.__line_start_position, start_position, self.__current_position,
-                              _token_names.KeywordsAttribute(word).name, word)
+                              _mapper.KeywordsAttribute(word).name, word)
             # Otherwise put it as identifier.
             else:
                 token = Token(self.__line_number, self.__line_start_position, start_position, self.__current_position,
-                              _token_names.IDENTIFIER, word)
+                              _mapper.IDENTIFIER, word)
 
         # Checks if is a separator.
-        elif self.__current_char in _token_names.Separators.values():
+        elif self.__current_char in _mapper.Separators.values():
             token = Token(self.__line_number, self.__line_start_position,
                           self.__current_position, self.__current_position,
-                          _token_names.Separators(self.__current_char).name, self.__current_char)
+                          _mapper.Separators(self.__current_char).name, self.__current_char)
 
         # Checks if is an operator.
-        elif self.__current_char in _token_names.Operators.values():
+        elif self.__current_char in _mapper.Operators.values():
             last_position = self.__current_position
             if self.__current_char not in ["&", "|"] and self._peek() == "=":
                 val = self.__current_char + self._peek()
                 self.__next_char()
                 token = Token(self.__line_number, self.__line_start_position, last_position, self.__current_position,
-                              _token_names.Operators(val).name, val)
+                              _mapper.Operators(val).name, val)
             elif self.__current_char == "+" and self._peek() == "+":
                 val = self.__current_char + self._peek()
                 self.__next_char()
                 token = Token(self.__line_number, self.__line_start_position, last_position, self.__current_position,
-                              _token_names.Operators(val).name, val)
+                              _mapper.Operators(val).name, val)
             elif self.__current_char == "-" and self._peek() == "-":
                 val = self.__current_char + self._peek()
                 self.__next_char()
                 token = Token(self.__line_number, self.__line_start_position, last_position, self.__current_position,
-                              _token_names.Operators(val).name, val)
+                              _mapper.Operators(val).name, val)
             elif self.__current_char == "&" and self._peek() == "&":
                 val = self.__current_char + self._peek()
                 self.__next_char()
                 token = Token(self.__line_number, self.__line_start_position, last_position, self.__current_position,
-                              _token_names.Operators(val).name, val)
+                              _mapper.Operators(val).name, val)
             elif self.__current_char == "|" and self._peek() == "|":
                 val = self.__current_char + self._peek()
                 self.__next_char()
                 token = Token(self.__line_number, self.__line_start_position, last_position, self.__current_position,
-                              _token_names.Operators(val).name, val)
+                              _mapper.Operators(val).name, val)
             else:
                 token = Token(self.__line_number, self.__line_start_position,
                               self.__current_position, self.__current_position,
-                              _token_names.Operators(self.__current_char).name, self.__current_char)
+                              _mapper.Operators(self.__current_char).name, self.__current_char)
 
         # Checks if is EOF
         elif self.__current_char == "\0":
             token = Token(self.__line_number, self.__line_start_position,
                           self.__current_position, self.__current_position,
-                          _token_names.EOF, self.__current_char)
+                          _mapper.EOF, self.__current_char)
 
         # Raise error if is an unknown token.
         else:
@@ -352,10 +351,10 @@ class Lexer:
             token = self._get_token()
             if token is not None:
                 if ignore:
-                    if header and not token.check_token(_token_names.KeywordsType("class")):
+                    if header and not token.check_token(_mapper.KeywordsType("class")):
                         continue
                     else:
                         header = False
-                    if token.check_token(_token_names.Ignored.names()):
+                    if token.check_token(_mapper.Ignored.names()):
                         continue
                 yield token

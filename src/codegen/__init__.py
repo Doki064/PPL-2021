@@ -2,31 +2,12 @@ __all__ = ["CodeGen"]
 
 try:
     from ast import *
-    from lex.token_names import get_value_by_name as _get_value_by_name
+    from mapper import code_mapper as _code_mapper
+    from mapper import get_value_by_name as _get_value_by_name
 except ImportError:
     from src.ast import *
-    from src.lex.token_names import get_value_by_name as _get_value_by_name
-
-MAPPER = {
-    "Math.PI": "M_PI",
-    "Math.pow": "pow",
-    "Math.sqrt": "sqrt",
-    "Math.abs": "abs",
-    "System.out.println": "println",
-    "System.out.printf": "printf",
-}
-
-INPUT_FUNC = {
-    "scanner.nextDouble": ("double", "scanf(\"%lf\", &"),
-    "scanner.nextFloat": ("float", "scanf(\"%f\", &"),
-    "scanner.nextInt": ("int", "scanf(\"%d\", &"),
-}
-
-TYPE_MAPPER = {
-    "String": "char*"
-}
-
-IGNORE = ["Scanner", "scanner.close"]
+    from src.mapper import code_mapper as _code_mapper
+    from src.mapper import get_value_by_name as _get_value_by_name
 
 
 class CodeGen:
@@ -60,7 +41,7 @@ class CodeGen:
                 name += "[]"
             code = datatype + name
             try:
-                if self.travel_tree(t.getKid(3)) in INPUT_FUNC.values():
+                if self.travel_tree(t.getKid(3)) in _code_mapper.INPUT_FUNC.values():
                     code = (self.travel_tree(t.getKid(3))[0] + " " + name + ";\n" +
                             self.travel_tree(t.getKid(3))[1] + name + ")" + self.travel_tree(t.getKid(4)))
                     return code
@@ -82,11 +63,11 @@ class CodeGen:
             for idx, kid in enumerate(t.getKids()):
                 if idx == 0:
                     name = self.travel_tree(t.getKid(1))
-                    if name in MAPPER:
-                        name = MAPPER[name]
-                    elif name in INPUT_FUNC:
-                        return INPUT_FUNC[name]
-                    elif name in IGNORE:
+                    if name in _code_mapper.MAPPER:
+                        name = _code_mapper.MAPPER[name]
+                    elif name in _code_mapper.INPUT_FUNC:
+                        return _code_mapper.INPUT_FUNC[name]
+                    elif name in _code_mapper.IGNORE:
                         return ""
                     code += name + "("
                 else:
@@ -105,8 +86,8 @@ class CodeGen:
             return code
 
         elif isinstance(t, typeTree):
-            if t.getType() in TYPE_MAPPER:
-                code = TYPE_MAPPER[t.getType()]
+            if t.getType() in _code_mapper.TYPE_MAPPER:
+                code = _code_mapper.TYPE_MAPPER[t.getType()]
             else:
                 code = t.getType()
             return code + " "

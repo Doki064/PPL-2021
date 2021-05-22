@@ -16,9 +16,15 @@ __all__ = [
     "to_dict",
     "items",
     "get_value_by_name",
+    "code_mapper",
 ]
 
 from enum import Enum as _Enum
+
+try:
+    from mapper import code_mapper
+except ImportError:
+    from src.mapper import code_mapper
 
 # Must keep!
 EOF = "EOF"

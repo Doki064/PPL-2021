@@ -20,37 +20,18 @@ try:
     from lex import Lexer as _Lexer
     from lex import LexerError as _LexerError
     from lex import Token as _Token
-    from lex import token_names as _token_names
+    import mapper as _mapper
+    import mapper.code_mapper as _code_mapper
 except ImportError:
     from src.lex import Lexer as _Lexer
     from src.lex import LexerError as _LexerError
     from src.lex import Token as _Token
-    from src.lex import token_names as _token_names
+    import src.mapper as _mapper
+    import src.mapper.code_mapper as _code_mapper
 
 
 class SymbolTable(_UserDict):
     """The symbol table."""
-    __Double_Java_Math = [
-        "Math.E",
-        "Math.PI",
-        "Math.sqrt",
-        "Math.cbrt",
-        "Math.pow",
-        "Math.signum",
-        "Math.ceil",
-        "Math.floor",
-        "Math.random",
-        "Math.rint",
-        "Math.log",
-        "Math.log10",
-        "Math.log1p",
-        "Math.exp",
-        "Math.expm1",
-        "Math.sin",
-        "Math.cos",
-        "Math.tan",
-    ]
-    __Int_Java_Math = ["Math.round"]
 
     def __init__(self, lexer: _Lexer):
         """SymbolTable constructor.
@@ -80,15 +61,15 @@ class SymbolTable(_UserDict):
         identifier_attribute = []
 
         while self.__current_token is not None:
-            if self.__current_token.check_token(_token_names.IDENTIFIER):
+            if self.__current_token.check_token(_mapper.IDENTIFIER):
                 identifier_key = identifier_position = self.__current_token.key()
                 identifier_name = self.__current_token.value
-                if self.__next_token.check_token(_token_names.Separators("[")):
+                if self.__next_token.check_token(_mapper.Separators("[")):
                     while True:
                         self._advance()
                         identifier_name += self.__current_token.value
-                        if (self.__current_token.check_token(_token_names.Separators("]"))
-                                and not self.__next_token.check_token(_token_names.Separators("["))):
+                        if (self.__current_token.check_token(_mapper.Separators("]"))
+                                and not self.__next_token.check_token(_mapper.Separators("["))):
                             break
 
                 if scope_level == -1:
@@ -117,10 +98,20 @@ class SymbolTable(_UserDict):
                     else:
                         identifier_position = latest_valid_key
 
-                    if identifier_name in SymbolTable.__Double_Java_Math:
+                    if identifier_name in _code_mapper.Double_Java:
                         identifier_type = "double"
-                    elif identifier_name in SymbolTable.__Int_Java_Math:
+                    elif identifier_name in _code_mapper.Float_Java:
+                        identifier_type = "float"
+                    elif identifier_name in _code_mapper.Long_Java:
+                        identifier_type = "long"
+                    elif identifier_name in _code_mapper.Int_Java:
                         identifier_type = "int"
+                    elif identifier_name in _code_mapper.Short_Java:
+                        identifier_type = "short"
+                    elif identifier_name in _code_mapper.Byte_Java:
+                        identifier_type = "byte"
+                    elif identifier_name in _code_mapper.String_Java:
+                        identifier_type = "String"
 
                 self[identifier_key] = {
                     "identifier_position": identifier_position,
@@ -132,30 +123,34 @@ class SymbolTable(_UserDict):
                 identifier_type = None
                 identifier_attribute.clear()
 
-            elif self.__current_token.check_token(_token_names.KeywordsType.names()):
-                if self.__next_token.check_token(_token_names.Separators("[")):
-                    id_type = self.__current_token.value
+            elif self.__current_token.check_token(_mapper.KeywordsType.names()):
+                position = self.__current_token.position
+                identifier_type = self.__current_token.value
+                while self.__next_token.check_token(_mapper.KeywordsType.names()):
+                    self._advance()
+                    identifier_type += " " + self.__current_token.value
+                if self.__next_token.check_token(_mapper.Separators("[")):
                     while True:
                         self._advance()
-                        id_type += self.__current_token.value
-                        if (self.__current_token.check_token(_token_names.Separators("]"))
-                                and not self.__next_token.check_token(_token_names.Separators("["))):
+                        identifier_type += self.__current_token.value
+                        if (self.__current_token.check_token(_mapper.Separators("]"))
+                                and not self.__next_token.check_token(_mapper.Separators("["))):
                             break
-                    identifier_type = id_type
-                elif self.__next_token.check_token(_token_names.IDENTIFIER):
-                    identifier_type = self.__current_token.value
+                if not self.__next_token.check_token(_mapper.IDENTIFIER):
+                    raise SyntaxError(
+                        f"Invalid data type `{identifier_type + ' ' + self.__next_token.value}` at line {position}")
 
-            elif self.__current_token.check_token(_token_names.KeywordsAttribute.names()):
-                if (self.__next_token.check_token(_token_names.KeywordsAttribute.names())
-                        or self.__next_token.check_token(_token_names.KeywordsType.names())):
+            elif self.__current_token.check_token(_mapper.KeywordsAttribute.names()):
+                if (self.__next_token.check_token(_mapper.KeywordsAttribute.names())
+                        or self.__next_token.check_token(_mapper.KeywordsType.names())):
                     identifier_attribute.append(self.__current_token.value)
 
-            elif (self.__current_token.check_token(_token_names.Separators("{"))
-                  or self.__current_token.check_token(_token_names.Separators("("))):
+            elif (self.__current_token.check_token(_mapper.Separators("{"))
+                  or self.__current_token.check_token(_mapper.Separators("("))):
                 scope_level += 1
 
-            elif (self.__current_token.check_token(_token_names.Separators("}"))
-                  or self.__current_token.check_token(_token_names.Separators(")"))):
+            elif (self.__current_token.check_token(_mapper.Separators("}"))
+                  or self.__current_token.check_token(_mapper.Separators(")"))):
                 scope_level -= 1
 
             self._advance()
