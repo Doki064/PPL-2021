@@ -3,11 +3,14 @@ __all__ = ["Parser"]
 from sys import exit
 
 try:
-    from ast import *
+    from ast import addOPTree, assignTree, blockTree, callTree, declrTree, endTree, funcDeclTree, funcHeadTree, idTree, \
+        ifTree, multOPTree, numberTree, programTree, relOPTree, returnTree, stringTree, typeTree, whileTree
     import mapper as _mapper
 except ImportError:
-    from src.ast import *
+    from src.ast import addOPTree, assignTree, blockTree, callTree, declrTree, endTree, funcDeclTree, funcHeadTree, \
+        idTree, ifTree, multOPTree, numberTree, programTree, relOPTree, returnTree, stringTree, typeTree, whileTree
     import src.mapper as _mapper
+
 
 # Parser object keeps track of current token and checks if the code matches the grammar.
 
@@ -70,15 +73,16 @@ class Parser:
     def nextToken(self):
         self.curToken = self.peekToken
         self.peekToken = next(self.tokens, _mapper.EOF)
-        # No need to worry about passing the EOF, lexer handles that.
+
+    # No need to worry about passing the EOF, lexer handles that.
 
     @staticmethod
     def abort(message):
         exit("Error. " + message)
 
-#             HELPER FUNCTION DECLARATIONS END HERE                   #
-# --------------------------------------------------------------------#
-#               PARSING LOGIC STARTS FROM HERE                        #
+    #             HELPER FUNCTION DECLARATIONS END HERE                   #
+    # --------------------------------------------------------------------#
+    #               PARSING LOGIC STARTS FROM HERE                        #
 
     def program(self):
         t = programTree()

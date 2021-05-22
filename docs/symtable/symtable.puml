@@ -1,0 +1,13 @@
+@startuml
+class SymbolTable {
+    + __init__(lexer: Lexer): SymbolTable
+    # _advanced()
+    # _generate()
+    # get_declaration_type(key: str)
+    # get_identifier_position(key: str)
+    # get_identifier_name(key: str)
+    # get_identifier_type(key: str)
+    # get_identifier_attribute(key: str)
+    # get_identifier_scope(key: str)
+}
+@enduml

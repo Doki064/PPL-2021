@@ -1,0 +1,8 @@
+@startuml
+title CodeGen class diagram
+class CodeGen {
+    + __init__(ast: _AST): CodeGen
+    + travel_tree(t, __main: bool)
+    + generate_code(header: str)
+}
+@enduml
