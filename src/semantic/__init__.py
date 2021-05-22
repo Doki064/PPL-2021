@@ -30,7 +30,10 @@ class Semantic:
 		self.identifier_function = {}
 
 	def analyze(self):
-		self.traverse(self.ast)
+		try:
+			self.traverse(self.ast)
+		except Exception as e:
+			exit("Error. " + e)
 		return self.ast
 
 	def traverse(self, t):
