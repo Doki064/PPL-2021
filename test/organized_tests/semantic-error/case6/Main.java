@@ -12,5 +12,6 @@ public class Main {
         int y = (a + b) * c;
         int x = d / t;
         int Quang = (a + an_undefined_variable_come_out_of_some_where) + (c + d);
+        System.out.printf("Hello world");
     }
 }

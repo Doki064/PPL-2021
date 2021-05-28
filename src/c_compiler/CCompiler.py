@@ -54,13 +54,9 @@ class CustomGCC:
 
     def exe(self, clean=True):
         # libraries=['m'] <=> -lm : link with math library
-        subprocess.run([self.cc, f'{self.src_file} -o {self.exe_file}'])
+        subprocess.run([self.cc, f'{self.src_file}', '-lm', f'-o{self.exe_file}'])
         if clean:
             self.clean()
 
     def obj(self):
-        subprocess.run([self.cc, f'-c {self.src_file}'])
-
-
-    def exe(self, clean=True):
-        pass
+        subprocess.run([self.cc, f'-c{self.src_file}'])
