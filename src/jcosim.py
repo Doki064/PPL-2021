@@ -24,7 +24,7 @@ def section(title, work):
 
 def help_text():
     def work():
-        with Path('data/help.txt').resolve().open('r') as f:
+        with Path.joinpath(Path(__file__).parent, Path('data/help.txt')).resolve().open('r') as f:
             print(f.read())
 
     return "Manual:", work

@@ -15,6 +15,7 @@ Double_Java = {
     "Math.sin": "sin",
     "Math.cos": "cos",
     "Math.tan": "tan",
+    "Math.abs": "abs"
 }
 Float_Java = {"scanner.nextFloat": 'scanf("%f", &'}
 Long_Java = {"scanner.nextLong": 'scanf("%ld", &'}
@@ -38,7 +39,8 @@ INPUT_FUNC = {
 }
 
 TYPE_MAPPER = {
-    "String": "char*"
+    "String": "char*",
+    "string": "char*"
 }
 
 IGNORE = ["Scanner", "scanner.close"]
