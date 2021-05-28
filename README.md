@@ -141,7 +141,7 @@ pipenv install --dev
 ```
 python src/jcosim.py -i <file> [OPTIONS]
 ```
-***Please follow instructions in the manual***
+***Please follow instructions in the [manual](#Manual)***
 
 ---
 
@@ -164,7 +164,7 @@ pipenv run build-win
 ```
 ./dist/jcosim -i <file> [OPTIONS]
 ```
-***Please follow instructions in the manual***
+***Please follow instructions in the [manual](#Manual)***
 
 ***You may replace forward slash with backslash on Windows in case of path errors***
 
