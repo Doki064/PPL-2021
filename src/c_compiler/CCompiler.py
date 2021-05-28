@@ -22,7 +22,8 @@ class CCompiler:
 
     def exe(self, clean=True):
         self.obj()
-        self.compiler.link_executable(glob('*.o*'), self.exe_file)
+        # libraries=['m'] <=> -lm : link with math library
+        self.compiler.link_executable(glob('*.o*'), libraries=['m'], output_progname=self.exe_file)
         if clean:
             self.clean()
 
