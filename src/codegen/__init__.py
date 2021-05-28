@@ -109,7 +109,7 @@ class CodeGen:
 
         elif isinstance(t, (addOPTree, multOPTree, relOPTree)):
             code = " ".join(
-                [self.travel_tree(t.getKid(1)), _get_value_by_name(t.getToken()), self.travel_tree(t.getKid(2))])
+                ["(", self.travel_tree(t.getKid(1)), _get_value_by_name(t.getToken()), self.travel_tree(t.getKid(2)), ")"])
             return code
 
         elif isinstance(t, typeTree):
