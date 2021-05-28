@@ -139,7 +139,7 @@ pipenv install --dev
 
 ## Run using python file
 ```
-python src/jcosim.py -i jcosim -i <file> [OPTIONS]
+python src/jcosim.py -i <file> [OPTIONS]
 ```
 ***Please follow instructions in the manual***
 
@@ -162,7 +162,7 @@ pipenv run build-win
 
 ## Run Executable
 ```
-./dist/jcosim -i jcosim -i <file> [OPTIONS]
+./dist/jcosim -i <file> [OPTIONS]
 ```
 ***Please follow instructions in the manual***
 
