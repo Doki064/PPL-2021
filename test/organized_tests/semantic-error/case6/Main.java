@@ -10,7 +10,7 @@ public class Main {
         int d = 4;
         int z = a + (c + d);
         int y = (a + b) * c;
-        int x = d / t;
+        int x = d / b;
         int Quang = (a + an_undefined_variable_come_out_of_some_where) + (c + d);
         System.out.printf("Hello world");
     }
