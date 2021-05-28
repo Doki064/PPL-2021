@@ -52,3 +52,6 @@ SUPPORTED_FUNC = ["System.out.println",
                   "Scanner", 
                   "scanner.close", 
                   "Math.abs"]
+
+
+SUPPORTED_ID = Double_Java.keys()

@@ -19,7 +19,8 @@ def compare(a, b):
 				return a
 			else:
 				return b
-		return NotImplemented
+		raise NotImplementedError
+	return SystemError
 
 
 class Semantic:
@@ -48,7 +49,7 @@ class Semantic:
 			exit()
 		return self.ast
 
-	def traverse(self, t):
+	def traverse(self, t, requireDeclr=False):
 		#################################
 		#   check function is declared?
 		#       callTree kid:
@@ -157,8 +158,8 @@ class Semantic:
 		#           *expr
 		################################# 
 		elif isinstance(t, relOPTree):
-			_, identifier_type_left, _ = self.traverse(t.getKid(1))
-			_, identifier_type_right, _ = self.traverse(t.getKid(2))
+			_, identifier_type_left, _ = self.traverse(t.getKid(1), True)
+			_, identifier_type_right, _ = self.traverse(t.getKid(2), True)
 
 			compareGroupLeft = self.__comparableTypes.get(identifier_type_left, -1)
 			compareGroupRight = self.__comparableTypes.get(identifier_type_right, -1)
@@ -175,12 +176,12 @@ class Semantic:
 		#           *expr
 		#################################
 		elif isinstance(t, addOPTree):
-			_, identifier_type_left, _ = self.traverse(t.getKid(1))
-			_, identifier_type_right, _ = self.traverse(t.getKid(2))
+			_, identifier_type_left, _ = self.traverse(t.getKid(1), True)
+			_, identifier_type_right, _ = self.traverse(t.getKid(2), True)
 
 			try:
 				return [None, compare(identifier_type_left, identifier_type_right), None]
-			except NotImplemented:
+			except NotImplementedError:
 				raise Exception(f"Addition operations between `{identifier_type_left}` and `{identifier_type_right}` are unsupported")
 
 		#################################
@@ -191,8 +192,8 @@ class Semantic:
 		#           *expr
 		#################################
 		elif isinstance(t, multOPTree):
-			_, identifier_type_left, leftKey = self.traverse(t.getKid(1))
-			_, identifier_type_right, _ = self.traverse(t.getKid(2))
+			_, identifier_type_left, leftKey = self.traverse(t.getKid(1), True)
+			_, identifier_type_right, _ = self.traverse(t.getKid(2), True)
 
 			# if identifier_type_left == 'double' and (identifier_type_right in ['double', 'float', 'long', 'int']):
 			# 	return identifier_type_left
@@ -207,7 +208,7 @@ class Semantic:
 			# 		"Type mismatched between '%s' and '%s'" % (identifier_type_left, identifier_type_right))
 			try:
 				return [None, compare(identifier_type_left, identifier_type_right), None]
-			except NotImplemented:
+			except NotImplementedError:
 				raise Exception(f"Multiplication operations between `{identifier_type_left}` and `{identifier_type_right}` are unsupported.")
 
 		#################################
@@ -232,6 +233,8 @@ class Semantic:
 			return [t.getContent(), identifier_type, None]
 		elif isinstance(t, idTree):
 			identifier_name, identifier_type = self.symbolTable.get_declaration_data(t.getKey())
+			if requireDeclr and identifier_name not in self.identifier_variable and identifier_name not in _code_mapper.SUPPORTED_ID:
+				raise Exception(f'Undefined identifier `{identifier_name}` found.')
 			return [identifier_name, identifier_type, t.getKey()]
 		else:
 			for tree in t.getKids():
