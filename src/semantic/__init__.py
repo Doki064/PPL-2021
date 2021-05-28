@@ -1,5 +1,12 @@
-from ast import *
-from mapper import code_mapper as _code_mapper
+from sys import exit
+try:
+    from ast import addOPTree, assignTree, blockTree, callTree, declrTree, endTree, funcDeclTree, funcHeadTree, idTree, \
+        ifTree, multOPTree, numberTree, programTree, relOPTree, returnTree, stringTree, typeTree, whileTree
+    from mapper import code_mapper as _code_mapper
+except ImportError:
+    from src.ast import addOPTree, assignTree, blockTree, callTree, declrTree, endTree, funcDeclTree, funcHeadTree, \
+        idTree, ifTree, multOPTree, numberTree, programTree, relOPTree, returnTree, stringTree, typeTree, whileTree
+    from src.mapper import code_mapper as _code_mapper
 
 
 def compare(a, b):

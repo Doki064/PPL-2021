@@ -97,9 +97,9 @@ def native_compile_display(code, exe, cc):
         # Call native C compiler
         try:
             if cc:
-                cc_class = CCompiler
-            else:
                 cc_class = CustomGCC
+            else:
+                cc_class = CCompiler
             cc_class(src_file=f"{exe}.c", exe_file=exe).exe()
         except Exception as e:
             print(e)
@@ -118,13 +118,13 @@ def main():
             raise GetoptError('ERROR: Input file must be specified')
         options, remainder = getopt(
             argv[1:],
-            'i:o:stpgfc:vh',
+            'i:o:stupgc:vh',
             [
                 'input=',
                 'output=',
                 'symtable',
                 'token',
-                'use-gcc'
+                'use-gcc',
                 'parsetree',
                 'gencode',
                 'clean=',
@@ -148,7 +148,7 @@ def main():
                 raise GetoptError('')
             elif opt in ('-i', '--input'):
                 source = arg
-            elif opt in ('-f', '--use-gcc'):
+            elif opt in ('-u', '--use-gcc'):
                 cc = True
             elif opt in ('-o', '--output'):
                 exe = arg
