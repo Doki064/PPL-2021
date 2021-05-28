@@ -7,6 +7,7 @@ public class Main {
     }
 
     public static void main(String[] args) {
+        System.out.println("Please enter the radius of the circle: ");
         var scanner = new Scanner(System.in);
         var r = scanner.nextDouble();
         if (r <= 0) {
