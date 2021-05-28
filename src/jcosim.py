@@ -1,6 +1,7 @@
 from getopt import getopt, GetoptError
 from pathlib import Path
 from sys import argv
+from sys import exit
 
 from pydot import Dot, Node, Edge
 
@@ -118,14 +119,15 @@ def main():
             raise GetoptError('ERROR: Input file must be specified')
         options, remainder = getopt(
             argv[1:],
-            'i:o:stupgc:vh',
+            'i:o:stuapgc:vh',
             [
                 'input=',
                 'output=',
                 'symtable',
                 'token',
                 'use-gcc',
-                'parsetree',
+                'analyzedtree',
+                'analy',
                 'gencode',
                 'clean=',
                 'verbose',
@@ -139,13 +141,29 @@ def main():
         parsetree = False
         analyzedtree = False
         gencode = False
-        clean = False
         cc = False
-        clean_path = '.'
 
         for opt, arg in options:
             if opt in ('-h', '--help'):
                 raise GetoptError('')
+            elif opt in ('-c', '--clean'):
+                clean_path = arg
+                files = [
+                    'tokens.txt',
+                    'parsetree.png',
+                    'symtable.txt',
+                    f'{exe}.c',
+                    f'{exe}.exe',
+                    f'{exe}',
+                    f'{exe}.o',
+                    f'{exe}.obj'
+                ]
+                section(*clean_display(files))
+                for file in files:
+                    _path = Path(clean_path).joinpath(file).resolve()
+                    if Path(_path).exists():
+                        Path(_path).unlink()
+                exit()
             elif opt in ('-i', '--input'):
                 source = arg
             elif opt in ('-u', '--use-gcc'):
@@ -162,9 +180,6 @@ def main():
                 analyzedtree = True
             elif opt in ('-g', '--gencode'):
                 gencode = True
-            elif opt in ('-c', '--clean'):
-                clean = True
-                clean_path = arg
             elif opt in ('-v', '--verbose'):
                 symtable = True
                 token = True
@@ -217,22 +232,6 @@ def main():
             section(*parsetree_display(analyzed_tree, 'analyzedtree.png'))
         if gencode:
             section(*gencode_display(code, exe))
-        if clean:
-            files = [
-                'tokens.txt',
-                'parsetree.png',
-                'symtable.txt',
-                f'{exe}.c',
-                f'{exe}.exe',
-                f'{exe}',
-                f'{exe}.o',
-                f'{exe}.obj'
-            ]
-            section(*clean_display(files))
-            for file in files:
-                _path = Path(clean_path).joinpath(file).resolve()
-                if Path(_path).exists():
-                    Path(_path).unlink()
 
     except GetoptError as e:
         section(*help_text())

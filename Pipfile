@@ -17,4 +17,4 @@ python_version = "3.8"
 
 [scripts]
 build-unix = "pyinstaller ./src/jcosim.py --add-data \"src/data:data\" --hidden-import distutils.unixccompiler --onefile --clean --noconfirm"
-build-win = "pyinstaller ./src/jcosim.py --add-data \"src/data;data\" --hidden-import distutils.msvccompiler --onefile --clean --noconfirm"
+build-win = "pyinstaller ./src/jcosim.py --add-data \"src/data;data\" --hidden-import distutils._msvccompiler --onefile --clean --noconfirm"

@@ -35,6 +35,6 @@ Examples:
     - Show generated C code:
         jcosim -i Main.java -g
         jcosim --input Main.java --gencode
-    - Clean outputsL
-        jcosim -i Main.java -c .
-        jcosim --input Main.java --clean .
+    - Clean outputs
+        jcosim -c .
+        jcosim --clean .
