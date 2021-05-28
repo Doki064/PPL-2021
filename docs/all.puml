@@ -75,7 +75,7 @@ package Lex #f0f0f0 {
     }
     class Exception
 
-    Exception <|-- LexerErrorfile:///tmp/diagram-8910038735054907912.png
+    Exception <|-- LexerError
 }
 ' LEX -----------------------
 
