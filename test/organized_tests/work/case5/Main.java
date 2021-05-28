@@ -12,5 +12,6 @@ public class Main {
         int y = (a + b) * c;
         int x = d / (c - b);
         int Quang = (a + b) + (c + d);
+        System.out.println("Hello world!");
     }
 }

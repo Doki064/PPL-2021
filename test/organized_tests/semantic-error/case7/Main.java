@@ -3,7 +3,7 @@ package case7;
 import java.util.Scanner;
 
 public class Main {
-    static double circleArea(double r = 6) {
+    static double circleArea(double r) {
         return Math.PI * Math.pow(r, 2);
     }
 
