@@ -1,1 +1,1 @@
-from .CCompiler import CCompiler
+from .CCompiler import CCompiler, CustomGCC

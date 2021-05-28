@@ -9,6 +9,7 @@ Options:
     -a,             --analyzedtree          generate analyzed parse tree only
     -g,             --gencode               generate generated C code only
     -c <path>,      --clean <path>          clean all outputs in <path>
+    -f,             --use-gcc               use gcc compiler specified in jcosim.config.json
     -v,             --verbose               generate all intermediate output
     -h,             --help                  display this help and exit
 * NOTE: to generate parse tree, graphviz needs to be installed on the system

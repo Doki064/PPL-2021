@@ -4,7 +4,7 @@ from sys import argv
 
 from pydot import Dot, Node, Edge
 
-from c_compiler import CCompiler
+from c_compiler import CCompiler, CustomGCC
 from codegen import CodeGen
 from lex import Lexer
 from parse import Parser
@@ -89,14 +89,18 @@ def clean_display(files):
     return "Cleaning files", work
 
 
-def native_compile_display(code, exe):
+def native_compile_display(code, exe, cc):
     def work():
         # Save code to source file first
         with open(f"{exe}.c", "w") as f:
             f.write(code)
         # Call native C compiler
         try:
-            CCompiler(src_file=f"{exe}.c", exe_file=exe).exe()
+            if cc:
+                cc_class = CCompiler
+            else:
+                cc_class = CustomGCC
+            cc_class(src_file=f"{exe}.c", exe_file=exe).exe()
         except Exception as e:
             print(e)
         finally:
@@ -114,12 +118,13 @@ def main():
             raise GetoptError('ERROR: Input file must be specified')
         options, remainder = getopt(
             argv[1:],
-            'i:o:stpgc:vh',
+            'i:o:stpgfc:vh',
             [
                 'input=',
                 'output=',
                 'symtable',
                 'token',
+                'use-gcc'
                 'parsetree',
                 'gencode',
                 'clean=',
@@ -135,6 +140,7 @@ def main():
         analyzedtree = False
         gencode = False
         clean = False
+        cc = False
         clean_path = '.'
 
         for opt, arg in options:
@@ -142,6 +148,8 @@ def main():
                 raise GetoptError('')
             elif opt in ('-i', '--input'):
                 source = arg
+            elif opt in ('-f', '--use-gcc'):
+                cc = True
             elif opt in ('-o', '--output'):
                 exe = arg
             elif opt in ('-s', '--symtable'):
@@ -196,7 +204,7 @@ def main():
         code = code_gen.generate_code()
 
         # Compile the code and output native binary
-        section(*native_compile_display(code, exe))
+        section(*native_compile_display(code, exe, cc))
 
         # do things based on flags
         if token:
