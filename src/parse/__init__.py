@@ -86,7 +86,6 @@ class Parser:
 
     def program(self):
         t = programTree()
-        # match(_mapper.KEYWORDS_ATTRIBUTE['public'])
         self.match(_mapper.KeywordsType("class").name)
         self.match(_mapper.IDENTIFIER)
         t.addKid(self.block())

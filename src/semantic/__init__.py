@@ -23,6 +23,16 @@ def compare(a, b):
 
 
 class Semantic:
+	__comparableTypes = {
+		'int': 1,
+		'long': 1,
+		'byte': 1,
+		'short': 1,
+		'float': 1,
+		'double': 1,
+		'string': 2
+	}
+
 	def __init__(self, ast, symbolTable):
 		self.ast = ast
 		self.symbolTable = symbolTable
@@ -150,9 +160,11 @@ class Semantic:
 			_, identifier_type_left, _ = self.traverse(t.getKid(1))
 			_, identifier_type_right, _ = self.traverse(t.getKid(2))
 
-			if identifier_type_left != identifier_type_right:
-				raise Exception("Type mismatched between '%s' and '%s'" % (
-					identifier_type_left, identifier_type_right))
+			compareGroupLeft = self.__comparableTypes.get(identifier_type_left, -1)
+			compareGroupRight = self.__comparableTypes.get(identifier_type_right, -1)
+
+			if compareGroupLeft != compareGroupRight or compareGroupLeft == -1:
+				raise Exception(f'Comparisons between `{identifier_type_left}` and `{identifier_type_right}` are unsupported')
 			else:
 				return [None, 'boolean', None]
 		#################################
@@ -169,7 +181,7 @@ class Semantic:
 			try:
 				return [None, compare(identifier_type_left, identifier_type_right), None]
 			except NotImplemented:
-				raise SyntaxError(f"Addition Operation between `{identifier_type_left}` and `{identifier_type_right}` are unsupported")
+				raise Exception(f"Addition operations between `{identifier_type_left}` and `{identifier_type_right}` are unsupported")
 
 		#################################
 		#   check if multOPTree has type mismatched
@@ -179,7 +191,7 @@ class Semantic:
 		#           *expr
 		#################################
 		elif isinstance(t, multOPTree):
-			_, identifier_type_left, _ = self.traverse(t.getKid(1))
+			_, identifier_type_left, leftKey = self.traverse(t.getKid(1))
 			_, identifier_type_right, _ = self.traverse(t.getKid(2))
 
 			# if identifier_type_left == 'double' and (identifier_type_right in ['double', 'float', 'long', 'int']):
@@ -196,7 +208,7 @@ class Semantic:
 			try:
 				return [None, compare(identifier_type_left, identifier_type_right), None]
 			except NotImplemented:
-				raise SyntaxError(f"Multiplication operation between `{identifier_type_left}` and `{identifier_type_right}` are unsupported")
+				raise Exception(f"Multiplication operations between `{identifier_type_left}` and `{identifier_type_right}` are unsupported.")
 
 		#################################
 		#################################
