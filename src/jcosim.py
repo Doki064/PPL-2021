@@ -141,29 +141,16 @@ def main():
         parsetree = False
         analyzedtree = False
         gencode = False
+        clean = False
+        clean_path = '.'
         cc = False
 
         for opt, arg in options:
             if opt in ('-h', '--help'):
                 raise GetoptError('')
             elif opt in ('-c', '--clean'):
+                clean = True
                 clean_path = arg
-                files = [
-                    'tokens.txt',
-                    'parsetree.png',
-                    'symtable.txt',
-                    f'{exe}.c',
-                    f'{exe}.exe',
-                    f'{exe}',
-                    f'{exe}.o',
-                    f'{exe}.obj'
-                ]
-                section(*clean_display(files))
-                for file in files:
-                    _path = Path(clean_path).joinpath(file).resolve()
-                    if Path(_path).exists():
-                        Path(_path).unlink()
-                exit()
             elif opt in ('-i', '--input'):
                 source = arg
             elif opt in ('-u', '--use-gcc'):
@@ -186,6 +173,33 @@ def main():
                 parsetree = True
                 analyzedtree = True
                 gencode = True
+
+        # clean and exit
+        if clean:
+            if source:
+                # Smartly get exe file name
+                if not exe: exe = Path(source).stem
+            else:
+                exe = 'Main'
+
+            files = [
+                'tokens.txt',
+                'parsetree.png',
+                'analyzedtree.png',
+                'symtable.json',
+                f'{exe}.c',
+                f'{exe}.exe',
+                f'{exe}',
+                f'{exe}.o',
+                f'{exe}.obj'
+            ]
+
+            section(*clean_display(files))
+            for file in files:
+                _path = Path(clean_path).joinpath(file).resolve()
+                if Path(_path).exists():
+                    Path(_path).unlink()
+            exit()
 
         # No source no life
         if not source:
